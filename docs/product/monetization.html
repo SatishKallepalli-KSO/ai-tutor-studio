@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Monetization — AI Tutor Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;700&family=IBM+Plex+Sans:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+    <script type="module">
+      import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs'
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: 'dark',
+        themeVariables: {
+          primaryColor: '#12352c',
+          primaryTextColor: '#edf1f4',
+          primaryBorderColor: '#3dd6a5',
+          lineColor: '#9aa6b2',
+          secondaryColor: '#121820',
+          tertiaryColor: '#0b1017',
+          background: '#0b1017',
+          mainBkg: '#121820',
+          nodeBorder: '#3dd6a5',
+          fontFamily: 'IBM Plex Sans',
+        },
+      })
+    </script>
+  </head>
+  <body>
+    <div class="wrap">
+      <nav class="nav">
+        <a class="nav-brand" href="./">AI Tutor Studio Docs</a>
+        <div class="nav-links">
+          <a href="./">Overview</a>
+          <a href="./architecture.html">Architecture</a>
+          <a href="./user-flows.html">User flows</a>
+          <a class="active" href="./monetization.html">Monetization</a>
+          <a href="./api.html">API</a>
+          <a href="./sales-playbook.html">Sales playbook</a>
+          <a href="../">Open app</a>
+        </div>
+      </nav>
+
+      <p class="eyebrow">Business model</p>
+      <h1>Monetization</h1>
+      <p class="lede">
+        Industry-standard freemium: generous learning surface, constrained
+        practice, paid unlock for high-intent interview tracks and unlimited AI
+        coaching.
+      </p>
+
+      <h2>Packaging</h2>
+      <div class="grid-2">
+        <div class="card">
+          <span class="pill">Free</span>
+          <strong>$0</strong>
+          <ul>
+            <li>All Learn documentation</li>
+            <li>Practice: HTML, CSS, JavaScript, Python</li>
+            <li>5 feedbacks / day</li>
+            <li>Voice + delivery tips (within quota)</li>
+            <li>Rubric coaching (OpenAI optional on server)</li>
+          </ul>
+        </div>
+        <div class="card">
+          <span class="pill">Pro</span>
+          <strong>$19 / month · $149 / year</strong>
+          <ul>
+            <li>Everything in Free</li>
+            <li>Staff, EM, Java→AI, Java, TS, React, Node</li>
+            <li>Unlimited feedback</li>
+            <li>Priority LLM coaching when configured</li>
+            <li>Stripe Customer Portal</li>
+          </ul>
+        </div>
+      </div>
+
+      <h2>Why this converts</h2>
+      <ul>
+        <li><strong>Docs-first funnel:</strong> users invest time before payment.</li>
+        <li><strong>Voice differentiator:</strong> closer to real interviews than text-only sites.</li>
+        <li><strong>Track gating:</strong> career-critical Staff/EM content sits behind Pro.</li>
+        <li><strong>Daily quota:</strong> creates natural upgrade moments without hard-blocking learning.</li>
+      </ul>
+
+      <h2>Stripe lifecycle</h2>
+      <div class="mermaid">
+sequenceDiagram
+  participant User
+  participant App
+  participant API
+  participant Stripe
+
+  User->>App: Upgrade on /pricing
+  App->>API: POST /v1/billing/checkout
+  API->>Stripe: Checkout Session subscription
+  Stripe-->>User: Hosted checkout
+  User->>Stripe: Pay
+  Stripe->>API: checkout.session.completed
+  API->>API: plan=pro status=active
+  User->>App: Return ?billing=success
+  App->>API: GET /v1/auth/me
+  API-->>App: is_pro true
+  User->>App: Manage subscription
+  App->>API: POST /v1/billing/portal
+  API->>Stripe: Billing Portal session
+      </div>
+
+      <h2>Environment checklist (go-live)</h2>
+      <div class="panel">
+        <pre>JWT_SECRET=...
+APP_URL=https://your-frontend
+STRIPE_SECRET_KEY=sk_live_or_test_...
+STRIPE_PRICE_MONTHLY=price_...
+STRIPE_PRICE_YEARLY=price_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+OPENAI_API_KEY=optional
+ALLOW_DEMO_UPGRADE=false
+DATABASE_URL=optional postgres</pre>
+      </div>
+
+      <h2>Pilot / enterprise notes</h2>
+      <div class="panel">
+        <p class="muted">
+          For B2B pilots without Stripe yet, use demo upgrade or manually set
+          <code>plan=pro</code> in the database. For teams, next commercial
+          extensions (roadmap): seats, SSO, shared progress dashboards, and
+          custom question banks.
+        </p>
+      </div>
+
+      <div class="cta-row">
+        <a class="btn primary" href="./sales-playbook.html">Sales playbook</a>
+        <a class="btn" href="./api.html">Billing API details</a>
+      </div>
+
+      <footer class="footer">AI Tutor Studio · Monetization</footer>
+    </div>
+  </body>
+</html>

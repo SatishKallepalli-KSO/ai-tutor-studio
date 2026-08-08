@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sales playbook — AI Tutor Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;700&family=IBM+Plex+Sans:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <nav class="nav">
+        <a class="nav-brand" href="./">AI Tutor Studio Docs</a>
+        <div class="nav-links">
+          <a href="./">Overview</a>
+          <a href="./architecture.html">Architecture</a>
+          <a href="./user-flows.html">User flows</a>
+          <a href="./monetization.html">Monetization</a>
+          <a href="./api.html">API</a>
+          <a class="active" href="./sales-playbook.html">Sales playbook</a>
+          <a href="../">Open app</a>
+        </div>
+      </nav>
+
+      <p class="eyebrow">Go-to-market</p>
+      <h1>Sales playbook</h1>
+      <p class="lede">
+        Use this page on calls, in proposals, and as a leave-behind. Pair with the
+        live app and the architecture / flows docs.
+      </p>
+
+      <h2>One-liner</h2>
+      <div class="panel">
+        <p>
+          <strong>AI Tutor Studio</strong> helps engineers practice for real
+          interviews — study curated topics, answer out loud, and get AI coaching
+          on content and spoken delivery — with a Free tier and Pro unlock for
+          Staff/EM and unlimited feedback.
+        </p>
+      </div>
+
+      <h2>Problem</h2>
+      <ul>
+        <li>Candidates over-prepare by reading and under-prepare by speaking.</li>
+        <li>Generic chatbots don’t structure curriculum or monetize cleanly.</li>
+        <li>Interview loops (Staff/EM) need narrative + system design + AI depth.</li>
+      </ul>
+
+      <h2>Solution</h2>
+      <ul>
+        <li><strong>One-stop shop:</strong> docs → practice → feedback per topic.</li>
+        <li><strong>Voice-native:</strong> mic answers + delivery coaching.</li>
+        <li><strong>Freemium commerce:</strong> Stripe subscriptions like HackerRank-style products.</li>
+        <li><strong>Works offline-ish:</strong> local rubric when LLM key isn’t set.</li>
+      </ul>
+
+      <h2>Ideal customers</h2>
+      <div class="grid-2">
+        <div class="card">
+          <strong>B2C</strong>
+          <p class="muted">Job seekers (Senior/Staff/EM), career switchers into AI.</p>
+        </div>
+        <div class="card">
+          <strong>B2B (next)</strong>
+          <p class="muted">Bootcamps, internal L&amp;D, recruiting academies wanting branded tracks.</p>
+        </div>
+      </div>
+
+      <h2>5-minute demo script</h2>
+      <ol>
+        <li><strong>Open tracks</strong> — show Free vs Pro badges.</li>
+        <li><strong>Pick Python or HTML</strong> — open Learn docs (key points + example).</li>
+        <li><strong>Practice</strong> — click Speak answer, dictate 60–90s, submit.</li>
+        <li><strong>Show coaching</strong> — score, gaps, Spoken delivery &amp; grammar.</li>
+        <li><strong>Open Staff track</strong> — hit paywall → Pricing → monthly/yearly.</li>
+        <li><strong>Close</strong> — “Same loop for EM and Java→AI; Pro unlocks the career tracks.”</li>
+      </ol>
+
+      <h2>Competitive wedges</h2>
+      <div class="panel">
+        <table>
+          <thead>
+            <tr>
+              <th>Alternative</th>
+              <th>Their gap</th>
+              <th>Our wedge</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>LeetCode / HackerRank</td>
+              <td>Coding puzzles ≠ behavioral/system oral</td>
+              <td>Voice + narrative + Staff/EM tracks</td>
+            </tr>
+            <tr>
+              <td>ChatGPT alone</td>
+              <td>No curriculum, quota, or billing product</td>
+              <td>Structured tracks + freemium + Stripe</td>
+            </tr>
+            <tr>
+              <td>Coaching services</td>
+              <td>Expensive, not always-on</td>
+              <td>Always-on practice with upgrade path</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Objection handling</h2>
+      <div class="panel">
+        <p><strong>“Speech-to-text isn’t perfect.”</strong></p>
+        <p class="muted">Transcript is editable; coaching still grades structure and fillers. Same as real interviews — clarity matters.</p>
+        <p><strong>“Do I need OpenAI?”</strong></p>
+        <p class="muted">No — local rubric ships. OpenAI upgrades coaching quality for Pro hosts.</p>
+        <p><strong>“Can we white-label?”</strong></p>
+        <p class="muted">API + curriculum files are separable; Docker deploy supports a single branded service. Seats/SSO are the natural enterprise upsell.</p>
+      </div>
+
+      <h2>Pricing talk track</h2>
+      <ul>
+        <li>Free forever for learning + starter practice.</li>
+        <li>Pro at <strong>$19/mo</strong> or <strong>$149/yr (~35% save)</strong> for interview tracks + unlimited coaching.</li>
+        <li>Cheaper than one human mock session; available daily.</li>
+      </ul>
+
+      <h2>Assets to send after a call</h2>
+      <ul>
+        <li>Live app link</li>
+        <li>This docs hub (<code>/product/</code>)</li>
+        <li>Architecture + user flows pages</li>
+        <li>GitHub repo for technical buyers</li>
+      </ul>
+
+      <div class="cta-row">
+        <a class="btn primary" href="../">Open the product</a>
+        <a class="btn" href="./architecture.html">Architecture leave-behind</a>
+        <a class="btn" href="./user-flows.html">User flows leave-behind</a>
+      </div>
+
+      <footer class="footer">AI Tutor Studio · Sales playbook</footer>
+    </div>
+  </body>
+</html>

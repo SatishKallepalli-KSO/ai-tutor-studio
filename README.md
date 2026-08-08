@@ -14,6 +14,19 @@ Flow: **Register → Learn docs → Practice (type or speak) → AI feedback** (
 
 Voice practice uses the browser mic (Chrome/Edge/Safari). Feedback then coaches **content + spoken delivery** (fillers, grammar/clarity, pacing) — closer to real interviews.
 
+## Product documentation (for selling)
+
+HTML microsite under **`docs/product/`** (architecture, user flows, monetization, API, sales playbook):
+
+**https://satishkallepalli-kso.github.io/ai-tutor-studio/product/**
+
+Republish the app without wiping those docs:
+
+```bash
+chmod +x scripts/publish-pages.sh
+./scripts/publish-pages.sh
+```
+
 ## Quick start
 
 ### 1) API

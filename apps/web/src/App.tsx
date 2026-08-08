@@ -201,6 +201,12 @@ export default function App() {
           <h1>Learn. Practice. Get coached.</h1>
         </div>
         <div className="topbar-actions">
+          <a
+            className="btn ghost"
+            href={`${import.meta.env.BASE_URL}product/`}
+          >
+            Product docs
+          </a>
           <Link className="btn ghost" to="/pricing">
             Pricing
           </Link>
