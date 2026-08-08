@@ -900,6 +900,7 @@ export function localFeedback(input: {
   track_id: TrackId
   question_id: string
   answer: string
+  input_mode?: 'text' | 'voice'
 }): Feedback {
   const question = QUESTIONS.find(
     (q) => q.id === input.question_id && q.track_id === input.track_id,
@@ -908,6 +909,7 @@ export function localFeedback(input: {
     throw new Error('Unknown question')
   }
 
+  const mode = input.input_mode ?? 'text'
   const text = input.answer.trim()
   const lower = text.toLowerCase()
   const words = lower.match(/[a-z0-9']+/g) ?? []
@@ -942,24 +944,70 @@ export function localFeedback(input: {
     gaps.push('Add one concrete example or metric when possible.')
   }
 
+  const fillers = ['um', 'uh', 'like', 'you know', 'sort of', 'kind of', 'basically', 'actually', 'i mean']
+  const delivery_tips: string[] = []
+  if (mode === 'voice') {
+    const found = fillers.filter((f) => new RegExp(`\\b${f}\\b`).test(lower))
+    if (found.length) {
+      delivery_tips.push(
+        `Reduce filler words (${found.slice(0, 4).join(', ')}). Pause instead.`,
+      )
+    } else {
+      delivery_tips.push('Clean delivery — few filler words. Keep that in live interviews.')
+    }
+    if (words.length < 70) {
+      delivery_tips.push(
+        'Interview answers usually need ~90–120 seconds. Add context → action → outcome.',
+      )
+    }
+    if (!/[.!?]/.test(text)) {
+      delivery_tips.push(
+        'Add natural sentence endings when you speak — it helps grammar and pacing.',
+      )
+    }
+    if (found.filter((f) => (lower.match(new RegExp(`\\b${f}\\b`, 'g')) || []).length >= 3).length >= 2) {
+      score = Math.max(1, score - 1)
+      gaps.push('Spoken delivery had repeated fillers — practice a cleaner take.')
+    }
+  }
+
   return {
     score,
-    summary: `Rubric score ${score}/5 for ${question.category.toLowerCase()}. Running in free static hosting mode.`,
+    summary: `Rubric score ${score}/5 for ${question.category.toLowerCase()}. ${
+      mode === 'voice'
+        ? 'Voice mode: includes spoken grammar and delivery tips.'
+        : 'Running in free static hosting mode.'
+    }`,
     strengths: strengths.length
       ? strengths
       : ['You attempted a full answer — good start.'],
     gaps: gaps.length
       ? gaps
       : ['Tighten structure and end on a measurable outcome.'],
-    better_answer: [
-      'Stronger shape for this prompt:',
-      '1) Context: who/what system.',
-      '2) Ownership: what you owned.',
-      '3) Decision/tradeoff.',
-      '4) Outcome with metric.',
-      `Hint to include: ${question.hints.join(', ')}.`,
-    ].join('\n'),
-    next_drill: question.hints[0] ?? 'Practice out loud once, timed.',
+    better_answer:
+      mode === 'voice'
+        ? [
+            'Stronger spoken answer shape:',
+            '1) Open in one clear sentence (no filler).',
+            '2) Context: who/what system.',
+            '3) Ownership + decision/tradeoff.',
+            '4) Outcome with metric — then stop.',
+            `Hint to include: ${question.hints.join(', ')}.`,
+          ].join('\n')
+        : [
+            'Stronger shape for this prompt:',
+            '1) Context: who/what system.',
+            '2) Ownership: what you owned.',
+            '3) Decision/tradeoff.',
+            '4) Outcome with metric.',
+            `Hint to include: ${question.hints.join(', ')}.`,
+          ].join('\n'),
+    next_drill:
+      mode === 'voice'
+        ? 'Record the same answer once more out loud — cut fillers and end on the metric.'
+        : (question.hints[0] ?? 'Practice out loud once, timed.'),
     provider: 'browser-rubric',
+    delivery_tips,
+    input_mode: mode,
   }
 }

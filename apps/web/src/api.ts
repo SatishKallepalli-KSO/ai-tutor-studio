@@ -40,6 +40,8 @@ export type Feedback = {
   better_answer: string
   next_drill: string
   provider: string
+  delivery_tips?: string[]
+  input_mode?: 'text' | 'voice'
 }
 
 export type UserProfile = {
@@ -155,10 +157,14 @@ export const api = {
     track_id: TrackId
     question_id: string
     answer: string
+    input_mode?: 'text' | 'voice'
   }): Promise<Feedback> {
     return request<Feedback>('/v1/tutor/feedback', {
       method: 'POST',
-      body: JSON.stringify(body),
+      body: JSON.stringify({
+        ...body,
+        input_mode: body.input_mode ?? 'text',
+      }),
     })
   },
 
@@ -167,6 +173,7 @@ export const api = {
     track_id: TrackId
     question_id: string
     answer: string
+    input_mode?: 'text' | 'voice'
   }): Feedback {
     return localFeedback(body)
   },

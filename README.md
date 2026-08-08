@@ -10,7 +10,9 @@ Local-first **AI-assisted tutoring / upskilling** product with **Free + Pro** mo
 | **Free** | All Learn docs · practice on HTML, CSS, JavaScript, Python · 5 feedbacks/day |
 | **Pro ($19/mo or $149/yr)** | All tracks (Staff, EM, Java→AI, Java, TS, React, Node) · unlimited AI feedback · Stripe billing portal |
 
-Flow: **Register → Learn docs → Practice → AI feedback** (gated by plan).
+Flow: **Register → Learn docs → Practice (type or speak) → AI feedback** (gated by plan).
+
+Voice practice uses the browser mic (Chrome/Edge/Safari). Feedback then coaches **content + spoken delivery** (fillers, grammar/clarity, pacing) — closer to real interviews.
 
 ## Quick start
 

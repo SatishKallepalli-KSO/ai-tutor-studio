@@ -35,6 +35,7 @@ class FeedbackRequest(BaseModel):
     track_id: str
     question_id: str
     answer: str = Field(min_length=1, max_length=8000)
+    input_mode: str = Field(default="text", pattern="^(text|voice)$")
 
 
 class FeedbackResponse(BaseModel):
@@ -45,6 +46,8 @@ class FeedbackResponse(BaseModel):
     better_answer: str
     next_drill: str
     provider: str
+    delivery_tips: list[str] = Field(default_factory=list)
+    input_mode: str = "text"
 
 
 def _load_content() -> tuple[list[Track], list[TutorQuestion]]:
@@ -69,7 +72,66 @@ def get_question(question_id: str) -> TutorQuestion | None:
     return next((q for q in QUESTIONS if q.id == question_id), None)
 
 
-def _heuristic_feedback(question: TutorQuestion, answer: str) -> FeedbackResponse:
+FILLERS = (
+    "um",
+    "uh",
+    "like",
+    "you know",
+    "sort of",
+    "kind of",
+    "basically",
+    "actually",
+    "i mean",
+)
+
+
+def _delivery_tips(answer: str) -> list[str]:
+    text = answer.strip()
+    lower = text.lower()
+    words = re.findall(r"[a-z0-9']+", lower)
+    tips: list[str] = []
+
+    filler_hits = [f for f in FILLERS if re.search(rf"\b{re.escape(f)}\b", lower)]
+    if filler_hits:
+        tips.append(
+            f"Reduce filler words in spoken answers ({', '.join(filler_hits[:4])}). Pause instead."
+        )
+    else:
+        tips.append("Clean delivery — few filler words. Keep that in live interviews.")
+
+    if len(words) < 70:
+        tips.append(
+            "Interview answers usually need ~90–120 seconds. Add context → action → outcome."
+        )
+    elif len(words) > 280:
+        tips.append("Trim for clarity — land the metric and stop. Long rambles lose panels.")
+
+    sentences = [s.strip() for s in re.split(r"[.!?]+", text) if s.strip()]
+    if sentences:
+        longish = sum(1 for s in sentences if len(s.split()) > 28)
+        if longish >= 2:
+            tips.append(
+                "Break long sentences. Spoken grammar works best in short, clear clauses."
+            )
+
+    if not re.search(r"[.!?]", text):
+        tips.append(
+            "Add natural sentence endings when you speak — it helps grammar and pacing."
+        )
+
+    if re.search(r"\b(i did|we did|then i|and then)\b", lower) and not re.search(
+        r"\b(so|therefore|as a result|which led|impact|result)\b", lower
+    ):
+        tips.append(
+            "Close with impact: ‘so the result was…’ — interviewers score outcomes."
+        )
+
+    return tips[:4]
+
+
+def _heuristic_feedback(
+    question: TutorQuestion, answer: str, input_mode: str = "text"
+) -> FeedbackResponse:
     text = answer.strip()
     lower = text.lower()
     words = re.findall(r"[a-z0-9']+", lower)
@@ -102,15 +164,43 @@ def _heuristic_feedback(question: TutorQuestion, answer: str) -> FeedbackRespons
     else:
         gaps.append("Add one concrete example or metric when possible.")
 
-    better = (
-        "Stronger shape for this prompt:\n"
-        "1) Context: who/what system.\n"
-        "2) Ownership: what you owned.\n"
-        "3) Decision/tradeoff.\n"
-        "4) Outcome with metric.\n"
-        f"Hint to include: {', '.join(question.hints)}."
+    delivery = _delivery_tips(answer) if input_mode == "voice" else []
+    if input_mode == "voice" and delivery:
+        # Light score nudge for heavy fillers
+        filler_heavy = sum(
+            1 for f in FILLERS if len(re.findall(rf"\b{re.escape(f)}\b", lower)) >= 3
+        )
+        if filler_heavy >= 2:
+            score = max(1, score - 1)
+            gaps.append("Spoken delivery had repeated fillers — practice a cleaner take.")
+
+    mode_note = (
+        " Voice mode: coaching includes spoken grammar and delivery."
+        if input_mode == "voice"
+        else ""
     )
-    next_drill = question.hints[0] if question.hints else "Practice out loud once, timed."
+    better = (
+        "Stronger spoken answer shape:\n"
+        "1) Open in one clear sentence (no filler).\n"
+        "2) Context: who/what system.\n"
+        "3) Ownership + decision/tradeoff.\n"
+        "4) Outcome with metric — then stop.\n"
+        f"Hint to include: {', '.join(question.hints)}."
+        if input_mode == "voice"
+        else (
+            "Stronger shape for this prompt:\n"
+            "1) Context: who/what system.\n"
+            "2) Ownership: what you owned.\n"
+            "3) Decision/tradeoff.\n"
+            "4) Outcome with metric.\n"
+            f"Hint to include: {', '.join(question.hints)}."
+        )
+    )
+    next_drill = (
+        "Record the same answer once more out loud — cut fillers and end on the metric."
+        if input_mode == "voice"
+        else (question.hints[0] if question.hints else "Practice out loud once, timed.")
+    )
 
     return FeedbackResponse(
         score=score,
@@ -122,17 +212,20 @@ def _heuristic_feedback(question: TutorQuestion, answer: str) -> FeedbackRespons
                 if not os.getenv("OPENAI_API_KEY")
                 else "."
             )
+            + mode_note
         ),
         strengths=strengths or ["You attempted a full answer — good start."],
         gaps=gaps or ["Tighten structure and end on a measurable outcome."],
         better_answer=better,
         next_drill=next_drill,
         provider="local-rubric",
+        delivery_tips=delivery,
+        input_mode=input_mode,
     )
 
 
 def _openai_feedback(
-    question: TutorQuestion, track: Track, answer: str
+    question: TutorQuestion, track: Track, answer: str, input_mode: str = "text"
 ) -> FeedbackResponse | None:
     api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
@@ -143,17 +236,27 @@ def _openai_feedback(
         return None
 
     client = OpenAI(api_key=api_key)
+    voice_extra = ""
+    if input_mode == "voice":
+        voice_extra = (
+            " The answer was spoken (speech-to-text). Coach spoken interview delivery: "
+            "grammar that sounds natural when spoken, filler words, pacing, clarity, "
+            "and a crisp ending. Put delivery notes in delivery_tips."
+        )
     system = (
         "You are a tough but fair interview coach for software engineers. "
         "Return concise coaching. Score 1-5. Focus on clarity, correctness, and examples."
+        + voice_extra
     )
     user = (
         f"Track: {track.title}\n"
         f"Category: {question.category}\n"
+        f"Input mode: {input_mode}\n"
         f"Question: {question.prompt}\n"
         f"Candidate answer:\n{answer}\n\n"
         "Respond in JSON with keys: score (int 1-5), summary, strengths (array), "
-        "gaps (array), better_answer (string), next_drill (string)."
+        "gaps (array), better_answer (string), next_drill (string), "
+        "delivery_tips (array of spoken grammar/delivery tips; empty if text mode)."
     )
     try:
         completion = client.chat.completions.create(
@@ -167,6 +270,9 @@ def _openai_feedback(
         )
         raw = completion.choices[0].message.content or "{}"
         data = json.loads(raw)
+        tips = list(data.get("delivery_tips") or [])[:4]
+        if input_mode == "voice" and not tips:
+            tips = _delivery_tips(answer)
         return FeedbackResponse(
             score=int(data.get("score", 3)),
             summary=str(data.get("summary", "LLM coaching complete.")),
@@ -175,6 +281,8 @@ def _openai_feedback(
             better_answer=str(data.get("better_answer", "")),
             next_drill=str(data.get("next_drill", "Practice again out loud.")),
             provider="openai",
+            delivery_tips=tips,
+            input_mode=input_mode,
         )
     except Exception:
         return None
@@ -186,7 +294,8 @@ def generate_feedback(body: FeedbackRequest) -> FeedbackResponse:
     if not track or not question or question.track_id != body.track_id:
         raise ValueError("Unknown track or question")
 
-    llm = _openai_feedback(question, track, body.answer)
+    mode = body.input_mode if body.input_mode in {"text", "voice"} else "text"
+    llm = _openai_feedback(question, track, body.answer, mode)
     if llm:
         return llm
-    return _heuristic_feedback(question, body.answer)
+    return _heuristic_feedback(question, body.answer, mode)

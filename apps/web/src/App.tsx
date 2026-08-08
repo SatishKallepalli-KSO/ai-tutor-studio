@@ -10,6 +10,7 @@ import {
 } from './api'
 import { useAuth } from './auth'
 import { getTopic, topicsForTrack, type Topic } from './curriculum'
+import { speakText, stopSpeaking, useSpeechAnswer } from './useSpeechAnswer'
 import './App.css'
 
 type Step = 'tracks' | 'learn' | 'practice'
@@ -23,11 +24,23 @@ export default function App() {
   const [topicId, setTopicId] = useState<string | null>(null)
   const [questionId, setQuestionId] = useState<string | null>(null)
   const [answer, setAnswer] = useState('')
+  const [inputMode, setInputMode] = useState<'text' | 'voice'>('text')
+  const [interim, setInterim] = useState('')
   const [feedback, setFeedback] = useState<Feedback | null>(null)
   const [step, setStep] = useState<Step>('tracks')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [paywall, setPaywall] = useState<string | null>(null)
+
+  const speech = useSpeechAnswer({
+    onTranscript: (finalChunk, liveInterim) => {
+      if (finalChunk) {
+        setAnswer((prev) => `${prev}${prev && !prev.endsWith(' ') ? ' ' : ''}${finalChunk}`)
+        setInputMode('voice')
+      }
+      setInterim(liveInterim)
+    },
+  })
 
   const track = useMemo(
     () => tracks.find((t) => t.id === trackId) ?? null,
@@ -118,11 +131,20 @@ export default function App() {
   }
 
   async function submitAnswer() {
-    if (!trackId || !questionId || !answer.trim()) return
+    if (!trackId || !questionId) return
+    const spokenOrTyped = (
+      interim
+        ? `${answer}${answer && !answer.endsWith(' ') ? ' ' : ''}${interim}`
+        : answer
+    ).trim()
+    if (!spokenOrTyped) return
     if (!user) {
       setPaywall('Sign in to get feedback.')
       return
     }
+    speech.stop()
+    setInterim('')
+    setAnswer(spokenOrTyped)
     setLoading(true)
     setError(null)
     setFeedback(null)
@@ -131,7 +153,8 @@ export default function App() {
       const result = await api.feedback({
         track_id: trackId as Track['id'],
         question_id: questionId,
-        answer: answer.trim(),
+        answer: spokenOrTyped,
+        input_mode: inputMode,
       })
       setFeedback(result)
       await refresh()
@@ -153,7 +176,8 @@ export default function App() {
             const result = api.localFeedback({
               track_id: trackId as Track['id'],
               question_id: questionId,
-              answer: answer.trim(),
+              answer: spokenOrTyped,
+              input_mode: inputMode,
             })
             setFeedback(result)
             if (!user.is_pro) localStorage.setItem(key, String(used + 1))
@@ -430,6 +454,10 @@ export default function App() {
                       setQuestionId(q.id)
                       setFeedback(null)
                       setAnswer('')
+                      setInterim('')
+                      setInputMode('text')
+                      speech.stop()
+                      stopSpeaking()
                     }}
                   >
                     <span>{q.category}</span>
@@ -450,7 +478,16 @@ export default function App() {
 
                 {question && (
                   <>
-                    <p className="pill">{question.category}</p>
+                    <div className="question-tools">
+                      <p className="pill">{question.category}</p>
+                      <button
+                        type="button"
+                        className="btn ghost"
+                        onClick={() => speakText(question.prompt)}
+                      >
+                        Hear question
+                      </button>
+                    </div>
                     <h3>{question.prompt}</h3>
                     <p className="muted">Hints</p>
                     <ul>
@@ -458,23 +495,100 @@ export default function App() {
                         <li key={h}>{h}</li>
                       ))}
                     </ul>
-                    <label className="answer-label" htmlFor="answer">
-                      Your answer
-                    </label>
+                    <div className="answer-toolbar">
+                      <label className="answer-label" htmlFor="answer">
+                        Your answer{' '}
+                        {inputMode === 'voice' && (
+                          <span className="pill voice">Voice</span>
+                        )}
+                      </label>
+                      <div className="voice-actions">
+                        {speech.listening ? (
+                          <button
+                            type="button"
+                            className="btn danger-outline"
+                            onClick={() => {
+                              speech.stop()
+                              setInterim('')
+                            }}
+                          >
+                            Stop listening
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            className="btn primary"
+                            onClick={() => {
+                              setInputMode('voice')
+                              speech.start()
+                            }}
+                            disabled={!speech.supported}
+                            title={
+                              speech.supported
+                                ? 'Answer out loud like a real interview'
+                                : 'Voice needs Chrome, Edge, or Safari'
+                            }
+                          >
+                            Speak answer
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          className="btn ghost"
+                          onClick={() => {
+                            setAnswer('')
+                            setInterim('')
+                            setInputMode('text')
+                            speech.stop()
+                          }}
+                        >
+                          Clear
+                        </button>
+                      </div>
+                    </div>
+                    {speech.listening && (
+                      <p className="listening-bar" aria-live="polite">
+                        Listening… speak for ~90–120 seconds like the interview room.
+                        {interim ? ` “${interim}”` : ''}
+                      </p>
+                    )}
+                    {speech.error && (
+                      <div className="banner error">{speech.error}</div>
+                    )}
+                    {!speech.supported && (
+                      <p className="muted note">
+                        Voice dictation isn’t available in this browser — type your
+                        answer, or open Chrome/Edge/Safari for mic practice.
+                      </p>
+                    )}
                     <textarea
                       id="answer"
-                      value={answer}
-                      onChange={(e) => setAnswer(e.target.value)}
-                      placeholder="Write like you'd speak in an interview (90–120 seconds)…"
+                      value={
+                        interim
+                          ? `${answer}${answer && !answer.endsWith(' ') ? ' ' : ''}${interim}`
+                          : answer
+                      }
+                      onChange={(e) => {
+                        setAnswer(e.target.value)
+                        setInterim('')
+                        if (inputMode === 'voice') setInputMode('text')
+                      }}
+                      placeholder="Speak your answer (or type) like a 90–120 second interview response…"
                       rows={10}
                     />
                     <div className="actions">
                       <button
                         className="btn primary"
                         onClick={submitAnswer}
-                        disabled={loading || !answer.trim()}
+                        disabled={
+                          loading || !(answer.trim() || interim.trim())
+                        }
                       >
-                        {loading ? 'Coaching…' : 'Get AI feedback'}
+                        {loading
+                          ? 'Coaching…'
+                          : inputMode === 'voice'
+                            ? 'Get voice + content feedback'
+                            : 'Get AI feedback'}
                       </button>
                     </div>
                   </>
@@ -485,7 +599,10 @@ export default function App() {
                     <div className="score">
                       <span>{feedback.score}/5</span>
                       <p>{feedback.summary}</p>
-                      <small>Provider: {feedback.provider}</small>
+                      <small>
+                        Provider: {feedback.provider}
+                        {feedback.input_mode === 'voice' ? ' · voice coaching' : ''}
+                      </small>
                     </div>
                     <div className="feedback-grid">
                       <div>
@@ -505,6 +622,16 @@ export default function App() {
                         </ul>
                       </div>
                     </div>
+                    {!!feedback.delivery_tips?.length && (
+                      <div className="delivery">
+                        <h4>Spoken delivery & grammar</h4>
+                        <ul>
+                          {feedback.delivery_tips.map((tip) => (
+                            <li key={tip}>{tip}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                     <h4>Stronger answer shape</h4>
                     <pre>{feedback.better_answer}</pre>
                     <p className="next">
