@@ -5,7 +5,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 # Free can learn everything (docs = funnel). Practice + feedback gated.
-FREE_PRACTICE_TRACKS = frozenset({"html", "css", "javascript", "python"})
+FREE_PRACTICE_TRACKS = frozenset(
+    {"html", "css", "javascript", "python", "java-to-python"}
+)
 
 FREE_FEEDBACK_PER_DAY = 5
 
@@ -32,6 +34,7 @@ PLANS: dict[str, PlanInfo] = {
         features=[
             "All topic documentation (Learn)",
             "Practice on HTML, CSS, JavaScript, Python",
+            "Java → Python transition track",
             f"{FREE_FEEDBACK_PER_DAY} feedback reviews per day",
             "Local rubric coaching",
         ],

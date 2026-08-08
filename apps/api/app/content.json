@@ -52,6 +52,24 @@
       ]
     },
     {
+      "id": "java-to-python",
+      "title": "Java → Python Developer",
+      "audience": "Java engineers switching to Python",
+      "summary": "Map Java/Spring instincts to Python: syntax, typing, OOP, asyncio, and FastAPI.",
+      "outcomes": [
+        "Translate Java types and collections into idiomatic Python",
+        "Use typing, venv/packaging, and pytest like a production Python engineer",
+        "Explain Spring concepts as FastAPI + Pydantic equivalents"
+      ],
+      "study_plan": [
+        "Day 1–2: Syntax & collections map (list/dict/set, comprehensions)",
+        "Day 3: Classes, dataclasses, protocols vs Java interfaces",
+        "Day 4: Typing (mypy) + packaging (venv/poetry) + pytest",
+        "Day 5: asyncio vs executors; when to use each",
+        "Day 6–7: Rebuild a small Spring-style API in FastAPI and practice explaining it"
+      ]
+    },
+    {
       "id": "java",
       "title": "Java",
       "audience": "Backend / JVM engineers",
@@ -850,6 +868,127 @@
         "breakpoint",
         "mobile-first",
         "clamp"
+      ]
+    },
+    {
+      "id": "j2p-mindset-q",
+      "track_id": "java-to-python",
+      "topic_id": "j2p-mindset",
+      "category": "Transition",
+      "prompt": "You are a Java engineer moving to Python. What skills transfer, what do you unlearn, and how do you stay production-safe without Java’s ceremony?",
+      "hints": [
+        "Keep systems / API / testing instincts",
+        "Unlearn mandatory classes and getters everywhere",
+        "Mention typing + venv + tests as the safety net"
+      ],
+      "strong_answer_signals": [
+        "transfer",
+        "unlearn",
+        "typing",
+        "venv",
+        "idiomatic",
+        "production"
+      ]
+    },
+    {
+      "id": "j2p-syntax-q",
+      "track_id": "java-to-python",
+      "topic_id": "j2p-syntax",
+      "category": "Language",
+      "prompt": "Map Java List and Map to Python. When do you use a comprehension, and what mutable-default pitfall must you avoid?",
+      "hints": [
+        "list/dict/set mapping",
+        "comprehension for transforms",
+        "never def f(xs=[])"
+      ],
+      "strong_answer_signals": [
+        "list",
+        "dict",
+        "comprehension",
+        "mutable default",
+        "set",
+        "tuple"
+      ]
+    },
+    {
+      "id": "j2p-oop-q",
+      "track_id": "java-to-python",
+      "topic_id": "j2p-oop",
+      "category": "OOP",
+      "prompt": "How do Python dataclasses and Protocol compare to Java records/Lombok and interfaces? When do you still write a full class?",
+      "hints": [
+        "dataclass for data carriers",
+        "Protocol = structural typing",
+        "full class when behavior/invariants matter"
+      ],
+      "strong_answer_signals": [
+        "dataclass",
+        "protocol",
+        "interface",
+        "composition",
+        "invariant",
+        "property"
+      ]
+    },
+    {
+      "id": "j2p-typing-q",
+      "track_id": "java-to-python",
+      "topic_id": "j2p-typing",
+      "category": "Tooling",
+      "prompt": "Describe the Python toolchain you would require on a team coming from Maven/JUnit: environments, types, tests, and CI checks.",
+      "hints": [
+        "venv or poetry/uv",
+        "mypy/pyright",
+        "pytest",
+        "ruff/black in CI"
+      ],
+      "strong_answer_signals": [
+        "venv",
+        "mypy",
+        "pytest",
+        "ci",
+        "poetry",
+        "type hint"
+      ]
+    },
+    {
+      "id": "j2p-async-q",
+      "track_id": "java-to-python",
+      "topic_id": "j2p-async",
+      "category": "Concurrency",
+      "prompt": "Compare Java ExecutorService / CompletableFuture to Python asyncio. When is asyncio the wrong tool?",
+      "hints": [
+        "I/O bound vs CPU bound",
+        "do not block the event loop",
+        "process pool for CPU"
+      ],
+      "strong_answer_signals": [
+        "asyncio",
+        "event loop",
+        "i/o",
+        "cpu",
+        "blocking",
+        "gather"
+      ]
+    },
+    {
+      "id": "j2p-fastapi-q",
+      "track_id": "java-to-python",
+      "topic_id": "j2p-fastapi",
+      "category": "APIs",
+      "prompt": "Explain Spring Boot REST + Bean Validation as FastAPI + Pydantic. Where does business logic live, and what do you keep identical to Java service design?",
+      "hints": [
+        "Pydantic ≈ @Valid DTOs",
+        "thin routes, fat services",
+        "OpenAPI docs parallel"
+      ],
+      "strong_answer_signals": [
+        "fastapi",
+        "pydantic",
+        "validation",
+        "service",
+        "openapi",
+        "dependency"
       ]
     }
   ]

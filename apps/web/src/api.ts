@@ -4,6 +4,7 @@ export type TrackId =
   | 'staff-interview'
   | 'em-interview'
   | 'java-to-ai'
+  | 'java-to-python'
   | 'java'
   | 'python'
   | 'javascript'
@@ -228,4 +229,5 @@ export const FREE_PRACTICE_TRACKS = new Set([
   'css',
   'javascript',
   'python',
+  'java-to-python',
 ])

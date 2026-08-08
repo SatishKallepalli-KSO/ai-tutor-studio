@@ -27,6 +27,7 @@ export function PricingPage() {
               features: [
                 'All topic documentation (Learn)',
                 'Practice on HTML, CSS, JavaScript, Python',
+                'Java → Python transition track',
                 '5 feedback reviews per day',
                 'Local rubric coaching',
               ],

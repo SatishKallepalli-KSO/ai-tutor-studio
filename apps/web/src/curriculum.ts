@@ -2,6 +2,7 @@ export type TrackId =
   | 'staff-interview'
   | 'em-interview'
   | 'java-to-ai'
+  | 'java-to-python'
   | 'java'
   | 'python'
   | 'javascript'
@@ -946,6 +947,241 @@ nightly: eval set → score faithfulness / citation coverage`,
       'How do you stop runaway tool use?',
     ],
   }),
+
+  // Java → Python
+  t(
+    'j2p-mindset',
+    'java-to-python',
+    'Mindset shift',
+    'What carries over from Java — and what to unlearn.',
+    {
+      overview:
+        'You already know APIs, OOP, concurrency, and production discipline. Python trades ceremony for clarity: prefer readable modules, explicit dependencies, and “batteries included” libraries over heavy frameworks — until scale demands structure.',
+      keyPoints: [
+        'Keep your systems instincts; drop “everything needs a class” habits.',
+        'Python is multi-paradigm: functions + classes + modules.',
+        'Dynamic runtime + optional static typing (mypy/pyright) is the modern combo.',
+        'Packaging and envs (venv/poetry) replace “one big WAR” mental model.',
+      ],
+      example: {
+        title: 'Same job, less boilerplate',
+        code: `// Java
+public int sum(List<Integer> xs) {
+  int t = 0;
+  for (Integer x : xs) t += x;
+  return t;
+}
+
+# Python
+def sum_nums(xs: list[int]) -> int:
+    return sum(xs)`,
+        note: 'Idiomatic Python is short — but still typed in serious services.',
+      },
+      commonMistakes: [
+        'Writing Java-in-Python (getters/setters everywhere, huge class trees).',
+        'Ignoring virtualenvs and polluting the system interpreter.',
+        'Treating “dynamic” as “no types in production code”.',
+      ],
+      beforeYouPractice: [
+        'Name three Java strengths that still apply in Python.',
+        'Name one habit you will unlearn.',
+      ],
+    },
+  ),
+  t(
+    'j2p-syntax',
+    'java-to-python',
+    'Syntax & collections',
+    'Lists, dicts, sets, comprehensions, exceptions.',
+    {
+      overview:
+        'Map Java collections to Python builtins. Prefer list/dict/set, use comprehensions for transforms, and raise/catch exceptions with clear types.',
+      keyPoints: [
+        'List ≈ ArrayList, dict ≈ HashMap, set ≈ HashSet.',
+        'Tuples are immutable records; dataclasses for richer objects.',
+        'Comprehensions replace many trivial loops.',
+        'EAFP: try/except is common; still validate at API boundaries.',
+      ],
+      example: {
+        title: 'Collection map',
+        code: `names = ["Ada", "Grace", "Linus"]
+lengths = {n: len(n) for n in names}      # dict comprehension
+adults = [u for u in users if u.age >= 18] # list comprehension
+
+# exceptions
+try:
+    value = cache[key]
+except KeyError:
+    value = load(key)`,
+        note: 'Say the Java equivalent out loud — it sticks faster.',
+      },
+      commonMistakes: [
+        'Mutating a list while iterating.',
+        'Using mutable default args: def f(xs=[]).',
+        'Catching bare Exception everywhere.',
+      ],
+      beforeYouPractice: [
+        'Translate an ArrayList + HashMap snippet to Python.',
+        'When do you use a tuple vs a dataclass?',
+      ],
+    },
+  ),
+  t(
+    'j2p-oop',
+    'java-to-python',
+    'OOP in Python',
+    'Classes, dataclasses, protocols, composition.',
+    {
+      overview:
+        'Python classes are simpler: no access modifiers by convention (_private), dataclasses cut boilerplate, and Protocol (typing) replaces many interface hierarchies.',
+      keyPoints: [
+        'dataclass ≈ record/Lombok data class.',
+        'Protocol = structural typing (duck typing with checks).',
+        'Prefer composition and small modules over deep inheritance.',
+        '@property replaces many getters.',
+      ],
+      example: {
+        title: 'Dataclass + protocol',
+        code: `from dataclasses import dataclass
+from typing import Protocol
+
+class Payable(Protocol):
+    def total(self) -> int: ...
+
+@dataclass
+class Order:
+    items: list[int]
+    def total(self) -> int:
+        return sum(self.items)
+
+def invoice(p: Payable) -> int:
+    return p.total()`,
+        note: 'Protocols let you type duck-typed APIs without inheritance.',
+      },
+      commonMistakes: [
+        'Giant “Manager” classes ported from enterprise Java.',
+        'Overusing inheritance for code reuse.',
+        'Ignoring __init__ clarity and invariants.',
+      ],
+      beforeYouPractice: [
+        'When is a dataclass better than a raw dict?',
+        'How does Protocol differ from a Java interface?',
+      ],
+    },
+  ),
+  t(
+    'j2p-typing',
+    'java-to-python',
+    'Typing & tooling',
+    'type hints, mypy, venv, pytest.',
+    {
+      overview:
+        'Production Python uses type hints + a checker (mypy/pyright), isolated envs, and pytest. This is how Java teams keep safety without the JVM ceremony.',
+      keyPoints: [
+        'Annotate public functions and domain models.',
+        'venv/poetry/uv isolate dependencies like Maven modules.',
+        'pytest replaces JUnit for most services.',
+        'Black/ruff format and lint — CI quality gates.',
+      ],
+      example: {
+        title: 'Typed function + pytest',
+        code: `# app.py
+def discount(price: int, pct: float) -> int:
+    return int(price * (1 - pct))
+
+# test_app.py
+def test_discount():
+    assert discount(100, 0.1) == 90`,
+        note: 'Show the toolchain in interviews: types + tests + env.',
+      },
+      commonMistakes: [
+        'No requirements.lock / poetry.lock in services.',
+        'Types only in your head, never checked in CI.',
+        'unittest boilerplate when pytest fixtures are enough.',
+      ],
+      beforeYouPractice: [
+        'Explain venv vs installing packages globally.',
+        'What would you put in CI for a Python API?',
+      ],
+    },
+  ),
+  t(
+    'j2p-async',
+    'java-to-python',
+    'Concurrency map',
+    'Threads / executors → asyncio and when not to.',
+    {
+      overview:
+        'Java ExecutorService maps to threads or process pools; Python asyncio shines for many I/O waits. CPU-heavy work still needs processes or native extensions.',
+      keyPoints: [
+        'asyncio await ≈ non-blocking I/O event loop.',
+        'Do not call blocking JDBC-style I/O inside async handlers.',
+        'concurrent.futures for thread/process pools.',
+        'Pick async frameworks (FastAPI) when concurrency is I/O bound.',
+      ],
+      example: {
+        title: 'Parallel I/O',
+        code: `import asyncio
+
+async def fetch_all(urls: list[str]) -> list[str]:
+    async with aiohttp.ClientSession() as session:
+        tasks = [session.get(u) for u in urls]
+        responses = await asyncio.gather(*tasks)
+        return [await r.text() for r in responses]`,
+        note: 'Compare to CompletableFuture.allOf in Java.',
+      },
+      commonMistakes: [
+        'Blocking the event loop with time.sleep or sync HTTP.',
+        'Assuming asyncio speeds up CPU-bound math.',
+        'Unbounded gather without timeouts.',
+      ],
+      beforeYouPractice: [
+        'When would you keep sync Flask/Django style instead of asyncio?',
+        'Map CompletableFuture to an asyncio pattern.',
+      ],
+    },
+  ),
+  t(
+    'j2p-fastapi',
+    'java-to-python',
+    'Spring → FastAPI',
+    'Routes, Pydantic models, dependency injection.',
+    {
+      overview:
+        'FastAPI is the closest “Spring Boot feeling” for many Java backend engineers: typed request models, OpenAPI, dependency injection, and async support.',
+      keyPoints: [
+        'Pydantic models ≈ Bean Validation DTOs.',
+        'Depends() ≈ Spring DI for request-scoped deps.',
+        'APIRouter ≈ controller grouping.',
+        'Keep business logic out of route functions — same as Java.',
+      ],
+      example: {
+        title: 'Validated endpoint',
+        code: `from fastapi import FastAPI
+from pydantic import BaseModel, Field
+
+class CreateOrder(BaseModel):
+    sku: str
+    qty: int = Field(gt=0)
+
+app = FastAPI()
+
+@app.post("/orders")
+def create(order: CreateOrder) -> dict:
+    return {"ok": True, "qty": order.qty}`,
+        note: 'Mention OpenAPI auto-docs — interviewers like the Spring parallel.',
+      },
+      commonMistakes: [
+        'Fat route handlers with SQL and business rules mixed.',
+        'No request validation (raw dicts everywhere).',
+        'Ignoring status codes and error models.',
+      ],
+      beforeYouPractice: [
+        'Map @RestController + @Valid to FastAPI + Pydantic.',
+        'Where do transactions/services live in a FastAPI app?',
+      ],
+    },
+  ),
 ]
 
 export function topicsForTrack(trackId: string): Topic[] {
