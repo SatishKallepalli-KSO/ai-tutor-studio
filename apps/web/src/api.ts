@@ -1,3 +1,5 @@
+import { TRACKS, localFeedback, localQuestions } from './data'
+
 export type TrackId = 'staff-interview' | 'em-interview' | 'java-to-ai'
 
 export type Track = {
@@ -28,8 +30,10 @@ export type Feedback = {
   provider: string
 }
 
+const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? ''
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(path, {
+  const res = await fetch(`${API_BASE}${path}`, {
     headers: { 'Content-Type': 'application/json', ...(init?.headers ?? {}) },
     ...init,
   })
@@ -41,16 +45,36 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
-  tracks: () => request<Track[]>('/v1/tutor/tracks'),
-  questions: (trackId: string) =>
-    request<TutorQuestion[]>(`/v1/tutor/tracks/${trackId}/questions`),
-  feedback: (body: {
+  async tracks(): Promise<Track[]> {
+    try {
+      return await request<Track[]>('/v1/tutor/tracks')
+    } catch {
+      return TRACKS
+    }
+  },
+
+  async questions(trackId: string): Promise<TutorQuestion[]> {
+    try {
+      return await request<TutorQuestion[]>(
+        `/v1/tutor/tracks/${trackId}/questions`,
+      )
+    } catch {
+      return localQuestions(trackId)
+    }
+  },
+
+  async feedback(body: {
     track_id: TrackId
     question_id: string
     answer: string
-  }) =>
-    request<Feedback>('/v1/tutor/feedback', {
-      method: 'POST',
-      body: JSON.stringify(body),
-    }),
+  }): Promise<Feedback> {
+    try {
+      return await request<Feedback>('/v1/tutor/feedback', {
+        method: 'POST',
+        body: JSON.stringify(body),
+      })
+    } catch {
+      return localFeedback(body)
+    }
+  },
 }

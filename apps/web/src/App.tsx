@@ -28,13 +28,7 @@ export default function App() {
     api
       .tracks()
       .then(setTracks)
-      .catch((err: Error) =>
-        setError(
-          err.message.includes('Failed to fetch')
-            ? 'API not running. Start apps/api on port 8000.'
-            : err.message,
-        ),
-      )
+      .catch((err: Error) => setError(err.message))
   }, [])
 
   async function selectTrack(id: string) {

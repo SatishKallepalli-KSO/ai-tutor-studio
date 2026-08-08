@@ -57,10 +57,17 @@ apps/api   FastAPI tutoring backend
 apps/web   React + Vite coaching UI
 ```
 
-## Scripts (from repo root)
+## Deploy (free)
 
-```bash
-npm install
-npm run dev          # web
-npm run dev:api      # api helper (needs venv activated separately for now)
-```
+### GitHub Pages (live static app)
+
+The UI runs on GitHub Pages with built-in rubric feedback (no server required).
+
+Live: **https://satishkallepalli-kso.github.io/ai-tutor-studio/**
+
+### Optional: Render (API + UI in one Docker service)
+
+1. Go to [Render](https://render.com) → New → Blueprint
+2. Connect `SatishKallepalli-KSO/ai-tutor-studio`
+3. Deploy with `render.yaml` (free web service)
+4. Optionally set `OPENAI_API_KEY` for richer coaching

@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: ai-tutor-studio
+    runtime: docker
+    plan: free
+    region: oregon
+    healthCheckPath: /healthz
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
