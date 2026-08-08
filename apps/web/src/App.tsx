@@ -1,13 +1,15 @@
 import { useEffect, useMemo, useState } from 'react'
 import { api, type Feedback, type Track, type TutorQuestion } from './api'
+import { getTopic, topicsForTrack, type Topic } from './curriculum'
 import './App.css'
 
-type Step = 'tracks' | 'plan' | 'practice'
+type Step = 'tracks' | 'learn' | 'practice'
 
 export default function App() {
   const [tracks, setTracks] = useState<Track[]>([])
   const [trackId, setTrackId] = useState<string | null>(null)
   const [questions, setQuestions] = useState<TutorQuestion[]>([])
+  const [topicId, setTopicId] = useState<string | null>(null)
   const [questionId, setQuestionId] = useState<string | null>(null)
   const [answer, setAnswer] = useState('')
   const [feedback, setFeedback] = useState<Feedback | null>(null)
@@ -19,6 +21,18 @@ export default function App() {
     () => tracks.find((t) => t.id === trackId) ?? null,
     [trackId, tracks],
   )
+  const topics = useMemo(
+    () => (trackId ? topicsForTrack(trackId) : []),
+    [trackId],
+  )
+  const topic = useMemo(
+    () => (topicId ? getTopic(topicId) ?? null : null),
+    [topicId],
+  )
+  const topicQuestions = useMemo(() => {
+    if (!topicId) return questions
+    return questions.filter((q) => q.topic_id === topicId)
+  }, [questions, topicId])
   const question = useMemo(
     () => questions.find((q) => q.id === questionId) ?? null,
     [questionId, questions],
@@ -40,13 +54,35 @@ export default function App() {
     try {
       const qs = await api.questions(id)
       setQuestions(qs)
+      const firstTopic = topicsForTrack(id)[0]
+      setTopicId(firstTopic?.id ?? qs[0]?.topic_id ?? null)
       setQuestionId(qs[0]?.id ?? null)
-      setStep('plan')
+      setStep('learn')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load questions')
     } finally {
       setLoading(false)
     }
+  }
+
+  function selectTopic(next: Topic) {
+    setTopicId(next.id)
+    setFeedback(null)
+    setAnswer('')
+    const qs = questions.filter((q) => q.topic_id === next.id)
+    setQuestionId(qs[0]?.id ?? null)
+  }
+
+  function goPractice(forTopicId?: string) {
+    const id = forTopicId ?? topicId
+    if (id) {
+      setTopicId(id)
+      const qs = questions.filter((q) => q.topic_id === id)
+      setQuestionId(qs[0]?.id ?? questions[0]?.id ?? null)
+    }
+    setFeedback(null)
+    setAnswer('')
+    setStep('practice')
   }
 
   async function submitAnswer() {
@@ -75,12 +111,12 @@ export default function App() {
       <header className="topbar">
         <div>
           <p className="eyebrow">AI Tutor Studio</p>
-          <h1>Practice. Get coached. Level up.</h1>
+          <h1>Learn. Practice. Get coached.</h1>
         </div>
         <p className="tagline">
-        Interview prep + language tracks: Java, Python, React, TypeScript,
-        JavaScript, HTML, CSS, Node.js
-      </p>
+          One-stop shop: topic docs first, then mock answers with AI feedback —
+          Staff, EM, Java→AI, and language tracks.
+        </p>
       </header>
 
       {error && <div className="banner error">{error}</div>}
@@ -89,18 +125,22 @@ export default function App() {
         <section className="section">
           <h2>Choose a track</h2>
           <div className="track-grid">
-            {tracks.map((item) => (
-              <button
-                key={item.id}
-                className="track-card"
-                onClick={() => selectTrack(item.id)}
-                disabled={loading}
-              >
-                <span className="pill">{item.audience}</span>
-                <strong>{item.title}</strong>
-                <p>{item.summary}</p>
-              </button>
-            ))}
+            {tracks.map((item) => {
+              const count = topicsForTrack(item.id).length
+              return (
+                <button
+                  key={item.id}
+                  className="track-card"
+                  onClick={() => selectTrack(item.id)}
+                  disabled={loading}
+                >
+                  <span className="pill">{item.audience}</span>
+                  <strong>{item.title}</strong>
+                  <p>{item.summary}</p>
+                  <span className="meta">{count} topics · docs + practice</span>
+                </button>
+              )
+            })}
           </div>
         </section>
       )}
@@ -108,7 +148,13 @@ export default function App() {
       {track && step !== 'tracks' && (
         <section className="section">
           <div className="section-head">
-            <button className="linkish" onClick={() => setStep('tracks')}>
+            <button
+              className="linkish"
+              onClick={() => {
+                setStep('tracks')
+                setTrackId(null)
+              }}
+            >
               ← All tracks
             </button>
             <h2>{track.title}</h2>
@@ -117,49 +163,137 @@ export default function App() {
 
           <div className="tabs">
             <button
-              className={step === 'plan' ? 'tab active' : 'tab'}
-              onClick={() => setStep('plan')}
+              className={step === 'learn' ? 'tab active' : 'tab'}
+              onClick={() => setStep('learn')}
             >
-              Study plan
+              Learn (docs)
             </button>
             <button
               className={step === 'practice' ? 'tab active' : 'tab'}
-              onClick={() => setStep('practice')}
+              onClick={() => goPractice()}
             >
-              Mock practice
+              Practice + AI feedback
             </button>
           </div>
 
-          {step === 'plan' && (
-            <div className="panel">
-              <h3>Outcomes</h3>
-              <ul>
-                {track.outcomes.map((item) => (
-                  <li key={item}>{item}</li>
+          {step === 'learn' && (
+            <div className="learn">
+              <aside className="topic-list">
+                <h3>Topics</h3>
+                {topics.map((item) => (
+                  <button
+                    key={item.id}
+                    className={
+                      item.id === topicId ? 'topic-item active' : 'topic-item'
+                    }
+                    onClick={() => selectTopic(item)}
+                  >
+                    <strong>{item.title}</strong>
+                    <span>{item.summary}</span>
+                  </button>
                 ))}
-              </ul>
-              <h3>Plan</h3>
-              <ol>
-                {track.study_plan.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ol>
-              <button className="btn primary" onClick={() => setStep('practice')}>
-                Start mock practice
-              </button>
+                <div className="panel plan-mini">
+                  <h4>Track plan</h4>
+                  <ol>
+                    {track.study_plan.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ol>
+                </div>
+              </aside>
+
+              <div className="panel doc">
+                {topic ? (
+                  <>
+                    <p className="pill">Documentation</p>
+                    <h3>{topic.title}</h3>
+                    <p className="lede">{topic.doc.overview}</p>
+
+                    <h4>Key points</h4>
+                    <ul>
+                      {topic.doc.keyPoints.map((point) => (
+                        <li key={point}>{point}</li>
+                      ))}
+                    </ul>
+
+                    <h4>{topic.doc.example.title}</h4>
+                    <pre className="code">{topic.doc.example.code}</pre>
+                    <p className="muted note">{topic.doc.example.note}</p>
+
+                    <h4>Common mistakes</h4>
+                    <ul>
+                      {topic.doc.commonMistakes.map((m) => (
+                        <li key={m}>{m}</li>
+                      ))}
+                    </ul>
+
+                    <h4>Before you practice</h4>
+                    <ul>
+                      {topic.doc.beforeYouPractice.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+
+                    <div className="actions">
+                      <button
+                        className="btn primary"
+                        onClick={() => goPractice(topic.id)}
+                      >
+                        Practice this topic
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <p className="muted">Select a topic to read the docs.</p>
+                )}
+              </div>
             </div>
           )}
 
           {step === 'practice' && (
             <div className="practice">
               <aside className="question-list">
+                <h3>Filter by topic</h3>
+                <button
+                  className={!topicId ? 'topic-item active' : 'topic-item'}
+                  onClick={() => {
+                    setTopicId(null)
+                    setQuestionId(questions[0]?.id ?? null)
+                    setFeedback(null)
+                    setAnswer('')
+                  }}
+                >
+                  <strong>All topics</strong>
+                  <span>{questions.length} questions</span>
+                </button>
+                {topics.map((item) => {
+                  const count = questions.filter(
+                    (q) => q.topic_id === item.id,
+                  ).length
+                  return (
+                    <button
+                      key={item.id}
+                      className={
+                        item.id === topicId ? 'topic-item active' : 'topic-item'
+                      }
+                      onClick={() => selectTopic(item)}
+                    >
+                      <strong>{item.title}</strong>
+                      <span>
+                        {count} practice question{count === 1 ? '' : 's'}
+                      </span>
+                    </button>
+                  )
+                })}
+
                 <h3>Questions</h3>
-                {questions.map((q) => (
+                {topicQuestions.length === 0 && (
+                  <p className="muted">No practice questions for this topic yet.</p>
+                )}
+                {topicQuestions.map((q) => (
                   <button
                     key={q.id}
-                    className={
-                      q.id === questionId ? 'q-item active' : 'q-item'
-                    }
+                    className={q.id === questionId ? 'q-item active' : 'q-item'}
                     onClick={() => {
                       setQuestionId(q.id)
                       setFeedback(null)
@@ -173,6 +307,15 @@ export default function App() {
               </aside>
 
               <div className="panel practice-main">
+                {topic && (
+                  <button
+                    className="linkish doc-link"
+                    onClick={() => setStep('learn')}
+                  >
+                    ← Review docs: {topic.title}
+                  </button>
+                )}
+
                 {question && (
                   <>
                     <p className="pill">{question.category}</p>
@@ -244,7 +387,8 @@ export default function App() {
       )}
 
       <footer className="footer">
-        AI Tutor Studio · local MVP · works without OpenAI key (rubric mode)
+        AI Tutor Studio · study docs → practice answers → get coached (works
+        offline in rubric mode)
       </footer>
     </div>
   )

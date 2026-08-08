@@ -24,6 +24,7 @@ class Track(BaseModel):
 class TutorQuestion(BaseModel):
     id: str
     track_id: str
+    topic_id: str = ""
     category: str
     prompt: str
     hints: list[str]

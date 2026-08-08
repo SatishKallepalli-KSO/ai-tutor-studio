@@ -3,10 +3,13 @@
 Local-first **AI-assisted tutoring / upskilling** product.
 
 Sell interview prep and upskilling tracks with:
-- curated tracks (Staff IC, EM, Java → AI)
-- mock interview questions
-- AI or local-rubric feedback
+- curated tracks (Staff IC, EM, Java → AI, plus language tracks)
+- topic documentation under every section (learn first)
+- mock practice questions linked to each topic
+- AI or local-rubric feedback after you answer
 - study plans
+
+Flow: **Learn (docs) → Practice → Get AI feedback**.
 
 Built for Satish Kallepalli as a small-business MVP you can run on your laptop.
 

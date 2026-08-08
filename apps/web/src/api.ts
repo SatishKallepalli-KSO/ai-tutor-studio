@@ -25,6 +25,7 @@ export type Track = {
 export type TutorQuestion = {
   id: string
   track_id: TrackId
+  topic_id: string
   category: string
   prompt: string
   hints: string[]

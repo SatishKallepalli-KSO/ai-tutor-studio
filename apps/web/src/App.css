@@ -124,6 +124,14 @@ textarea {
   font-size: 0.95rem;
 }
 
+.track-card .meta {
+  display: block;
+  margin-top: 0.75rem;
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
 .pill {
   display: inline-flex;
   padding: 0.2rem 0.55rem;
@@ -204,22 +212,101 @@ textarea {
   cursor: not-allowed;
 }
 
+.learn,
 .practice {
   display: grid;
   grid-template-columns: 280px 1fr;
   gap: 1rem;
 }
 
-.question-list {
+.topic-list {
   display: grid;
   gap: 0.55rem;
   align-content: start;
 }
 
+.topic-list h3,
 .question-list h3 {
-  margin: 0 0 0.25rem;
+  margin: 0.4rem 0 0.15rem;
   font-size: 0.9rem;
   color: var(--muted);
+}
+
+.topic-item {
+  text-align: left;
+  padding: 0.75rem;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.02);
+  color: inherit;
+  cursor: pointer;
+}
+
+.topic-item strong {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+}
+
+.topic-item span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.topic-item.active {
+  border-color: rgba(61, 214, 165, 0.45);
+  background: rgba(61, 214, 165, 0.08);
+}
+
+.plan-mini {
+  margin-top: 0.5rem;
+  padding: 0.85rem;
+}
+
+.plan-mini h4 {
+  margin: 0 0 0.4rem;
+  font-size: 0.9rem;
+}
+
+.plan-mini ol {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.doc .lede {
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.doc h4 {
+  margin: 1.1rem 0 0.4rem;
+}
+
+.doc .code {
+  white-space: pre-wrap;
+  background: #0b1017;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0.85rem;
+  color: #c8d4df;
+  overflow-x: auto;
+}
+
+.doc .note {
+  margin-top: 0.45rem;
+}
+
+.doc-link {
+  margin-bottom: 0.75rem;
+}
+
+.question-list {
+  display: grid;
+  gap: 0.55rem;
+  align-content: start;
 }
 
 .q-item {
@@ -339,6 +426,7 @@ textarea {
 
 @media (max-width: 900px) {
   .track-grid,
+  .learn,
   .practice,
   .feedback-grid {
     grid-template-columns: 1fr;

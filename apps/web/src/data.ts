@@ -197,6 +197,7 @@ export const QUESTIONS: TutorQuestion[] = [
   {
     id: 'staff-ownership',
     track_id: 'staff-interview',
+    topic_id: 'staff-stories',
     category: 'Behavioral',
     prompt:
       'Tell me about a system you owned end-to-end. What was hard, what did you decide, and what measurable outcome did you drive?',
@@ -217,6 +218,7 @@ export const QUESTIONS: TutorQuestion[] = [
   {
     id: 'staff-design-sync',
     track_id: 'staff-interview',
+    topic_id: 'staff-design',
     category: 'System design',
     prompt:
       'Design a customer data syncing engine that must move large volumes of data to destinations reliably. How would you approach batch today and streaming later?',
@@ -238,6 +240,7 @@ export const QUESTIONS: TutorQuestion[] = [
   {
     id: 'staff-ai-guardrails',
     track_id: 'staff-interview',
+    topic_id: 'staff-ai-safe',
     category: 'AI / production',
     prompt:
       "How would you ship an enterprise natural-language-to-SQL feature safely when different customers must never see each other's data?",
@@ -258,6 +261,7 @@ export const QUESTIONS: TutorQuestion[] = [
   {
     id: 'em-opener',
     track_id: 'em-interview',
+    topic_id: 'em-people',
     category: 'Leadership',
     prompt:
       "Give your 30–40 second introduction as an Engineering Manager. Include scope, signature wins, and what you're looking for next.",
@@ -278,6 +282,7 @@ export const QUESTIONS: TutorQuestion[] = [
   {
     id: 'em-vendor',
     track_id: 'em-interview',
+    topic_id: 'em-transform',
     category: 'Transformation',
     prompt:
       'Describe leading a vendor-to-in-house transition. How did you protect delivery and uptime while building the team?',
@@ -298,6 +303,7 @@ export const QUESTIONS: TutorQuestion[] = [
   {
     id: 'em-conflict',
     track_id: 'em-interview',
+    topic_id: 'em-people',
     category: 'People',
     prompt:
       'Product wants more features; your team is drowning in reliability work. How do you handle the conflict?',
@@ -318,6 +324,7 @@ export const QUESTIONS: TutorQuestion[] = [
   {
     id: 'java-ai-map',
     track_id: 'java-to-ai',
+    topic_id: 'ai-path',
     category: 'Concepts',
     prompt:
       "You're a Java/Spring engineer. Explain how you would structure a production AI feature service and what maps from Spring Boot patterns.",
@@ -339,6 +346,7 @@ export const QUESTIONS: TutorQuestion[] = [
   {
     id: 'java-rag',
     track_id: 'java-to-ai',
+    topic_id: 'ai-rag',
     category: 'RAG',
     prompt:
       'When would you use RAG instead of fine-tuning, and how would you evaluate whether retrieval quality is good enough?',
@@ -359,6 +367,7 @@ export const QUESTIONS: TutorQuestion[] = [
   {
     id: 'java-agents',
     track_id: 'java-to-ai',
+    topic_id: 'ai-agents',
     category: 'Agents',
     prompt:
       'Design a simple document extraction agent for messy Excel/PDF inputs. What steps, tools, and failure handling do you need?',
@@ -379,6 +388,7 @@ export const QUESTIONS: TutorQuestion[] = [
   {
     id: 'java-oop',
     track_id: 'java',
+    topic_id: 'java-oop',
     category: 'Fundamentals',
     prompt:
       'Explain encapsulation, inheritance, and polymorphism with a realistic Spring service example.',
@@ -399,6 +409,7 @@ export const QUESTIONS: TutorQuestion[] = [
   {
     id: 'java-concurrency',
     track_id: 'java',
+    topic_id: 'java-concurrency',
     category: 'Concurrency',
     prompt:
       'How would you parallelize independent I/O-bound tasks in Java without blocking the request thread carelessly?',
@@ -419,6 +430,7 @@ export const QUESTIONS: TutorQuestion[] = [
   {
     id: 'java-spring-api',
     track_id: 'java',
+    topic_id: 'java-spring',
     category: 'Spring Boot',
     prompt:
       'Design a Spring Boot REST endpoint that validates input, calls a service, and returns consistent error responses.',
@@ -439,6 +451,7 @@ export const QUESTIONS: TutorQuestion[] = [
   {
     id: 'python-typing',
     track_id: 'python',
+    topic_id: 'python-basics',
     category: 'Fundamentals',
     prompt:
       'Why use type hints in Python services, and how do dataclasses/pydantic help API boundaries?',
@@ -459,6 +472,7 @@ export const QUESTIONS: TutorQuestion[] = [
   {
     id: 'python-async',
     track_id: 'python',
+    topic_id: 'python-async',
     category: 'Async',
     prompt:
       'When should you use asyncio in Python, and what mistakes do people make with blocking calls inside async functions?',
@@ -479,6 +493,7 @@ export const QUESTIONS: TutorQuestion[] = [
   {
     id: 'python-fastapi',
     track_id: 'python',
+    topic_id: 'python-fastapi',
     category: 'APIs',
     prompt:
       'Sketch a FastAPI endpoint that accepts JSON, validates it, and returns a typed response model.',
@@ -499,6 +514,7 @@ export const QUESTIONS: TutorQuestion[] = [
   {
     id: 'js-closures',
     track_id: 'javascript',
+    topic_id: 'js-language',
     category: 'Language',
     prompt:
       'Explain closures with a practical example (e.g. private counters or event handlers).',
@@ -519,6 +535,7 @@ export const QUESTIONS: TutorQuestion[] = [
   {
     id: 'js-async',
     track_id: 'javascript',
+    topic_id: 'js-async',
     category: 'Async',
     prompt:
       'Compare callbacks, promises, and async/await. When does Promise.all matter?',
@@ -539,6 +556,7 @@ export const QUESTIONS: TutorQuestion[] = [
   {
     id: 'js-dom',
     track_id: 'javascript',
+    topic_id: 'js-dom',
     category: 'DOM',
     prompt:
       'How would you build a small interactive UI (toggle + list render) with vanilla JS and event delegation?',
@@ -559,6 +577,7 @@ export const QUESTIONS: TutorQuestion[] = [
   {
     id: 'ts-unions',
     track_id: 'typescript',
+    topic_id: 'ts-basics',
     category: 'Types',
     prompt:
       'Explain union types and type narrowing with an example of API success vs error responses.',
@@ -579,6 +598,7 @@ export const QUESTIONS: TutorQuestion[] = [
   {
     id: 'ts-generics',
     track_id: 'typescript',
+    topic_id: 'ts-generics',
     category: 'Generics',
     prompt:
       'Write (in words or pseudocode) a generic fetchJson<T>() helper and explain the type parameter.',
@@ -599,6 +619,7 @@ export const QUESTIONS: TutorQuestion[] = [
   {
     id: 'ts-react-props',
     track_id: 'typescript',
+    topic_id: 'ts-react',
     category: 'React + TS',
     prompt:
       'How do you type React props and state for a form component with optional fields?',
@@ -619,6 +640,7 @@ export const QUESTIONS: TutorQuestion[] = [
   {
     id: 'react-state',
     track_id: 'react',
+    topic_id: 'react-components',
     category: 'State',
     prompt:
       'When do you lift state up vs keep it local? Give a concrete UI example.',
@@ -639,6 +661,7 @@ export const QUESTIONS: TutorQuestion[] = [
   {
     id: 'react-effects',
     track_id: 'react',
+    topic_id: 'react-effects',
     category: 'Hooks',
     prompt:
       'What are common useEffect mistakes, and how do you fetch data safely in React?',
@@ -659,6 +682,7 @@ export const QUESTIONS: TutorQuestion[] = [
   {
     id: 'react-keys',
     track_id: 'react',
+    topic_id: 'react-lists',
     category: 'Rendering',
     prompt:
       'Why are keys important in lists, and what goes wrong if you use array index as key during reordering?',
@@ -679,6 +703,7 @@ export const QUESTIONS: TutorQuestion[] = [
   {
     id: 'node-eventloop',
     track_id: 'nodejs',
+    topic_id: 'node-runtime',
     category: 'Runtime',
     prompt:
       'Explain the Node.js event loop in practical terms. What happens if you run CPU-heavy work on the main thread?',
@@ -699,6 +724,7 @@ export const QUESTIONS: TutorQuestion[] = [
   {
     id: 'node-express',
     track_id: 'nodejs',
+    topic_id: 'node-apis',
     category: 'APIs',
     prompt:
       'Design an Express (or similar) REST API with middleware for logging, auth, and centralized error handling.',
@@ -719,6 +745,7 @@ export const QUESTIONS: TutorQuestion[] = [
   {
     id: 'node-security',
     track_id: 'nodejs',
+    topic_id: 'node-prod',
     category: 'Production',
     prompt:
       'List practical security basics for a Node API in production (secrets, headers, input, deps).',
@@ -739,6 +766,7 @@ export const QUESTIONS: TutorQuestion[] = [
   {
     id: 'html-semantic',
     track_id: 'html',
+    topic_id: 'html-semantic',
     category: 'Semantics',
     prompt:
       'Why does semantic HTML matter for accessibility and SEO? Give tag examples for a blog post page.',
@@ -759,6 +787,7 @@ export const QUESTIONS: TutorQuestion[] = [
   {
     id: 'html-forms',
     track_id: 'html',
+    topic_id: 'html-forms',
     category: 'Forms',
     prompt:
       'Build (describe) an accessible signup form with labels, required fields, and useful input types.',
@@ -779,6 +808,7 @@ export const QUESTIONS: TutorQuestion[] = [
   {
     id: 'html-a11y',
     track_id: 'html',
+    topic_id: 'html-a11y',
     category: 'Accessibility',
     prompt:
       'What are 5 HTML accessibility checks you would run before shipping a marketing page?',
@@ -800,6 +830,7 @@ export const QUESTIONS: TutorQuestion[] = [
   {
     id: 'css-box',
     track_id: 'css',
+    topic_id: 'css-box',
     category: 'Fundamentals',
     prompt:
       'Explain the box model and how box-sizing: border-box changes layout math.',
@@ -820,6 +851,7 @@ export const QUESTIONS: TutorQuestion[] = [
   {
     id: 'css-flexgrid',
     track_id: 'css',
+    topic_id: 'css-layout',
     category: 'Layout',
     prompt:
       'When do you choose Flexbox vs Grid? Describe a header + card gallery layout.',
@@ -840,6 +872,7 @@ export const QUESTIONS: TutorQuestion[] = [
   {
     id: 'css-responsive',
     track_id: 'css',
+    topic_id: 'css-responsive',
     category: 'Responsive',
     prompt:
       'How would you make a page responsive using relative units and media queries without breaking desktop layout?',
