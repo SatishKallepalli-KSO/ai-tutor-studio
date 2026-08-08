@@ -22,6 +22,8 @@ mkdir -p docs
 cp -R apps/web/dist/. docs/
 cp docs/index.html docs/404.html
 
+touch docs/.nojekyll
+
 if [[ -d "$TMP/product" ]]; then
   cp -R "$TMP/product" docs/product
 fi
