@@ -1,11 +1,22 @@
 import { useEffect, useMemo, useState } from 'react'
-import { api, type Feedback, type Track, type TutorQuestion } from './api'
+import { Link, useSearchParams } from 'react-router-dom'
+import {
+  ApiError,
+  api,
+  FREE_PRACTICE_TRACKS,
+  type Feedback,
+  type Track,
+  type TutorQuestion,
+} from './api'
+import { useAuth } from './auth'
 import { getTopic, topicsForTrack, type Topic } from './curriculum'
 import './App.css'
 
 type Step = 'tracks' | 'learn' | 'practice'
 
 export default function App() {
+  const { user, loading: authLoading, refresh } = useAuth()
+  const [params] = useSearchParams()
   const [tracks, setTracks] = useState<Track[]>([])
   const [trackId, setTrackId] = useState<string | null>(null)
   const [questions, setQuestions] = useState<TutorQuestion[]>([])
@@ -16,6 +27,7 @@ export default function App() {
   const [step, setStep] = useState<Step>('tracks')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [paywall, setPaywall] = useState<string | null>(null)
 
   const track = useMemo(
     () => tracks.find((t) => t.id === trackId) ?? null,
@@ -38,6 +50,10 @@ export default function App() {
     [questionId, questions],
   )
 
+  const trackIsProOnly = trackId ? !FREE_PRACTICE_TRACKS.has(trackId) : false
+  const canPractice =
+    !!user && (user.is_pro || (trackId ? FREE_PRACTICE_TRACKS.has(trackId) : false))
+
   useEffect(() => {
     api
       .tracks()
@@ -45,8 +61,13 @@ export default function App() {
       .catch((err: Error) => setError(err.message))
   }, [])
 
+  useEffect(() => {
+    if (params.get('billing') === 'success') void refresh()
+  }, [params, refresh])
+
   async function selectTrack(id: string) {
     setError(null)
+    setPaywall(null)
     setTrackId(id)
     setFeedback(null)
     setAnswer('')
@@ -74,6 +95,16 @@ export default function App() {
   }
 
   function goPractice(forTopicId?: string) {
+    if (!user) {
+      setPaywall('Sign in to practice and get feedback on your answers.')
+      return
+    }
+    if (trackId && !user.is_pro && !FREE_PRACTICE_TRACKS.has(trackId)) {
+      setPaywall(
+        'This track is Pro-only. Upgrade to unlock Staff, EM, Java→AI, and advanced language tracks.',
+      )
+      return
+    }
     const id = forTopicId ?? topicId
     if (id) {
       setTopicId(id)
@@ -82,14 +113,20 @@ export default function App() {
     }
     setFeedback(null)
     setAnswer('')
+    setPaywall(null)
     setStep('practice')
   }
 
   async function submitAnswer() {
     if (!trackId || !questionId || !answer.trim()) return
+    if (!user) {
+      setPaywall('Sign in to get feedback.')
+      return
+    }
     setLoading(true)
     setError(null)
     setFeedback(null)
+    setPaywall(null)
     try {
       const result = await api.feedback({
         track_id: trackId as Track['id'],
@@ -97,8 +134,34 @@ export default function App() {
         answer: answer.trim(),
       })
       setFeedback(result)
+      await refresh()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Feedback failed')
+      if (err instanceof ApiError && err.status === 402) {
+        setPaywall(err.message)
+      } else if (err instanceof ApiError && err.status === 401) {
+        setPaywall('Sign in to get feedback on your answers.')
+      } else {
+        // Pages-only / API down: soft local free limits
+        if (!api.apiBase && user) {
+          const key = `ats_fb_${new Date().toISOString().slice(0, 10)}`
+          const used = Number(localStorage.getItem(key) || '0')
+          if (!user.is_pro && used >= 5) {
+            setPaywall('Free daily feedback limit reached. Upgrade to Pro for unlimited coaching.')
+          } else if (!user.is_pro && trackId && !FREE_PRACTICE_TRACKS.has(trackId)) {
+            setPaywall('This track is Pro-only. Upgrade to unlock full access.')
+          } else {
+            const result = api.localFeedback({
+              track_id: trackId as Track['id'],
+              question_id: questionId,
+              answer: answer.trim(),
+            })
+            setFeedback(result)
+            if (!user.is_pro) localStorage.setItem(key, String(used + 1))
+          }
+        } else {
+          setError(err instanceof Error ? err.message : 'Feedback failed')
+        }
+      }
     } finally {
       setLoading(false)
     }
@@ -113,13 +176,63 @@ export default function App() {
           <p className="eyebrow">AI Tutor Studio</p>
           <h1>Learn. Practice. Get coached.</h1>
         </div>
-        <p className="tagline">
-          One-stop shop: topic docs first, then mock answers with AI feedback —
-          Staff, EM, Java→AI, and language tracks.
-        </p>
+        <div className="topbar-actions">
+          <Link className="btn ghost" to="/pricing">
+            Pricing
+          </Link>
+          {authLoading ? null : user ? (
+            <>
+              <span className={user.is_pro ? 'plan-badge pro' : 'plan-badge'}>
+                {user.is_pro ? 'Pro' : 'Free'}
+                {!user.is_pro && (
+                  <>
+                    {' '}
+                    · {user.feedback_used_today}/{user.feedback_limit_today} today
+                  </>
+                )}
+              </span>
+              {!user.is_pro && (
+                <Link className="btn primary" to="/pricing">
+                  Upgrade
+                </Link>
+              )}
+              <AccountMenu />
+            </>
+          ) : (
+            <>
+              <Link className="btn ghost" to="/login">
+                Sign in
+              </Link>
+              <Link className="btn primary" to="/register">
+                Start free
+              </Link>
+            </>
+          )}
+        </div>
       </header>
 
+      <p className="tagline">
+        Industry-style freemium: study every topic free, practice starter tracks
+        on Free, unlock Staff/EM + unlimited AI feedback on Pro.
+      </p>
+
       {error && <div className="banner error">{error}</div>}
+      {paywall && (
+        <div className="banner paywall">
+          <p>{paywall}</p>
+          <div className="actions">
+            {!user ? (
+              <Link className="btn primary" to="/register">
+                Create free account
+              </Link>
+            ) : (
+              <Link className="btn primary" to="/pricing">
+                View Pro plans
+              </Link>
+            )}
+          </div>
+        </div>
+      )}
 
       {step === 'tracks' && (
         <section className="section">
@@ -127,6 +240,8 @@ export default function App() {
           <div className="track-grid">
             {tracks.map((item) => {
               const count = topicsForTrack(item.id).length
+              const locked =
+                !FREE_PRACTICE_TRACKS.has(item.id) && !(user?.is_pro)
               return (
                 <button
                   key={item.id}
@@ -134,10 +249,20 @@ export default function App() {
                   onClick={() => selectTrack(item.id)}
                   disabled={loading}
                 >
-                  <span className="pill">{item.audience}</span>
+                  <span className="pill-row">
+                    <span className="pill">{item.audience}</span>
+                    {locked ? (
+                      <span className="pill lock">Pro</span>
+                    ) : (
+                      <span className="pill free">Free practice</span>
+                    )}
+                  </span>
                   <strong>{item.title}</strong>
                   <p>{item.summary}</p>
-                  <span className="meta">{count} topics · docs + practice</span>
+                  <span className="meta">
+                    {count} topics · docs free · practice{' '}
+                    {locked ? 'Pro' : 'included'}
+                  </span>
                 </button>
               )
             })}
@@ -153,11 +278,17 @@ export default function App() {
               onClick={() => {
                 setStep('tracks')
                 setTrackId(null)
+                setPaywall(null)
               }}
             >
               ← All tracks
             </button>
-            <h2>{track.title}</h2>
+            <h2>
+              {track.title}{' '}
+              {trackIsProOnly && !user?.is_pro && (
+                <span className="pill lock">Pro practice</span>
+              )}
+            </h2>
             <p>{track.summary}</p>
           </div>
 
@@ -239,7 +370,11 @@ export default function App() {
                         className="btn primary"
                         onClick={() => goPractice(topic.id)}
                       >
-                        Practice this topic
+                        {canPractice
+                          ? 'Practice this topic'
+                          : trackIsProOnly
+                            ? 'Unlock practice (Pro)'
+                            : 'Sign in to practice'}
                       </button>
                     </div>
                   </>
@@ -287,9 +422,6 @@ export default function App() {
                 })}
 
                 <h3>Questions</h3>
-                {topicQuestions.length === 0 && (
-                  <p className="muted">No practice questions for this topic yet.</p>
-                )}
                 {topicQuestions.map((q) => (
                   <button
                     key={q.id}
@@ -387,9 +519,18 @@ export default function App() {
       )}
 
       <footer className="footer">
-        AI Tutor Studio · study docs → practice answers → get coached (works
-        offline in rubric mode)
+        Free docs for everyone · Free practice on starter tracks · Pro for full
+        interview suite + unlimited coaching
       </footer>
     </div>
+  )
+}
+
+function AccountMenu() {
+  const { user, logout } = useAuth()
+  return (
+    <button className="btn ghost" type="button" onClick={logout} title={user?.email}>
+      Sign out
+    </button>
   )
 }

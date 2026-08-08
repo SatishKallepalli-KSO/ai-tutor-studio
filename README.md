@@ -1,17 +1,16 @@
 # AI Tutor Studio
 
-Local-first **AI-assisted tutoring / upskilling** product.
+Local-first **AI-assisted tutoring / upskilling** product with **Free + Pro** monetization
+(HackerRank-style freemium).
 
-Sell interview prep and upskilling tracks with:
-- curated tracks (Staff IC, EM, Java → AI, plus language tracks)
-- topic documentation under every section (learn first)
-- mock practice questions linked to each topic
-- AI or local-rubric feedback after you answer
-- study plans
+## Product
 
-Flow: **Learn (docs) → Practice → Get AI feedback**.
+| Plan | What you get |
+|------|----------------|
+| **Free** | All Learn docs · practice on HTML, CSS, JavaScript, Python · 5 feedbacks/day |
+| **Pro ($19/mo or $149/yr)** | All tracks (Staff, EM, Java→AI, Java, TS, React, Node) · unlimited AI feedback · Stripe billing portal |
 
-Built for Satish Kallepalli as a small-business MVP you can run on your laptop.
+Flow: **Register → Learn docs → Practice → AI feedback** (gated by plan).
 
 ## Quick start
 
@@ -19,19 +18,26 @@ Built for Satish Kallepalli as a small-business MVP you can run on your laptop.
 
 ```bash
 cd apps/api
-python3 -m venv .venv
+python3.12 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+cp ../../.env.example .env   # set JWT_SECRET at minimum
 uvicorn app.main:app --reload --port 8000
 ```
 
-Optional richer feedback:
+Optional:
 
 ```bash
 export OPENAI_API_KEY=sk-...
+# Stripe (live subscriptions)
+export STRIPE_SECRET_KEY=sk_test_...
+export STRIPE_PRICE_MONTHLY=price_...
+export STRIPE_PRICE_YEARLY=price_...
+export STRIPE_WEBHOOK_SECRET=whsec_...
+export APP_URL=http://localhost:5173
 ```
 
-Without a key, feedback still works via a local scoring rubric.
+Without Stripe keys, **Demo upgrade** on `/pricing` unlocks Pro for local testing.
 
 ### 2) Web
 
@@ -41,36 +47,56 @@ npm install
 npm run dev
 ```
 
-Open **http://localhost:5173**
+Open **http://localhost:5173** — Vite proxies `/v1` to the API.
 
-API docs: **http://localhost:8000/docs**
+## Auth & billing APIs
 
-## Product shape
+| Endpoint | Purpose |
+|----------|---------|
+| `POST /v1/auth/register` | Create account |
+| `POST /v1/auth/login` | Sign in (JWT) |
+| `GET /v1/auth/me` | Current user + quota |
+| `GET /v1/billing/plans` | Free/Pro catalog |
+| `POST /v1/billing/checkout` | Stripe Checkout session |
+| `POST /v1/billing/portal` | Stripe Customer Portal |
+| `POST /v1/billing/webhook` | Stripe subscription events |
+| `POST /v1/billing/demo-upgrade` | Local Pro unlock (no Stripe) |
+| `POST /v1/tutor/feedback` | **Requires auth** + plan entitlement |
 
-| Track | Who it's for |
-|-------|----------------|
-| Staff Engineer Interview Prep | Senior/Staff IC loops |
-| Engineering Manager Interview Prep | EM / player-coach |
-| Java → Production AI Upskilling | Backend engineers moving into AI |
+## Stripe setup (production)
+
+1. Create a Product **AI Tutor Studio Pro** in Stripe.
+2. Add monthly + yearly recurring prices; copy Price IDs into env.
+3. Webhook endpoint: `https://YOUR_API/v1/billing/webhook`  
+   Events: `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`.
+4. Set `APP_URL` to your public frontend URL (success/cancel redirects).
+5. Set a strong `JWT_SECRET`.
+
+## Deploy
+
+### Render (recommended for monetization)
+
+Auth + Stripe need a real API. Use the Docker Blueprint (`render.yaml`):
+
+1. Render → New → Blueprint → this repo  
+2. Set env vars: `JWT_SECRET`, `APP_URL`, Stripe keys, optional `OPENAI_API_KEY`  
+3. Optional: attach a Postgres DB and set `DATABASE_URL` (otherwise SQLite on disk)
+
+### GitHub Pages (static UI only)
+
+Live UI: **https://satishkallepalli-kso.github.io/ai-tutor-studio/**
+
+For signed-in billing against a hosted API, rebuild with:
+
+```bash
+VITE_BASE=/ai-tutor-studio/ VITE_API_BASE=https://YOUR-RENDER-URL npm run build
+# copy apps/web/dist → docs/
+```
 
 ## Monorepo layout
 
 ```
-apps/api   FastAPI tutoring backend
-apps/web   React + Vite coaching UI
+apps/api   FastAPI — auth, plans, Stripe, tutoring
+apps/web   React — Learn / Practice / Pricing / Sign in
+docs/      GitHub Pages build output
 ```
-
-## Deploy (free)
-
-### GitHub Pages (live static app)
-
-The UI runs on GitHub Pages with built-in rubric feedback (no server required).
-
-Live: **https://satishkallepalli-kso.github.io/ai-tutor-studio/**
-
-### Optional: Render (API + UI in one Docker service)
-
-1. Go to [Render](https://render.com) → New → Blueprint
-2. Connect `SatishKallepalli-KSO/ai-tutor-studio`
-3. Deploy with `render.yaml` (free web service)
-4. Optionally set `OPENAI_API_KEY` for richer coaching

@@ -8,3 +8,19 @@ services:
     envVars:
       - key: OPENAI_API_KEY
         sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: APP_URL
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: STRIPE_PRICE_MONTHLY
+        sync: false
+      - key: STRIPE_PRICE_YEARLY
+        sync: false
+      - key: ALLOW_DEMO_UPGRADE
+        value: "false"
+      - key: DATABASE_URL
+        sync: false

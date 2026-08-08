@@ -4,11 +4,23 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy.orm import Session
 
+from app.auth import (
+    assert_can_get_feedback,
+    get_current_user,
+    get_optional_user,
+    record_feedback_usage,
+    router as auth_router,
+)
+from app.billing import router as billing_router
+from app.db import get_db, init_db
+from app.models import User
+from app.plans import can_practice_track
 from app.tutor import (
     TRACKS,
     FeedbackRequest,
@@ -26,17 +38,25 @@ STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
 
 app = FastAPI(
     title="AI Tutor Studio API",
-    version="0.1.0",
-    description="AI-assisted tutoring for Staff/EM interview prep and Java→AI upskilling",
+    version="0.2.0",
+    description="AI tutoring with Free/Pro plans, auth, and Stripe subscriptions",
 )
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=False,
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(auth_router)
+app.include_router(billing_router)
+
+
+@app.on_event("startup")
+def on_startup() -> None:
+    init_db()
 
 
 @app.get("/healthz")
@@ -68,12 +88,44 @@ def list_questions(track_id: str) -> list[TutorQuestion]:
     return questions_for_track(track_id)
 
 
+@app.get("/v1/tutor/tracks/{track_id}/access")
+def track_access(
+    track_id: str,
+    user: User | None = Depends(get_optional_user),
+) -> dict:
+    if not get_track(track_id):  # type: ignore[arg-type]
+        raise HTTPException(status_code=404, detail="Track not found")
+    if user is None:
+        return {
+            "track_id": track_id,
+            "can_learn": True,
+            "can_practice": False,
+            "requires_auth": True,
+            "requires_pro": not can_practice_track(track_id, "free"),
+        }
+    allowed = can_practice_track(track_id, user.plan, user.subscription_status) or user.plan == "pro"
+    return {
+        "track_id": track_id,
+        "can_learn": True,
+        "can_practice": allowed,
+        "requires_auth": False,
+        "requires_pro": not allowed,
+    }
+
+
 @app.post("/v1/tutor/feedback", response_model=FeedbackResponse)
-def tutor_feedback(body: FeedbackRequest) -> FeedbackResponse:
+def tutor_feedback(
+    body: FeedbackRequest,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> FeedbackResponse:
+    assert_can_get_feedback(db, user, body.track_id)
     try:
-        return generate_feedback(body)
+        result = generate_feedback(body)
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+    record_feedback_usage(db, user)
+    return result
 
 
 if STATIC_DIR.exists():
@@ -87,6 +139,9 @@ if STATIC_DIR.exists():
 
     @app.get("/{full_path:path}")
     def spa_fallback(full_path: str) -> FileResponse:
+        # Don't swallow API routes (mounted above); only unmatched paths hit here
+        if full_path.startswith("v1/") or full_path == "healthz":
+            raise HTTPException(status_code=404, detail="Not found")
         candidate = STATIC_DIR / full_path
         if candidate.is_file():
             return FileResponse(candidate)
