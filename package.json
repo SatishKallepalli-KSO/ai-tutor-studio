@@ -1,0 +1,18 @@
+{
+  "name": "ai-tutor-studio",
+  "private": true,
+  "version": "0.1.0",
+  "description": "AI-assisted tutoring and upskilling product (Staff/EM interview prep + Java→AI)",
+  "workspaces": [
+    "apps/web"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=@ai-tutor-studio/web",
+    "dev:web": "npm run dev --workspace=@ai-tutor-studio/web",
+    "build": "npm run build --workspace=@ai-tutor-studio/web",
+    "preview": "npm run preview --workspace=@ai-tutor-studio/web"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
