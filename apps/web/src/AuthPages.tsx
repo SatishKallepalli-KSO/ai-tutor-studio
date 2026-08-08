@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from './auth'
+import { Shell } from './Shell'
 
 export function LoginPage() {
   const { login } = useAuth()
@@ -25,41 +26,45 @@ export function LoginPage() {
   }
 
   return (
-    <div className="auth-page">
-      <form className="auth-card" onSubmit={onSubmit}>
-        <p className="eyebrow">Welcome back</p>
-        <h1>Sign in</h1>
-        <p className="muted">Continue your interview prep and language practice.</p>
-        {error && <div className="banner error">{error}</div>}
-        <label>
-          Email
-          <input
-            type="email"
-            autoComplete="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </label>
-        <label>
-          Password
-          <input
-            type="password"
-            autoComplete="current-password"
-            required
-            minLength={8}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </label>
-        <button className="btn primary" type="submit" disabled={loading}>
-          {loading ? 'Signing in…' : 'Sign in'}
-        </button>
-        <p className="auth-switch">
-          New here? <Link to="/register">Create a free account</Link>
-        </p>
-      </form>
-    </div>
+    <Shell>
+      <div className="auth-page">
+        <form className="auth-card reveal" onSubmit={onSubmit}>
+          <p className="eyebrow">Welcome back</p>
+          <h1>Sign in</h1>
+          <p className="muted">
+            Continue voice practice and AI coaching where you left off.
+          </p>
+          {error && <div className="banner error">{error}</div>}
+          <label>
+            Email
+            <input
+              type="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </label>
+          <label>
+            Password
+            <input
+              type="password"
+              autoComplete="current-password"
+              required
+              minLength={8}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </label>
+          <button className="btn primary" type="submit" disabled={loading}>
+            {loading ? 'Signing in…' : 'Sign in'}
+          </button>
+          <p className="auth-switch">
+            New here? <Link to="/register">Create a free account</Link>
+          </p>
+        </form>
+      </div>
+    </Shell>
   )
 }
 
@@ -87,54 +92,56 @@ export function RegisterPage() {
   }
 
   return (
-    <div className="auth-page">
-      <form className="auth-card" onSubmit={onSubmit}>
-        <p className="eyebrow">Start free</p>
-        <h1>Create account</h1>
-        <p className="muted">
-          Free includes docs + starter tracks. Upgrade anytime for Staff/EM and
-          unlimited AI feedback.
-        </p>
-        {error && <div className="banner error">{error}</div>}
-        <label>
-          Name
-          <input
-            type="text"
-            autoComplete="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Your name"
-          />
-        </label>
-        <label>
-          Email
-          <input
-            type="email"
-            autoComplete="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </label>
-        <label>
-          Password
-          <input
-            type="password"
-            autoComplete="new-password"
-            required
-            minLength={8}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="At least 8 characters"
-          />
-        </label>
-        <button className="btn primary" type="submit" disabled={loading}>
-          {loading ? 'Creating…' : 'Create free account'}
-        </button>
-        <p className="auth-switch">
-          Already have an account? <Link to="/login">Sign in</Link>
-        </p>
-      </form>
-    </div>
+    <Shell>
+      <div className="auth-page">
+        <form className="auth-card reveal" onSubmit={onSubmit}>
+          <p className="eyebrow">Start free</p>
+          <h1>Create account</h1>
+          <p className="muted">
+            Free includes docs, starter tracks, and Java → Python. Upgrade for
+            Staff/EM and unlimited coaching.
+          </p>
+          {error && <div className="banner error">{error}</div>}
+          <label>
+            Name
+            <input
+              type="text"
+              autoComplete="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Your name"
+            />
+          </label>
+          <label>
+            Email
+            <input
+              type="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </label>
+          <label>
+            Password
+            <input
+              type="password"
+              autoComplete="new-password"
+              required
+              minLength={8}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="At least 8 characters"
+            />
+          </label>
+          <button className="btn primary" type="submit" disabled={loading}>
+            {loading ? 'Creating…' : 'Create free account'}
+          </button>
+          <p className="auth-switch">
+            Already have an account? <Link to="/login">Sign in</Link>
+          </p>
+        </form>
+      </div>
+    </Shell>
   )
 }

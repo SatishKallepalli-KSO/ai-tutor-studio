@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { api, type BillingPlans } from './api'
 import { useAuth } from './auth'
+import { Shell } from './Shell'
 
 export function PricingPage() {
   const { user, refresh, setUser } = useAuth()
@@ -96,17 +97,14 @@ export function PricingPage() {
   }
 
   return (
-    <div className="pricing-page">
-      <div className="section-head">
-        <Link className="linkish" to="/">
-          ← Back to tracks
-        </Link>
-        <h1>Simple pricing</h1>
-        <p className="tagline">
-          HackerRank-style freemium: learn free, unlock full interview tracks and
-          unlimited AI coaching on Pro.
+    <Shell>
+      <div className="pricing-page reveal">
+        <p className="eyebrow">Plans</p>
+        <h1>Simple pricing that converts</h1>
+        <p className="muted">
+          Freemium like the platforms candidates already know — learn free,
+          unlock Staff/EM and unlimited voice coaching on Pro.
         </p>
-      </div>
 
       {params.get('billing') === 'success' && (
         <div className="banner success">Payment received — refreshing your Pro access…</div>
@@ -193,6 +191,13 @@ export function PricingPage() {
           subscriptions.
         </p>
       )}
-    </div>
+
+        <p className="center-note">
+          <Link className="linkish" to="/">
+            ← Back to tracks
+          </Link>
+        </p>
+      </div>
+    </Shell>
   )
 }

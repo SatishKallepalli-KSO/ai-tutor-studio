@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type CSSProperties } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
   ApiError,
@@ -10,13 +10,22 @@ import {
 } from './api'
 import { useAuth } from './auth'
 import { getTopic, topicsForTrack, type Topic } from './curriculum'
+import { Shell, TRACK_GROUPS } from './Shell'
 import { speakText, stopSpeaking, useSpeechAnswer } from './useSpeechAnswer'
 import './App.css'
 
 type Step = 'tracks' | 'learn' | 'practice'
 
+function wordCount(text: string) {
+  return (text.trim().match(/[a-z0-9']+/gi) ?? []).length
+}
+
+function speakSeconds(words: number) {
+  return Math.max(0, Math.round((words / 140) * 60))
+}
+
 export default function App() {
-  const { user, loading: authLoading, refresh } = useAuth()
+  const { user, refresh } = useAuth()
   const [params] = useSearchParams()
   const [tracks, setTracks] = useState<Track[]>([])
   const [trackId, setTrackId] = useState<string | null>(null)
@@ -35,7 +44,10 @@ export default function App() {
   const speech = useSpeechAnswer({
     onTranscript: (finalChunk, liveInterim) => {
       if (finalChunk) {
-        setAnswer((prev) => `${prev}${prev && !prev.endsWith(' ') ? ' ' : ''}${finalChunk}`)
+        setAnswer(
+          (prev) =>
+            `${prev}${prev && !prev.endsWith(' ') ? ' ' : ''}${finalChunk}`,
+        )
         setInputMode('voice')
       }
       setInterim(liveInterim)
@@ -65,7 +77,20 @@ export default function App() {
 
   const trackIsProOnly = trackId ? !FREE_PRACTICE_TRACKS.has(trackId) : false
   const canPractice =
-    !!user && (user.is_pro || (trackId ? FREE_PRACTICE_TRACKS.has(trackId) : false))
+    !!user &&
+    (user.is_pro || (trackId ? FREE_PRACTICE_TRACKS.has(trackId) : false))
+
+  const liveAnswer = interim
+    ? `${answer}${answer && !answer.endsWith(' ') ? ' ' : ''}${interim}`
+    : answer
+  const words = wordCount(liveAnswer)
+  const seconds = speakSeconds(words)
+  const topicIndex = Math.max(
+    0,
+    topics.findIndex((t) => t.id === topicId),
+  )
+  const progressPct =
+    topics.length > 0 ? Math.round(((topicIndex + 1) / topics.length) * 100) : 0
 
   useEffect(() => {
     api
@@ -132,11 +157,7 @@ export default function App() {
 
   async function submitAnswer() {
     if (!trackId || !questionId) return
-    const spokenOrTyped = (
-      interim
-        ? `${answer}${answer && !answer.endsWith(' ') ? ' ' : ''}${interim}`
-        : answer
-    ).trim()
+    const spokenOrTyped = liveAnswer.trim()
     if (!spokenOrTyped) return
     if (!user) {
       setPaywall('Sign in to get feedback.')
@@ -163,28 +184,31 @@ export default function App() {
         setPaywall(err.message)
       } else if (err instanceof ApiError && err.status === 401) {
         setPaywall('Sign in to get feedback on your answers.')
-      } else {
-        // Pages-only / API down: soft local free limits
-        if (!api.apiBase && user) {
-          const key = `ats_fb_${new Date().toISOString().slice(0, 10)}`
-          const used = Number(localStorage.getItem(key) || '0')
-          if (!user.is_pro && used >= 5) {
-            setPaywall('Free daily feedback limit reached. Upgrade to Pro for unlimited coaching.')
-          } else if (!user.is_pro && trackId && !FREE_PRACTICE_TRACKS.has(trackId)) {
-            setPaywall('This track is Pro-only. Upgrade to unlock full access.')
-          } else {
-            const result = api.localFeedback({
-              track_id: trackId as Track['id'],
-              question_id: questionId,
-              answer: spokenOrTyped,
-              input_mode: inputMode,
-            })
-            setFeedback(result)
-            if (!user.is_pro) localStorage.setItem(key, String(used + 1))
-          }
+      } else if (!api.apiBase && user) {
+        const key = `ats_fb_${new Date().toISOString().slice(0, 10)}`
+        const used = Number(localStorage.getItem(key) || '0')
+        if (!user.is_pro && used >= 5) {
+          setPaywall(
+            'Free daily feedback limit reached. Upgrade to Pro for unlimited coaching.',
+          )
+        } else if (
+          !user.is_pro &&
+          trackId &&
+          !FREE_PRACTICE_TRACKS.has(trackId)
+        ) {
+          setPaywall('This track is Pro-only. Upgrade to unlock full access.')
         } else {
-          setError(err instanceof Error ? err.message : 'Feedback failed')
+          const result = api.localFeedback({
+            track_id: trackId as Track['id'],
+            question_id: questionId,
+            answer: spokenOrTyped,
+            input_mode: inputMode,
+          })
+          setFeedback(result)
+          if (!user.is_pro) localStorage.setItem(key, String(used + 1))
         }
+      } else {
+        setError(err instanceof Error ? err.message : 'Feedback failed')
       }
     } finally {
       setLoading(false)
@@ -192,64 +216,14 @@ export default function App() {
   }
 
   return (
-    <div className="app">
-      <div className="atmosphere" aria-hidden="true" />
-
-      <header className="topbar">
-        <div>
-          <p className="eyebrow">AI Tutor Studio</p>
-          <h1>Learn. Practice. Get coached.</h1>
-        </div>
-        <div className="topbar-actions">
-          <a
-            className="btn ghost"
-            href={`${import.meta.env.BASE_URL}product/`}
-          >
-            Product docs
-          </a>
-          <Link className="btn ghost" to="/pricing">
-            Pricing
-          </Link>
-          {authLoading ? null : user ? (
-            <>
-              <span className={user.is_pro ? 'plan-badge pro' : 'plan-badge'}>
-                {user.is_pro ? 'Pro' : 'Free'}
-                {!user.is_pro && (
-                  <>
-                    {' '}
-                    · {user.feedback_used_today}/{user.feedback_limit_today} today
-                  </>
-                )}
-              </span>
-              {!user.is_pro && (
-                <Link className="btn primary" to="/pricing">
-                  Upgrade
-                </Link>
-              )}
-              <AccountMenu />
-            </>
-          ) : (
-            <>
-              <Link className="btn ghost" to="/login">
-                Sign in
-              </Link>
-              <Link className="btn primary" to="/register">
-                Start free
-              </Link>
-            </>
-          )}
-        </div>
-      </header>
-
-      <p className="tagline">
-        Industry-style freemium: study every topic free, practice starter tracks
-        on Free, unlock Staff/EM + unlimited AI feedback on Pro.
-      </p>
-
+    <Shell wide={step !== 'tracks'}>
       {error && <div className="banner error">{error}</div>}
       {paywall && (
-        <div className="banner paywall">
-          <p>{paywall}</p>
+        <div className="banner paywall reveal">
+          <div>
+            <strong>Upgrade moment</strong>
+            <p>{paywall}</p>
+          </div>
           <div className="actions">
             {!user ? (
               <Link className="btn primary" to="/register">
@@ -265,44 +239,152 @@ export default function App() {
       )}
 
       {step === 'tracks' && (
-        <section className="section">
-          <h2>Choose a track</h2>
-          <div className="track-grid">
-            {tracks.map((item) => {
-              const count = topicsForTrack(item.id).length
-              const locked =
-                !FREE_PRACTICE_TRACKS.has(item.id) && !(user?.is_pro)
+        <>
+          <section className="hero reveal">
+            <p className="eyebrow">AI Tutor Studio</p>
+            <h1>
+              Practice interviews
+              <span> the way they actually happen.</span>
+            </h1>
+            <p className="hero-lede">
+              Study curated topic docs, answer out loud, and get AI coaching on
+              content plus spoken delivery — built to beat text-only prep tools.
+            </p>
+            <div className="hero-cta">
+              <a className="btn primary" href="#tracks">
+                Browse tracks
+              </a>
+              <Link className="btn ghost" to="/pricing">
+                Compare Free vs Pro
+              </Link>
+            </div>
+            <div className="hero-stage" aria-hidden="true">
+              <div className="hero-orbit" />
+              <div className="hero-panel">
+                <span className="pulse-dot" />
+                Listening · 01:42
+                <em>“I owned the migration end-to-end… latency dropped 40%.”</em>
+              </div>
+            </div>
+          </section>
+
+          <section className="diff-row reveal">
+            <div>
+              <strong>Voice-first</strong>
+              <p>Mic answers like the real room — not just typed essays.</p>
+            </div>
+            <div>
+              <strong>Docs → drill</strong>
+              <p>Topic curriculum before feedback, not random chat prompts.</p>
+            </div>
+            <div>
+              <strong>Freemium that converts</strong>
+              <p>Learn free. Unlock Staff/EM and unlimited coaching on Pro.</p>
+            </div>
+          </section>
+
+          <section className="compare reveal">
+            <h2>Built to compete with prep platforms</h2>
+            <div className="compare-table-wrap">
+              <table className="compare-table">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>AI Tutor Studio</th>
+                    <th>Coding sites</th>
+                    <th>Generic ChatGPT</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Spoken interview practice</td>
+                    <td className="yes">Yes + delivery tips</td>
+                    <td>Rare</td>
+                    <td>DIY prompts</td>
+                  </tr>
+                  <tr>
+                    <td>Structured topic docs</td>
+                    <td className="yes">Per-track curriculum</td>
+                    <td>Problems only</td>
+                    <td>No curriculum</td>
+                  </tr>
+                  <tr>
+                    <td>Staff / EM loops</td>
+                    <td className="yes">Native tracks</td>
+                    <td>Limited</td>
+                    <td>Unstructured</td>
+                  </tr>
+                  <tr>
+                    <td>Free → Pro monetization</td>
+                    <td className="yes">Stripe-ready</td>
+                    <td>Yes</td>
+                    <td>No product</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section className="section" id="tracks">
+            <div className="section-title">
+              <h2>Choose your path</h2>
+              <p className="muted">
+                {tracks.length} tracks · docs free on all · practice gated by plan
+              </p>
+            </div>
+
+            {TRACK_GROUPS.map((group) => {
+              const items = group.trackIds
+                .map((id) => tracks.find((t) => t.id === id))
+                .filter(Boolean) as Track[]
+              if (!items.length) return null
               return (
-                <button
-                  key={item.id}
-                  className="track-card"
-                  onClick={() => selectTrack(item.id)}
-                  disabled={loading}
-                >
-                  <span className="pill-row">
-                    <span className="pill">{item.audience}</span>
-                    {locked ? (
-                      <span className="pill lock">Pro</span>
-                    ) : (
-                      <span className="pill free">Free practice</span>
-                    )}
-                  </span>
-                  <strong>{item.title}</strong>
-                  <p>{item.summary}</p>
-                  <span className="meta">
-                    {count} topics · docs free · practice{' '}
-                    {locked ? 'Pro' : 'included'}
-                  </span>
-                </button>
+                <div key={group.id} className="track-group reveal">
+                  <div className="track-group-head">
+                    <h3>{group.title}</h3>
+                    <p>{group.blurb}</p>
+                  </div>
+                  <div className="track-grid">
+                    {items.map((item) => {
+                      const count = topicsForTrack(item.id).length
+                      const locked =
+                        !FREE_PRACTICE_TRACKS.has(item.id) && !(user?.is_pro)
+                      return (
+                        <button
+                          key={item.id}
+                          className={`track-card ${locked ? 'locked' : ''}`}
+                          onClick={() => selectTrack(item.id)}
+                          disabled={loading}
+                        >
+                          <span className="pill-row">
+                            <span className="pill">{item.audience}</span>
+                            {locked ? (
+                              <span className="pill lock">Pro</span>
+                            ) : (
+                              <span className="pill free">Free practice</span>
+                            )}
+                          </span>
+                          <strong>{item.title}</strong>
+                          <p>{item.summary}</p>
+                          <span className="meta">
+                            {count} topics · Learn free · Practice{' '}
+                            {locked ? 'Pro' : 'included'}
+                          </span>
+                          <span className="track-go">Open track →</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
               )
             })}
-          </div>
-        </section>
+          </section>
+        </>
       )}
 
       {track && step !== 'tracks' && (
-        <section className="section">
-          <div className="section-head">
+        <section className="workspace reveal">
+          <div className="workspace-head">
             <button
               className="linkish"
               onClick={() => {
@@ -313,35 +395,51 @@ export default function App() {
             >
               ← All tracks
             </button>
-            <h2>
-              {track.title}{' '}
-              {trackIsProOnly && !user?.is_pro && (
-                <span className="pill lock">Pro practice</span>
-              )}
-            </h2>
-            <p>{track.summary}</p>
+            <div className="workspace-title">
+              <h2>
+                {track.title}
+                {trackIsProOnly && !user?.is_pro && (
+                  <span className="pill lock">Pro practice</span>
+                )}
+              </h2>
+              <p>{track.summary}</p>
+            </div>
+            <div className="progress-block">
+              <div className="progress-label">
+                Topic {topicIndex + 1} / {topics.length || 1}
+              </div>
+              <div className="progress-bar" aria-hidden="true">
+                <span style={{ width: `${progressPct}%` }} />
+              </div>
+            </div>
           </div>
 
-          <div className="tabs">
+          <div className="mode-switch" role="tablist">
             <button
-              className={step === 'learn' ? 'tab active' : 'tab'}
+              type="button"
+              role="tab"
+              aria-selected={step === 'learn'}
+              className={step === 'learn' ? 'mode active' : 'mode'}
               onClick={() => setStep('learn')}
             >
-              Learn (docs)
+              <span>01</span> Learn
             </button>
             <button
-              className={step === 'practice' ? 'tab active' : 'tab'}
+              type="button"
+              role="tab"
+              aria-selected={step === 'practice'}
+              className={step === 'practice' ? 'mode active' : 'mode'}
               onClick={() => goPractice()}
             >
-              Practice + AI feedback
+              <span>02</span> Practice + coach
             </button>
           </div>
 
           {step === 'learn' && (
             <div className="learn">
               <aside className="topic-list">
-                <h3>Topics</h3>
-                {topics.map((item) => (
+                <h3>Curriculum</h3>
+                {topics.map((item, idx) => (
                   <button
                     key={item.id}
                     className={
@@ -349,12 +447,13 @@ export default function App() {
                     }
                     onClick={() => selectTopic(item)}
                   >
+                    <em>{String(idx + 1).padStart(2, '0')}</em>
                     <strong>{item.title}</strong>
                     <span>{item.summary}</span>
                   </button>
                 ))}
                 <div className="panel plan-mini">
-                  <h4>Track plan</h4>
+                  <h4>Study plan</h4>
                   <ol>
                     {track.study_plan.map((item) => (
                       <li key={item}>{item}</li>
@@ -371,7 +470,7 @@ export default function App() {
                     <p className="lede">{topic.doc.overview}</p>
 
                     <h4>Key points</h4>
-                    <ul>
+                    <ul className="check-list">
                       {topic.doc.keyPoints.map((point) => (
                         <li key={point}>{point}</li>
                       ))}
@@ -381,21 +480,26 @@ export default function App() {
                     <pre className="code">{topic.doc.example.code}</pre>
                     <p className="muted note">{topic.doc.example.note}</p>
 
-                    <h4>Common mistakes</h4>
-                    <ul>
-                      {topic.doc.commonMistakes.map((m) => (
-                        <li key={m}>{m}</li>
-                      ))}
-                    </ul>
+                    <div className="doc-split">
+                      <div>
+                        <h4>Common mistakes</h4>
+                        <ul>
+                          {topic.doc.commonMistakes.map((m) => (
+                            <li key={m}>{m}</li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div>
+                        <h4>Before you practice</h4>
+                        <ul>
+                          {topic.doc.beforeYouPractice.map((item) => (
+                            <li key={item}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
 
-                    <h4>Before you practice</h4>
-                    <ul>
-                      {topic.doc.beforeYouPractice.map((item) => (
-                        <li key={item}>{item}</li>
-                      ))}
-                    </ul>
-
-                    <div className="actions">
+                    <div className="actions sticky-actions">
                       <button
                         className="btn primary"
                         onClick={() => goPractice(topic.id)}
@@ -418,7 +522,7 @@ export default function App() {
           {step === 'practice' && (
             <div className="practice">
               <aside className="question-list">
-                <h3>Filter by topic</h3>
+                <h3>Topics</h3>
                 <button
                   className={!topicId ? 'topic-item active' : 'topic-item'}
                   onClick={() => {
@@ -445,14 +549,14 @@ export default function App() {
                     >
                       <strong>{item.title}</strong>
                       <span>
-                        {count} practice question{count === 1 ? '' : 's'}
+                        {count} question{count === 1 ? '' : 's'}
                       </span>
                     </button>
                   )
                 })}
 
-                <h3>Questions</h3>
-                {topicQuestions.map((q) => (
+                <h3>Queue</h3>
+                {topicQuestions.map((q, idx) => (
                   <button
                     key={q.id}
                     className={q.id === questionId ? 'q-item active' : 'q-item'}
@@ -466,7 +570,9 @@ export default function App() {
                       stopSpeaking()
                     }}
                   >
-                    <span>{q.category}</span>
+                    <span>
+                      {q.category} · Q{idx + 1}
+                    </span>
                     <strong>{q.prompt.slice(0, 72)}…</strong>
                   </button>
                 ))}
@@ -488,19 +594,22 @@ export default function App() {
                       <p className="pill">{question.category}</p>
                       <button
                         type="button"
-                        className="btn ghost"
+                        className="btn ghost sm"
                         onClick={() => speakText(question.prompt)}
                       >
                         Hear question
                       </button>
                     </div>
-                    <h3>{question.prompt}</h3>
-                    <p className="muted">Hints</p>
-                    <ul>
-                      {question.hints.map((h) => (
-                        <li key={h}>{h}</li>
-                      ))}
-                    </ul>
+                    <h3 className="prompt">{question.prompt}</h3>
+                    <div className="hint-row">
+                      <p className="muted">Hints</p>
+                      <ul className="hint-chips">
+                        {question.hints.map((h) => (
+                          <li key={h}>{h}</li>
+                        ))}
+                      </ul>
+                    </div>
+
                     <div className="answer-toolbar">
                       <label className="answer-label" htmlFor="answer">
                         Your answer{' '}
@@ -518,7 +627,7 @@ export default function App() {
                               setInterim('')
                             }}
                           >
-                            Stop listening
+                            <span className="pulse-dot" /> Stop
                           </button>
                         ) : (
                           <button
@@ -529,18 +638,13 @@ export default function App() {
                               speech.start()
                             }}
                             disabled={!speech.supported}
-                            title={
-                              speech.supported
-                                ? 'Answer out loud like a real interview'
-                                : 'Voice needs Chrome, Edge, or Safari'
-                            }
                           >
                             Speak answer
                           </button>
                         )}
                         <button
                           type="button"
-                          className="btn ghost"
+                          className="btn ghost sm"
                           onClick={() => {
                             setAnswer('')
                             setInterim('')
@@ -552,43 +656,45 @@ export default function App() {
                         </button>
                       </div>
                     </div>
+
                     {speech.listening && (
                       <p className="listening-bar" aria-live="polite">
-                        Listening… speak for ~90–120 seconds like the interview room.
+                        Listening… aim for ~90–120 seconds.
                         {interim ? ` “${interim}”` : ''}
                       </p>
                     )}
                     {speech.error && (
                       <div className="banner error">{speech.error}</div>
                     )}
-                    {!speech.supported && (
-                      <p className="muted note">
-                        Voice dictation isn’t available in this browser — type your
-                        answer, or open Chrome/Edge/Safari for mic practice.
-                      </p>
-                    )}
+
                     <textarea
                       id="answer"
-                      value={
-                        interim
-                          ? `${answer}${answer && !answer.endsWith(' ') ? ' ' : ''}${interim}`
-                          : answer
-                      }
+                      value={liveAnswer}
                       onChange={(e) => {
                         setAnswer(e.target.value)
                         setInterim('')
                         if (inputMode === 'voice') setInputMode('text')
                       }}
-                      placeholder="Speak your answer (or type) like a 90–120 second interview response…"
-                      rows={10}
+                      placeholder="Speak or type a 90–120 second interview answer…"
+                      rows={11}
                     />
+                    <div className="answer-meta">
+                      <span>
+                        {words} words · ~{seconds}s spoken
+                      </span>
+                      <span
+                        className={
+                          seconds >= 90 && seconds <= 130 ? 'good' : 'soft'
+                        }
+                      >
+                        Target 90–120s
+                      </span>
+                    </div>
                     <div className="actions">
                       <button
                         className="btn primary"
                         onClick={submitAnswer}
-                        disabled={
-                          loading || !(answer.trim() || interim.trim())
-                        }
+                        disabled={loading || !liveAnswer.trim()}
                       >
                         {loading
                           ? 'Coaching…'
@@ -601,17 +707,31 @@ export default function App() {
                 )}
 
                 {feedback && (
-                  <div className="feedback">
-                    <div className="score">
-                      <span>{feedback.score}/5</span>
-                      <p>{feedback.summary}</p>
-                      <small>
-                        Provider: {feedback.provider}
-                        {feedback.input_mode === 'voice' ? ' · voice coaching' : ''}
-                      </small>
+                  <div className="feedback reveal">
+                    <div className="score-row">
+                      <div
+                        className="score-ring"
+                        style={
+                          {
+                            '--p': `${(feedback.score / 5) * 100}%`,
+                          } as CSSProperties
+                        }
+                      >
+                        <strong>{feedback.score}</strong>
+                        <span>/5</span>
+                      </div>
+                      <div>
+                        <p className="score-summary">{feedback.summary}</p>
+                        <small>
+                          {feedback.provider}
+                          {feedback.input_mode === 'voice'
+                            ? ' · voice coaching'
+                            : ''}
+                        </small>
+                      </div>
                     </div>
                     <div className="feedback-grid">
-                      <div>
+                      <div className="fb-col good">
                         <h4>Strengths</h4>
                         <ul>
                           {feedback.strengths.map((s) => (
@@ -619,7 +739,7 @@ export default function App() {
                           ))}
                         </ul>
                       </div>
-                      <div>
+                      <div className="fb-col gap">
                         <h4>Gaps</h4>
                         <ul>
                           {feedback.gaps.map((g) => (
@@ -630,7 +750,7 @@ export default function App() {
                     </div>
                     {!!feedback.delivery_tips?.length && (
                       <div className="delivery">
-                        <h4>Spoken delivery & grammar</h4>
+                        <h4>Spoken delivery &amp; grammar</h4>
                         <ul>
                           {feedback.delivery_tips.map((tip) => (
                             <li key={tip}>{tip}</li>
@@ -650,20 +770,6 @@ export default function App() {
           )}
         </section>
       )}
-
-      <footer className="footer">
-        Free docs for everyone · Free practice on starter tracks · Pro for full
-        interview suite + unlimited coaching
-      </footer>
-    </div>
-  )
-}
-
-function AccountMenu() {
-  const { user, logout } = useAuth()
-  return (
-    <button className="btn ghost" type="button" onClick={logout} title={user?.email}>
-      Sign out
-    </button>
+    </Shell>
   )
 }
