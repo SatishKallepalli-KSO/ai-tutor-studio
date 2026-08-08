@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { AgenticPathPage } from './AgenticPathPage.tsx'
 import App from './App.tsx'
 import { AuthProvider } from './auth.tsx'
 import { LoginPage, RegisterPage } from './AuthPages.tsx'
@@ -15,6 +16,7 @@ createRoot(document.getElementById('root')!).render(
       <AuthProvider>
         <Routes>
           <Route path="/" element={<App />} />
+          <Route path="/agentic-path" element={<AgenticPathPage />} />
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />

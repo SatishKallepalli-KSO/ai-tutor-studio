@@ -12,6 +12,8 @@ Local-first **AI-assisted tutoring / upskilling** product with **Free + Pro** mo
 
 Flow: **Register → Learn docs → Practice (type or speak) → AI feedback** (gated by plan).
 
+Also: **[/agentic-path](https://satishkallepalli-kso.github.io/ai-tutor-studio/agentic-path)** — ordered free YouTube curriculum from Java developer → Agentic AI engineer.
+
 Voice practice uses the browser mic (Chrome/Edge/Safari). Feedback then coaches **content + spoken delivery** (fillers, grammar/clarity, pacing) — closer to real interviews.
 
 ## Product documentation (for selling)

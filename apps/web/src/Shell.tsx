@@ -28,6 +28,7 @@ export function Shell({
 
         <nav className="site-links" aria-label="Primary">
           <Link to="/">Tracks</Link>
+          <Link to="/agentic-path">Agentic path</Link>
           <Link to="/pricing">Pricing</Link>
           <a href={docsHref}>Docs</a>
         </nav>
@@ -103,7 +104,7 @@ export const TRACK_GROUPS: {
   {
     id: 'career',
     title: 'Career switches',
-    blurb: 'Java → Python and Java → production AI paths.',
+    blurb: 'Java → Python, Java → AI, and the full Agentic video path.',
     trackIds: ['java-to-python', 'java-to-ai'],
   },
   {

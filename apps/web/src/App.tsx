@@ -254,6 +254,9 @@ export default function App() {
               <a className="btn primary" href="#tracks">
                 Browse tracks
               </a>
+              <Link className="btn ghost" to="/agentic-path">
+                Java → Agentic video path
+              </Link>
               <Link className="btn ghost" to="/pricing">
                 Compare Free vs Pro
               </Link>
@@ -344,6 +347,15 @@ export default function App() {
                     <h3>{group.title}</h3>
                     <p>{group.blurb}</p>
                   </div>
+                  {group.id === 'career' && (
+                    <Link to="/agentic-path" className="path-banner">
+                      <strong>Full Agentic AI video path</strong>
+                      <span>
+                        Ordered YouTube curriculum for Java → Agentic AI
+                        engineer →
+                      </span>
+                    </Link>
+                  )}
                   <div className="track-grid">
                     {items.map((item) => {
                       const count = topicsForTrack(item.id).length
