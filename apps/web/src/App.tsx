@@ -78,8 +78,9 @@ export default function App() {
           <h1>Practice. Get coached. Level up.</h1>
         </div>
         <p className="tagline">
-          Staff / EM interview prep + Java → AI upskilling — local MVP
-        </p>
+        Interview prep + language tracks: Java, Python, React, TypeScript,
+        JavaScript, HTML, CSS, Node.js
+      </p>
       </header>
 
       {error && <div className="banner error">{error}</div>}

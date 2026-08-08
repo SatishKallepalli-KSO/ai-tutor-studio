@@ -1,6 +1,17 @@
 import { TRACKS, localFeedback, localQuestions } from './data'
 
-export type TrackId = 'staff-interview' | 'em-interview' | 'java-to-ai'
+export type TrackId =
+  | 'staff-interview'
+  | 'em-interview'
+  | 'java-to-ai'
+  | 'java'
+  | 'python'
+  | 'javascript'
+  | 'typescript'
+  | 'react'
+  | 'nodejs'
+  | 'html'
+  | 'css'
 
 export type Track = {
   id: TrackId

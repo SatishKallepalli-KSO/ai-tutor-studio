@@ -5,15 +5,15 @@ from __future__ import annotations
 import json
 import os
 import re
-from typing import Literal
+from pathlib import Path
 
 from pydantic import BaseModel, Field
 
-TrackId = Literal["staff-interview", "em-interview", "java-to-ai"]
+CONTENT_PATH = Path(__file__).with_name("content.json")
 
 
 class Track(BaseModel):
-    id: TrackId
+    id: str
     title: str
     audience: str
     summary: str
@@ -23,7 +23,7 @@ class Track(BaseModel):
 
 class TutorQuestion(BaseModel):
     id: str
-    track_id: TrackId
+    track_id: str
     category: str
     prompt: str
     hints: list[str]
@@ -31,7 +31,7 @@ class TutorQuestion(BaseModel):
 
 
 class FeedbackRequest(BaseModel):
-    track_id: TrackId
+    track_id: str
     question_id: str
     answer: str = Field(min_length=1, max_length=8000)
 
@@ -46,265 +46,17 @@ class FeedbackResponse(BaseModel):
     provider: str
 
 
-TRACKS: list[Track] = [
-    Track(
-        id="staff-interview",
-        title="Staff Engineer Interview Prep",
-        audience="Senior / Staff IC candidates",
-        summary="System design, ownership stories, and production AI depth for Staff loops.",
-        outcomes=[
-            "Tell Staff-level ownership stories with metrics",
-            "Design distributed systems with clear tradeoffs",
-            "Explain production AI guardrails (entitlements, audit, evals)",
-        ],
-        study_plan=[
-            "Day 1–2: Rewrite 3 ownership stories (Context → Action → Metric)",
-            "Day 3–4: Drill 2 system designs (sync engine, NLQ platform)",
-            "Day 5: Mock behavioral + deep dive on one production AI project",
-            "Day 6–7: Timed answers + tighten resume bullets to stories",
-        ],
-    ),
-    Track(
-        id="em-interview",
-        title="Engineering Manager Interview Prep",
-        audience="EM / player-coach leaders",
-        summary="People leadership, delivery, hiring, and vendor/team-build narratives.",
-        outcomes=[
-            "Lead with people + delivery ownership, not only IC craft",
-            "Run hiring / performance / incident stories cleanly",
-            "Show technical credibility without competing for IC tickets",
-        ],
-        study_plan=[
-            "Day 1: Memorize 30–40s EM opener",
-            "Day 2–3: Team-from-scratch + vendor-to-in-house STAR cards",
-            "Day 4: Hiring loop + performance management scenarios",
-            "Day 5–7: Mock HM screen + conflict / prioritization drills",
-        ],
-    ),
-    Track(
-        id="java-to-ai",
-        title="Java → Production AI Upskilling",
-        audience="Java/backend engineers moving into AI",
-        summary="Practical path from Spring services to RAG, agents, and safe LLM features.",
-        outcomes=[
-            "Map Spring concepts to FastAPI / AI service patterns",
-            "Explain RAG vs fine-tuning vs prompt-only clearly",
-            "Design an entitlement-safe NLQ or document pipeline",
-        ],
-        study_plan=[
-            "Week 1: Python fluency + HTTP/LLM basics",
-            "Week 2: RAG building blocks (chunk, embed, retrieve, cite)",
-            "Week 3: Agents/tools + guardrails + evals",
-            "Week 4: Ship a tiny production-shaped AI feature",
-        ],
-    ),
-]
-
-QUESTIONS: list[TutorQuestion] = [
-    TutorQuestion(
-        id="staff-ownership",
-        track_id="staff-interview",
-        category="Behavioral",
-        prompt=(
-            "Tell me about a system you owned end-to-end. What was hard, what did you decide, "
-            "and what measurable outcome did you drive?"
-        ),
-        hints=[
-            "Lead with scope and users",
-            "Name 1–2 hard tradeoffs",
-            "End with a metric (uptime, latency, manual hours saved)",
-        ],
-        strong_answer_signals=[
-            "owned",
-            "tradeoff",
-            "metric",
-            "production",
-            "reliability",
-            "customer",
-        ],
-    ),
-    TutorQuestion(
-        id="staff-design-sync",
-        track_id="staff-interview",
-        category="System design",
-        prompt=(
-            "Design a customer data syncing engine that must move large volumes of data to "
-            "destinations reliably. How would you approach batch today and streaming later?"
-        ),
-        hints=[
-            "Separate ingest, transform, deliver, observe",
-            "Talk retries, idempotency, backpressure",
-            "Call out multi-tenant isolation and failure modes",
-        ],
-        strong_answer_signals=[
-            "idempotent",
-            "retry",
-            "queue",
-            "batch",
-            "stream",
-            "observability",
-            "backpressure",
-        ],
-    ),
-    TutorQuestion(
-        id="staff-ai-guardrails",
-        track_id="staff-interview",
-        category="AI / production",
-        prompt=(
-            "How would you ship an enterprise natural-language-to-SQL feature safely when "
-            "different customers must never see each other's data?"
-        ),
-        hints=[
-            "Entitlements before model call",
-            "Fail-closed validation on generated SQL",
-            "Audit + rate limits + eval set",
-        ],
-        strong_answer_signals=[
-            "entitlement",
-            "guardrail",
-            "fail-closed",
-            "audit",
-            "rate limit",
-            "eval",
-        ],
-    ),
-    TutorQuestion(
-        id="em-opener",
-        track_id="em-interview",
-        category="Leadership",
-        prompt=(
-            "Give your 30–40 second introduction as an Engineering Manager. Include scope, "
-            "signature wins, and what you're looking for next."
-        ),
-        hints=[
-            "Lead with people ownership",
-            "Mention team size / footprint",
-            "One transformation win + one AI/product win",
-        ],
-        strong_answer_signals=[
-            "team",
-            "hiring",
-            "delivery",
-            "coaching",
-            "uptime",
-            "product",
-        ],
-    ),
-    TutorQuestion(
-        id="em-vendor",
-        track_id="em-interview",
-        category="Transformation",
-        prompt=(
-            "Describe leading a vendor-to-in-house transition. How did you protect delivery "
-            "and uptime while building the team?"
-        ),
-        hints=[
-            "Continuity plan first",
-            "Hiring + knowledge transfer",
-            "Explicit uptime / customer impact metric",
-        ],
-        strong_answer_signals=[
-            "vendor",
-            "in-house",
-            "hiring",
-            "uptime",
-            "knowledge transfer",
-            "stakeholder",
-        ],
-    ),
-    TutorQuestion(
-        id="em-conflict",
-        track_id="em-interview",
-        category="People",
-        prompt=(
-            "Product wants more features; your team is drowning in reliability work. How do "
-            "you handle the conflict?"
-        ),
-        hints=[
-            "Reframe to shared outcomes",
-            "Bring options with risk",
-            "Escalate only with a recommendation",
-        ],
-        strong_answer_signals=[
-            "tradeoff",
-            "risk",
-            "capacity",
-            "roadmap",
-            "option",
-            "reliability",
-        ],
-    ),
-    TutorQuestion(
-        id="java-ai-map",
-        track_id="java-to-ai",
-        category="Concepts",
-        prompt=(
-            "You're a Java/Spring engineer. Explain how you would structure a production AI "
-            "feature service and what maps from Spring Boot patterns."
-        ),
-        hints=[
-            "Controllers → API routes",
-            "Services → orchestration + tools",
-            "Observability and config still matter",
-        ],
-        strong_answer_signals=[
-            "spring",
-            "api",
-            "service",
-            "observability",
-            "config",
-            "timeout",
-            "retry",
-        ],
-    ),
-    TutorQuestion(
-        id="java-rag",
-        track_id="java-to-ai",
-        category="RAG",
-        prompt=(
-            "When would you use RAG instead of fine-tuning, and how would you evaluate whether "
-            "retrieval quality is good enough?"
-        ),
-        hints=[
-            "Fresh / private knowledge → RAG",
-            "Behavior/style → maybe fine-tune",
-            "Eval with golden questions + citation checks",
-        ],
-        strong_answer_signals=[
-            "rag",
-            "fine-tune",
-            "retrieval",
-            "citation",
-            "eval",
-            "chunk",
-        ],
-    ),
-    TutorQuestion(
-        id="java-agents",
-        track_id="java-to-ai",
-        category="Agents",
-        prompt=(
-            "Design a simple document extraction agent for messy Excel/PDF inputs. What steps, "
-            "tools, and failure handling do you need?"
-        ),
-        hints=[
-            "Ingest → extract → validate → retry → store",
-            "Deterministic validation gates",
-            "Human review on low confidence",
-        ],
-        strong_answer_signals=[
-            "validate",
-            "retry",
-            "tool",
-            "confidence",
-            "pipeline",
-            "human",
-        ],
-    ),
-]
+def _load_content() -> tuple[list[Track], list[TutorQuestion]]:
+    raw = json.loads(CONTENT_PATH.read_text())
+    tracks = [Track.model_validate(item) for item in raw["tracks"]]
+    questions = [TutorQuestion.model_validate(item) for item in raw["questions"]]
+    return tracks, questions
 
 
-def get_track(track_id: TrackId) -> Track | None:
+TRACKS, QUESTIONS = _load_content()
+
+
+def get_track(track_id: str) -> Track | None:
     return next((t for t in TRACKS if t.id == track_id), None)
 
 
@@ -347,7 +99,7 @@ def _heuristic_feedback(question: TutorQuestion, answer: str) -> FeedbackRespons
     if re.search(r"\d|%|uptime|million|team", lower):
         strengths.append("Includes concrete scale or metrics — interviewers love this.")
     else:
-        gaps.append("Add one hard metric (uptime, txn/day, team size, % improvement).")
+        gaps.append("Add one concrete example or metric when possible.")
 
     better = (
         "Stronger shape for this prompt:\n"
@@ -391,8 +143,8 @@ def _openai_feedback(
 
     client = OpenAI(api_key=api_key)
     system = (
-        "You are a tough but fair interview coach for Staff engineers and Engineering Managers. "
-        "Return concise coaching. Score 1-5. Focus on ownership, metrics, tradeoffs, clarity."
+        "You are a tough but fair interview coach for software engineers. "
+        "Return concise coaching. Score 1-5. Focus on clarity, correctness, and examples."
     )
     user = (
         f"Track: {track.title}\n"
