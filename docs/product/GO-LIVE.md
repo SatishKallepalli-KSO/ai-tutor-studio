@@ -174,14 +174,22 @@ Set `APP_URL` to the public UI origin. The API builds:
 
 ## 6. Deploy on any cloud (pick one)
 
+**Free live stack (no paid domain):** see **[DEPLOY-FREE.md](DEPLOY-FREE.md)** — one-click Render Free → `https://ai-tutor-studio.onrender.com`, then optional free CNAME (`aitutor.nxtdev.xyz`).
+
+```bash
+./scripts/deploy-free.sh
+# or open: https://render.com/deploy?repo=https://github.com/SatishKallepalli-KSO/ai-tutor-studio
+```
+
 ### Option A — Render (fastest; Blueprint included)
 
-1. Push repo to GitHub.
-2. Render → **New** → **Blueprint** → select repo (`render.yaml`).
-3. Create / attach **Postgres**; set `DATABASE_URL` from the DB connection string.
-4. Fill env vars from §3 (especially `JWT_SECRET`, `APP_URL`, Stripe, OpenAI, `ADMIN_EMAILS`).
-5. Deploy. Health check: `/healthz`.
-6. Set custom domain in Render if desired; update `APP_URL` + Stripe webhook URL.
+1. Push repo to GitHub (Blueprint reads `render.yaml` from `main`).
+2. One-click: https://render.com/deploy?repo=https://github.com/SatishKallepalli-KSO/ai-tutor-studio  
+   Or Render → **New** → **Blueprint** → select repo.
+3. Free launch: skip Postgres (SQLite) and Stripe; Blueprint sets `ALLOW_DEMO_UPGRADE=true`.  
+   Production: attach **Postgres** / Neon → set `DATABASE_URL`; fill Stripe + OpenAI + `ADMIN_EMAILS`.
+4. Deploy. Health check: `/healthz` → live URL `https://ai-tutor-studio.onrender.com`.
+5. Optional custom / free subdomain; update `APP_URL` + Stripe webhook URL.
 
 ### Option B — Railway / Fly.io / Google Cloud Run / Azure Container Apps / AWS App Runner
 

@@ -1,3 +1,9 @@
+# Free-tier live stack on Render (Blueprint)
+# One-click: https://render.com/deploy?repo=https://github.com/SatishKallepalli-KSO/ai-tutor-studio
+#
+# Free URL after deploy: https://ai-tutor-studio.onrender.com
+# (cold-starts on free plan after idle — normal for free hosting)
+
 services:
   - type: web
     name: ai-tutor-studio
@@ -6,11 +12,18 @@ services:
     region: oregon
     healthCheckPath: /healthz
     envVars:
-      - key: OPENAI_API_KEY
-        sync: false
       - key: JWT_SECRET
         generateValue: true
       - key: APP_URL
+        value: https://ai-tutor-studio.onrender.com
+      # Free launch without Stripe — Pro via Demo upgrade; set false when Stripe is live
+      - key: ALLOW_DEMO_UPGRADE
+        value: "true"
+      - key: OPENAI_TUTOR_MODEL
+        value: gpt-4o-mini
+      - key: ADMIN_EMAILS
+        sync: false
+      - key: OPENAI_API_KEY
         sync: false
       - key: STRIPE_SECRET_KEY
         sync: false
@@ -20,7 +33,6 @@ services:
         sync: false
       - key: STRIPE_PRICE_YEARLY
         sync: false
-      - key: ALLOW_DEMO_UPGRADE
-        value: "false"
+      # Optional free Neon/Supabase Postgres — leave empty to use SQLite on the instance
       - key: DATABASE_URL
         sync: false

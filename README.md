@@ -23,9 +23,11 @@ Also: Agentic AI & Snowflake video paths · jobs board · profiles · messaging 
 - App: https://satishkallepalli-kso.github.io/ai-tutor-studio/
 - Sales playbook: https://satishkallepalli-kso.github.io/ai-tutor-studio/product/sales-playbook.html
 - Go-live: [docs/product/GO-LIVE.md](docs/product/GO-LIVE.md)
+- **Free cloud deploy:** [docs/product/DEPLOY-FREE.md](docs/product/DEPLOY-FREE.md) → `https://ai-tutor-studio.onrender.com`
 
 ```bash
-./scripts/publish-pages.sh
+./scripts/deploy-free.sh          # one-click Render Free Blueprint
+./scripts/publish-pages.sh        # static GitHub Pages demo
 ```
 
 ## Quick start
