@@ -73,16 +73,15 @@ export function Shell({
           {isLearner ? (
             <>
               <Link to="/">Learn</Link>
+              <Link to="/agentic-path">Agentic AI</Link>
+              <Link to="/snowflake-path">Snowflake</Link>
               <Link to="/jobs">Jobs</Link>
-              <Link to="/network">Network</Link>
-              <Link to="/messages">Chat</Link>
               <MoreMenu label="More">
+                <Link to="/network">Network</Link>
+                <Link to="/messages">Chat</Link>
                 <Link to="/profile">Profile</Link>
-                <Link to="/agentic-path">Agentic AI</Link>
-                <Link to="/snowflake-path">Snowflake</Link>
                 <Link to="/pricing">Plans</Link>
                 <Link to="/for-companies">For companies</Link>
-                <Link to="/compare">Compare</Link>
                 {user?.is_admin && <Link to="/admin">Admin</Link>}
                 <a href={docsHref}>Docs</a>
               </MoreMenu>
@@ -95,9 +94,7 @@ export function Shell({
               <Link to="/profile">Talent</Link>
               <MoreMenu label="More">
                 <Link to="/for-companies">Hiring studio</Link>
-                <Link to="/compare">Compare</Link>
-                <Link to="/company">Company</Link>
-                <Link to="/">Learn view</Link>
+                <Link to="/">Learner view</Link>
                 {user?.is_admin && <Link to="/admin">Admin</Link>}
                 <a href={docsHref}>Docs</a>
               </MoreMenu>

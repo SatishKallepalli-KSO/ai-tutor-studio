@@ -20,13 +20,13 @@ export const PERSONAS: Record<
     label: 'Learner',
     short: 'Learn',
     homePath: '/',
-    blurb: 'Study paths, practice out loud, get coached.',
+    blurb: 'Learning paths first — then practice, jobs, and network.',
   },
   recruiter: {
     label: 'Recruiter / hiring',
     short: 'Hire',
     homePath: '/jobs',
-    blurb: 'Post jobs and hire with structured interviews.',
+    blurb: 'Post jobs and reach practice-ready talent.',
   },
 }
 

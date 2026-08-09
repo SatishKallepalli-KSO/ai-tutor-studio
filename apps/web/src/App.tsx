@@ -15,7 +15,6 @@ import { AUDIENCES, BRAND } from './brand'
 import { getTopic, topicsForTrack, type Topic } from './curriculum'
 import { usePersona } from './persona'
 import { Shell, TRACK_GROUPS } from './Shell'
-import { TrustStats } from './TrustStats'
 import { speakText, stopSpeaking, useSpeechAnswer } from './useSpeechAnswer'
 import './App.css'
 
@@ -265,23 +264,23 @@ export default function App() {
           <section className="hero reveal">
             <p className="eyebrow">{BRAND.product}</p>
             <h1>
-              {isRecruiter ? 'Hire with structure' : BRAND.tagline}
+              {isRecruiter ? 'Hire with structure' : 'Your learning paths'}
               <span>
                 {isRecruiter
-                  ? 'Recruiter view — interviews and readiness.'
-                  : 'One studio for talent and hiring teams.'}
+                  ? 'Post jobs and reach practice-ready talent.'
+                  : 'Study structured paths, practice out loud, then browse open roles.'}
               </span>
             </h1>
             <p className="hero-lede">
               {isRecruiter
                 ? AUDIENCES.companies.blurb
-                : BRAND.oneLiner}
+                : 'Pick a track below — docs are free; practice unlocks by plan. Jobs posted by recruiters stay one click away.'}
             </p>
             <div className="hero-cta">
               {isRecruiter ? (
                 <>
                   <Link className="btn primary" to="/jobs">
-                    Browse jobs
+                    Browse &amp; post jobs
                   </Link>
                   <Link className="btn ghost" to="/for-companies">
                     Hiring studio
@@ -290,10 +289,10 @@ export default function App() {
               ) : (
                 <>
                   <a className="btn primary" href="#paths">
-                    Start learning
+                    Browse learning paths
                   </a>
                   <Link className="btn ghost" to="/jobs">
-                    Jobs
+                    See all jobs
                   </Link>
                 </>
               )}
@@ -302,7 +301,7 @@ export default function App() {
               <div className="hero-orbit" />
               <div className="hero-panel">
                 <span className="pulse-dot" />
-                {isRecruiter ? 'Hiring studio · early access' : 'Live practice · hiring-ready'}
+                {isRecruiter ? 'Hiring studio · early access' : 'Learn · Practice · Apply'}
                 <em>
                   {isRecruiter
                     ? '“Same scorecard across every panelist.”'
@@ -312,26 +311,39 @@ export default function App() {
             </div>
           </section>
 
-          <TrustStats variant="strip" className="reveal" />
-
-          <section className="dual-audience reveal" aria-label="Who it’s for">
-            <div className="dual-card">
-              <p className="eyebrow">{AUDIENCES.talent.label}</p>
-              <h3>{AUDIENCES.talent.title}</h3>
-              <p>{AUDIENCES.talent.blurb}</p>
-              <a className="btn ghost sm" href="#paths">
-                Browse paths
-              </a>
-            </div>
-            <div className="dual-card dual-card-accent">
-              <p className="eyebrow">{AUDIENCES.companies.label}</p>
-              <h3>{AUDIENCES.companies.title}</h3>
-              <p>{AUDIENCES.companies.blurb}</p>
-              <Link className="btn primary sm" to="/for-companies">
-                For companies
+          {!isRecruiter && (
+            <section className="learner-path-highlights reveal" aria-label="Featured paths">
+              <Link to="/agentic-path" className="path-banner">
+                <strong>Agentic AI learning path</strong>
+                <span>Backend → Python for AI → LLMs → agents → production</span>
               </Link>
-            </div>
-          </section>
+              <Link to="/snowflake-path" className="path-banner">
+                <strong>Snowflake + Agentic path</strong>
+                <span>Data Engineer → Cortex → agents → interview prep</span>
+              </Link>
+            </section>
+          )}
+
+          {isRecruiter && (
+            <section className="dual-audience reveal" aria-label="Who it’s for">
+              <div className="dual-card">
+                <p className="eyebrow">{AUDIENCES.talent.label}</p>
+                <h3>{AUDIENCES.talent.title}</h3>
+                <p>{AUDIENCES.talent.blurb}</p>
+                <Link className="btn ghost sm" to="/">
+                  Learner view
+                </Link>
+              </div>
+              <div className="dual-card dual-card-accent">
+                <p className="eyebrow">{AUDIENCES.companies.label}</p>
+                <h3>{AUDIENCES.companies.title}</h3>
+                <p>{AUDIENCES.companies.blurb}</p>
+                <Link className="btn primary sm" to="/jobs">
+                  Post a job
+                </Link>
+              </div>
+            </section>
+          )}
 
           <AdSlot
             id="home-below-hero"
@@ -340,21 +352,41 @@ export default function App() {
             detail="Premium partner strip — kept below the brand composition on purpose."
           />
 
-          <section className="diff-row reveal">
-            <div>
-              <strong>Learn with structure</strong>
-              <p>Topic docs and career paths — not random chatbot prompts.</p>
-            </div>
-            <div>
-              <strong>Practice out loud</strong>
-              <p>Mic answers under timing pressure — how real screens sound.</p>
-            </div>
-            <div>
-              <strong>Hire with consistency</strong>
-              <p>Same interview bar for panels — scorecards and readiness signals.</p>
-            </div>
-          </section>
+          {isRecruiter ? (
+            <section className="diff-row reveal">
+              <div>
+                <strong>Learn with structure</strong>
+                <p>Topic docs and career paths — not random chatbot prompts.</p>
+              </div>
+              <div>
+                <strong>Practice out loud</strong>
+                <p>Mic answers under timing pressure — how real screens sound.</p>
+              </div>
+              <div>
+                <strong>Hire with consistency</strong>
+                <p>Same interview bar for panels — scorecards and readiness signals.</p>
+              </div>
+            </section>
+          ) : (
+            <section className="diff-row reveal">
+              <div>
+                <strong>Structured paths</strong>
+                <p>Topic docs under every track — clear what to study next.</p>
+              </div>
+              <div>
+                <strong>Practice out loud</strong>
+                <p>Type or speak answers; get coaching on content and delivery.</p>
+              </div>
+              <div>
+                <strong>Then apply</strong>
+                <p>
+                  Browse every open job recruiters post — when you&apos;re ready.
+                </p>
+              </div>
+            </section>
+          )}
 
+          {isRecruiter && (
           <section className="compare reveal">
             <div className="section-title">
               <h2>Built bigger than interview prep alone</h2>
@@ -401,10 +433,15 @@ export default function App() {
               </table>
             </div>
           </section>
+          )}
 
           <section className="section paths-layout" id="paths">
             <div className="section-title">
-              <h2>Pick the loop you’re training for</h2>
+              <h2>
+                {isRecruiter
+                  ? 'Paths talent trains on'
+                  : 'Pick your learning path'}
+              </h2>
               <p className="muted">
                 {tracks.length} paths · docs free on every path · practice by plan
               </p>
@@ -487,6 +524,20 @@ export default function App() {
               />
             </div>
           </section>
+
+          {!isRecruiter && (
+            <section className="learner-jobs-strip reveal" aria-label="Open jobs">
+              <div className="section-title">
+                <h2>Open jobs from recruiters</h2>
+                <p className="muted">
+                  After you practice, browse every role users have posted.
+                </p>
+              </div>
+              <Link className="btn primary" to="/jobs">
+                View all open jobs
+              </Link>
+            </section>
+          )}
         </>
       )}
 

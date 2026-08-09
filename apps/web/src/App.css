@@ -3629,3 +3629,30 @@ a.ad-slot:hover {
     width: min(100vw - 1.2rem, 360px);
   }
 }
+
+.learner-path-highlights {
+  display: grid;
+  gap: 0.65rem;
+  margin: 0.5rem 0 1.25rem;
+}
+
+.learner-jobs-strip {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+  margin: 1.5rem 0 0.5rem;
+  padding: 1.15rem 0 0.25rem;
+  border-top: 1px solid var(--line);
+}
+
+.learner-jobs-strip .section-title {
+  margin: 0;
+}
+
+.learner-jobs-strip h2 {
+  margin: 0 0 0.25rem;
+  font-family: var(--display);
+  font-size: 1.35rem;
+}

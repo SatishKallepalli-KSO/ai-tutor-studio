@@ -110,40 +110,55 @@ export function JobsBoardPage() {
   const load = useCallback(async () => {
     setLoading(true)
     setError(null)
+    const local = loadLocalJobs().filter((j) => j.status !== 'closed')
+    const mergeJobs = (remote: JobPost[]) => {
+      const byId = new Map<number, JobPost>()
+      // Learners always see every open posting: API + local recruiter posts + demos
+      for (const j of [...remote, ...local, ...DEMO_JOBS]) {
+        if (j.status === 'closed') continue
+        if (!byId.has(j.id)) byId.set(j.id, j)
+      }
+      return [...byId.values()].sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      )
+    }
     try {
       if (!api.apiBase) {
-        const local = loadLocalJobs()
-        setJobs([...local, ...DEMO_JOBS])
+        const list = mergeJobs([])
+        setJobs(list)
         setUseLocal(true)
-        setActiveId((prev) => prev ?? local[0]?.id ?? DEMO_JOBS[0]?.id ?? null)
+        setActiveId((prev) => prev ?? list[0]?.id ?? null)
         return
       }
-      const list = await api.listJobs({
+      // Learners browse all open jobs; recruiters may filter "mine"
+      const remote = await api.listJobs({
         q: query || undefined,
         workplace: workplace || undefined,
-        mine: mineOnly || undefined,
+        mine: isRecruiter && mineOnly ? true : undefined,
         status: 'open',
       })
       setUseLocal(false)
-      setJobs(list.length ? list : DEMO_JOBS)
+      const list = mergeJobs(remote)
+      setJobs(list)
       setActiveId((prev) => {
         if (prev && list.some((j) => j.id === prev)) return prev
-        return list[0]?.id ?? DEMO_JOBS[0]?.id ?? null
+        return list[0]?.id ?? null
       })
     } catch (err) {
-      const local = loadLocalJobs()
-      setJobs([...local, ...DEMO_JOBS])
+      const list = mergeJobs([])
+      setJobs(list)
       setUseLocal(true)
       setError(
         err instanceof Error
-          ? `${err.message} — showing local/demo jobs.`
-          : 'Showing local/demo jobs.',
+          ? `${err.message} — showing all local/demo jobs.`
+          : 'Showing all local/demo jobs.',
       )
-      setActiveId((prev) => prev ?? local[0]?.id ?? DEMO_JOBS[0]?.id ?? null)
+      setActiveId((prev) => prev ?? list[0]?.id ?? null)
     } finally {
       setLoading(false)
     }
-  }, [query, workplace, mineOnly])
+  }, [query, workplace, mineOnly, isRecruiter])
 
   useEffect(() => {
     void load()
@@ -250,8 +265,12 @@ export function JobsBoardPage() {
     <Shell wide>
       <section className="page-head reveal">
         <div>
-          <h1>Jobs</h1>
-          <p className="page-sub">Browse roles or post openings.</p>
+          <h1>{isRecruiter ? 'Jobs' : 'Open jobs'}</h1>
+          <p className="page-sub">
+            {isRecruiter
+              ? 'Post openings and manage your listings.'
+              : 'Every role recruiters post — browse and apply when you\'re ready.'}
+          </p>
         </div>
         <div className="page-head-actions">
           {isRecruiter ? (
@@ -263,16 +282,9 @@ export function JobsBoardPage() {
               {showComposer ? 'Cancel' : 'Post job'}
             </button>
           ) : (
-            <button
-              type="button"
-              className="btn primary sm"
-              onClick={() => {
-                void setPersona('recruiter')
-                setShowComposer(true)
-              }}
-            >
-              Post as recruiter
-            </button>
+            <Link className="btn ghost sm" to="/">
+              Back to learning
+            </Link>
           )}
         </div>
       </section>
@@ -437,7 +449,11 @@ export function JobsBoardPage() {
         <aside className="jobs-list panel">
           {loading && <p className="muted">Loading jobs…</p>}
           {!loading && filtered.length === 0 && (
-            <p className="muted">No jobs match. Post the first one.</p>
+            <p className="muted">
+              {isRecruiter
+                ? 'No jobs match. Post the first one.'
+                : 'No open jobs yet — check back after recruiters post.'}
+            </p>
           )}
           {filtered.map((job) => (
             <button
