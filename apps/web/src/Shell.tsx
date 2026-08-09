@@ -16,6 +16,7 @@ export function Shell({
     <div className={wide ? 'shell shell-wide' : 'shell'}>
       <div className="atmosphere" aria-hidden="true" />
       <div className="grid-glow" aria-hidden="true" />
+      <div className="film-grain" aria-hidden="true" />
 
       <header className="site-nav">
         <Link to="/" className="brand">
