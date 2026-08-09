@@ -4,6 +4,12 @@
 # Free URL after deploy: https://ai-tutor-studio.onrender.com
 # (cold-starts on free plan after idle — normal for free hosting)
 
+databases:
+  - name: ai-tutor-studio-db
+    plan: free
+    region: oregon
+    postgresMajorVersion: "16"
+
 services:
   - type: web
     name: ai-tutor-studio
@@ -21,6 +27,10 @@ services:
         value: "true"
       - key: OPENAI_TUTOR_MODEL
         value: gpt-4o-mini
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ai-tutor-studio-db
+          property: connectionString
       - key: ADMIN_EMAILS
         sync: false
       - key: OPENAI_API_KEY
@@ -32,7 +42,4 @@ services:
       - key: STRIPE_PRICE_MONTHLY
         sync: false
       - key: STRIPE_PRICE_YEARLY
-        sync: false
-      # Optional free Neon/Supabase Postgres — leave empty to use SQLite on the instance
-      - key: DATABASE_URL
         sync: false

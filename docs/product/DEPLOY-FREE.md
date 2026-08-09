@@ -68,7 +68,7 @@ Docker (this repo Dockerfile)
    ├── React SPA  (/static)
    └── FastAPI    (/v1, /healthz)
          │
-         ├── SQLite on disk (default free)  OR  free Neon Postgres (DATABASE_URL)
+         ├── Render Free Postgres (DATABASE_URL) — SQLite only as local fallback
          ├── OpenAI (optional)
          └── Stripe (optional; demo upgrade enabled on free Blueprint)
 ```
@@ -76,7 +76,7 @@ Docker (this repo Dockerfile)
 | Piece | Free choice |
 |-------|-------------|
 | Compute | Render Free Docker web |
-| DB | SQLite (ephemeral on redeploy) or [Neon](https://neon.tech) free Postgres |
+| DB | Render Free Postgres (30-day free DB) or [Neon](https://neon.tech) free Postgres; SQLite only as local fallback |
 | AI | Skip, or OpenAI prepaid |
 | Pay | Demo upgrade now; Stripe when ready |
 | Domain | `*.onrender.com` then free CNAME |
