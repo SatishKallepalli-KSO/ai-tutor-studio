@@ -812,6 +812,60 @@ Outcome: millions txn/day, Gatling-validated peaks`,
       'What do you log for audit?',
     ],
   }),
+  t('staff-influence', 'staff-interview', 'Cross-team Influence', 'Lead without authority.', {
+    overview:
+      'Staff scope often means aligning multiple teams. Interviewers want to hear how you used evidence, prototypes, and clear decision framing — not politics — to ship the right thing.',
+    keyPoints: [
+      'Name the decision and the conflict explicitly.',
+      'Bring options with tradeoffs and a recommendation.',
+      'Use a spike/prototype or incident data when opinions stall.',
+      'Close the loop: what shipped and what you learned.',
+    ],
+    example: {
+      title: 'Influence spine',
+      code: `Conflict: Team A wants sync batch; Team B wants event stream
+Evidence: peak load + customer SLA miss risk
+Move: 2-week spike + shared RFC with rollback plan
+Outcome: phased batch→stream; p95 within SLO`,
+      note: 'Decision + evidence + outcome — keep under 2 minutes.',
+    },
+    commonMistakes: [
+      'Vague “I convinced them” with no mechanism.',
+      'Taking credit for a VP decision you didn’t shape.',
+      'No shipping result.',
+    ],
+    beforeYouPractice: [
+      'Pick one real cross-team decision you influenced.',
+      'Write the conflict in one sentence.',
+    ],
+  }),
+  t('staff-incidents', 'staff-interview', 'Incidents & Production', 'Lead under fire.', {
+    overview:
+      'Staff candidates must sound calm and structured in incidents: mitigate first, communicate clearly, find root cause, and leave a lasting prevention.',
+    keyPoints: [
+      'Customer impact timeline before deep forensics.',
+      'Mitigate (rollback/feature flag) before perfect RCA.',
+      'Communicate status to eng + stakeholders.',
+      'End with a concrete prevention (alert, test, runbook, design change).',
+    ],
+    example: {
+      title: 'Incident spine',
+      code: `Detect → Mitigate → Communicate → RCA → Follow-ups
+Flag off bad path in 12m; customer error rate ↓
+Postmortem: missing saturation alert + retry storm
+Fix: circuit breaker + runbook + alert`,
+      note: 'Show ownership of the system, not hero debugging lore.',
+    },
+    commonMistakes: [
+      'Jumping to root cause while customers are still broken.',
+      'No communication story.',
+      'No lasting fix — only “we restarted it”.',
+    ],
+    beforeYouPractice: [
+      'Prepare one SEV-level story with times and impact.',
+      'Name the prevention that still exists today.',
+    ],
+  }),
   t('em-people', 'em-interview', 'People Leadership', 'Hiring, coaching, performance.', {
     overview:
       'EM interviews lead with people outcomes: hiring bar, growth, performance, and healthy delivery systems.',
@@ -864,6 +918,60 @@ Looking for EM ownership of platform/AI products.`,
     beforeYouPractice: [
       'Tell the vendor transition story in 2 minutes.',
       'What did you personally own?',
+    ],
+  }),
+  t('em-hiring', 'em-interview', 'Hiring Bar', 'Loops, signals, tough calls.', {
+    overview:
+      'Great EMs protect the hiring bar under delivery pressure. Interviewers listen for structured loops, calibrated signals, and the courage to reject when the bar isn’t met.',
+    keyPoints: [
+      'Define level expectations before the loop.',
+      'Use structured rubrics and written debriefs.',
+      'Separate “urgent headcount” from “right hire”.',
+      'Close the loop with candidates and hiring managers.',
+    ],
+    example: {
+      title: 'Bar story',
+      code: `Pressure: “ship Q3 — hire anyone senior”
+Move: published Staff rubric + paired debriefs
+Call: no-hire on weak system design signal
+Outcome: delayed 3 weeks, hired stronger — fewer incidents later`,
+      note: 'Show the cost of a bad hire vs waiting.',
+    },
+    commonMistakes: [
+      'No clear bar — vibes-based hiring.',
+      'Overriding the panel without data.',
+      'Ignoring candidate experience.',
+    ],
+    beforeYouPractice: [
+      'Explain your hiring loop in 60 seconds.',
+      'Prepare one no-hire decision you defended.',
+    ],
+  }),
+  t('em-delivery', 'em-interview', 'Delivery & Prioritization', 'Roadmaps under constraints.', {
+    overview:
+      'EM delivery interviews test whether you can make capacity real: roadmap options, reliability budgets, and stakeholder alignment without burning the team.',
+    keyPoints: [
+      'Make capacity and WIP visible.',
+      'Offer options with risk — don’t just say no.',
+      'Protect reliability / quality allocation.',
+      'Reset commitments early when reality changes.',
+    ],
+    example: {
+      title: 'Roadmap options',
+      code: `A) Ship Feature X, slip reliability work (risk: SEV)
+B) Cut X scope 40%, keep reliability budget
+C) Add contractor capacity for X (cost + ramp)
+Recommend B + written risk to VP Product`,
+      note: 'Managers bring choices, not blockers.',
+    },
+    commonMistakes: [
+      'Silent overcommitment.',
+      'No reliability budget.',
+      'Escalating without a recommendation.',
+    ],
+    beforeYouPractice: [
+      'Prepare one roadmap conflict story with 2–3 options.',
+      'Name the reliability work you protected.',
     ],
   }),
   t('ai-path', 'java-to-ai', 'Backend → AI Path', 'Map Spring skills to AI systems.', {

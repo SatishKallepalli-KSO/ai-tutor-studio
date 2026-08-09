@@ -13,6 +13,12 @@ import { track as trackEvent } from './analytics'
 import { useAuth } from './auth'
 import { AUDIENCES, BRAND } from './brand'
 import { getTopic, topicsForTrack, type Topic } from './curriculum'
+import {
+  getTrackProgress,
+  markTopicStudied,
+  pathStats,
+  recordAttempt,
+} from './learnProgress'
 import { usePersona } from './persona'
 import { Shell, TRACK_GROUPS } from './Shell'
 import { SocialProof } from './SocialProof'
@@ -46,6 +52,7 @@ export default function App() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [paywall, setPaywall] = useState<string | null>(null)
+  const [progressTick, setProgressTick] = useState(0)
 
   const speech = useSpeechAnswer({
     onTranscript: (finalChunk, liveInterim) => {
@@ -98,6 +105,21 @@ export default function App() {
   const progressPct =
     topics.length > 0 ? Math.round(((topicIndex + 1) / topics.length) * 100) : 0
 
+  const learnStats = useMemo(() => {
+    void progressTick
+    if (!trackId) return null
+    return pathStats(
+      trackId,
+      topics.map((t) => t.id),
+      questions.map((q) => q.id),
+    )
+  }, [trackId, topics, questions, progressTick])
+
+  const trackProgress = useMemo(() => {
+    void progressTick
+    return trackId ? getTrackProgress(trackId) : null
+  }, [trackId, progressTick])
+
   useEffect(() => {
     api
       .tracks()
@@ -144,10 +166,54 @@ export default function App() {
     setAnswer('')
     const qs = questions.filter((q) => q.topic_id === next.id)
     setQuestionId(qs[0]?.id ?? null)
+    if (trackId) {
+      markTopicStudied(trackId, next.id)
+      setProgressTick((n) => n + 1)
+    }
     trackEvent('topic_open', {
       path: '/',
       properties: { track_id: trackId, topic_id: next.id },
     })
+  }
+
+  function markCurrentStudied() {
+    if (!trackId || !topicId) return
+    markTopicStudied(trackId, topicId)
+    setProgressTick((n) => n + 1)
+  }
+
+  function goNextQuestion() {
+    const list = topicQuestions.length ? topicQuestions : questions
+    if (!list.length) return
+    const idx = list.findIndex((q) => q.id === questionId)
+    const next = list[(idx >= 0 ? idx + 1 : 0) % list.length]
+    if (!next) return
+    // If wrapped and there is a next topic with questions, advance topic
+    if (idx === list.length - 1 && topicId && topics.length) {
+      const tIdx = topics.findIndex((t) => t.id === topicId)
+      const nextTopic = topics[tIdx + 1]
+      if (nextTopic) {
+        selectTopic(nextTopic)
+        setStep('practice')
+        return
+      }
+    }
+    setQuestionId(next.id)
+    setFeedback(null)
+    setAnswer('')
+    setInterim('')
+    setInputMode('text')
+    speech.stop()
+    stopSpeaking()
+  }
+
+  function retrySameQuestion() {
+    setFeedback(null)
+    setAnswer('')
+    setInterim('')
+    setInputMode('text')
+    speech.stop()
+    stopSpeaking()
   }
 
   function goPractice(forTopicId?: string) {
@@ -166,6 +232,10 @@ export default function App() {
       setTopicId(id)
       const qs = questions.filter((q) => q.topic_id === id)
       setQuestionId(qs[0]?.id ?? questions[0]?.id ?? null)
+      if (trackId) {
+        markTopicStudied(trackId, id)
+        setProgressTick((n) => n + 1)
+      }
     }
     setFeedback(null)
     setAnswer('')
@@ -200,6 +270,8 @@ export default function App() {
         input_mode: inputMode,
       })
       setFeedback(result)
+      recordAttempt(trackId, questionId, result.score, result.provider)
+      setProgressTick((n) => n + 1)
       await refresh()
     } catch (err) {
       if (err instanceof ApiError && err.status === 402) {
@@ -227,6 +299,8 @@ export default function App() {
             input_mode: inputMode,
           })
           setFeedback(result)
+          recordAttempt(trackId, questionId, result.score, result.provider)
+          setProgressTick((n) => n + 1)
           if (!user.is_pro) localStorage.setItem(key, String(used + 1))
         }
       } else {
@@ -333,15 +407,15 @@ export default function App() {
             <section className="magnet-proof reveal" aria-label="Why this works">
               <div>
                 <strong>1. Study the topic</strong>
-                <p>Staff &amp; EM docs — ownership, conflict, design narrative.</p>
+                <p>End-to-end Staff &amp; EM docs — ownership, design, incidents, hiring.</p>
               </div>
               <div>
                 <strong>2. Speak the answer</strong>
-                <p>Mic or type — same pressure as a real panel screen.</p>
+                <p>90–120s out loud. Retry until you hit ≥4/5.</p>
               </div>
               <div>
-                <strong>3. Get coached</strong>
-                <p>Score, gaps, stronger shape, delivery tips — free daily quota.</p>
+                <strong>3. Advance the path</strong>
+                <p>Coach names the gap — next question, next topic, real panel ready.</p>
               </div>
             </section>
           )}
@@ -618,11 +692,19 @@ export default function App() {
             </div>
             <div className="progress-block">
               <div className="progress-label">
-                Topic {topicIndex + 1} / {topics.length || 1}
+                Path {learnStats?.pct ?? progressPct}% · studied{' '}
+                {learnStats?.studied ?? 0}/{learnStats?.topicsTotal ?? topics.length} ·
+                practiced {learnStats?.practiced ?? 0}/
+                {learnStats?.questionsTotal ?? questions.length}
+                {learnStats?.avg != null ? ` · avg ${learnStats.avg}/5` : ''}
               </div>
               <div className="progress-bar" aria-hidden="true">
-                <span style={{ width: `${progressPct}%` }} />
+                <span style={{ width: `${learnStats?.pct ?? progressPct}%` }} />
               </div>
+              <p className="progress-hint muted">
+                Loop: Study → Speak → score ≥4 → next topic. Mastery:{' '}
+                {learnStats?.mastery ?? 0}/{learnStats?.questionsTotal ?? 0} drills ≥4
+              </p>
             </div>
           </div>
 
@@ -659,7 +741,13 @@ export default function App() {
             <div className="learn">
               <aside className="topic-list">
                 <h3>Curriculum</h3>
-                {topics.map((item, idx) => (
+                {topics.map((item, idx) => {
+                  const studied = trackProgress?.studiedTopicIds.includes(item.id)
+                  const topicQs = questions.filter((q) => q.topic_id === item.id)
+                  const best = topicQs
+                    .map((q) => trackProgress?.attempts[q.id]?.score ?? 0)
+                    .reduce((a, b) => Math.max(a, b), 0)
+                  return (
                   <button
                     key={item.id}
                     className={
@@ -668,10 +756,19 @@ export default function App() {
                     onClick={() => selectTopic(item)}
                   >
                     <em>{String(idx + 1).padStart(2, '0')}</em>
-                    <strong>{item.title}</strong>
+                    <strong>
+                      {item.title}
+                      {studied ? <span className="pill done">Studied</span> : null}
+                      {best > 0 ? (
+                        <span className={`pill ${best >= 4 ? 'good' : 'soft'}`}>
+                          {best}/5
+                        </span>
+                      ) : null}
+                    </strong>
                     <span>{item.summary}</span>
                   </button>
-                ))}
+                  )
+                })}
                 <div className="panel plan-mini">
                   <h4>Study plan</h4>
                   <ol>
@@ -727,16 +824,33 @@ export default function App() {
 
                     <div className="actions sticky-actions">
                       <button
+                        className="btn ghost"
+                        type="button"
+                        onClick={markCurrentStudied}
+                      >
+                        Mark studied
+                      </button>
+                      <button
                         className="btn primary"
                         onClick={() => goPractice(topic.id)}
                       >
                         {canPractice
-                          ? 'Practice this topic'
+                          ? 'Practice this topic out loud'
                           : trackIsProOnly
                             ? 'Unlock practice (Pro)'
                             : 'Sign in to practice'}
                       </button>
                     </div>
+                    {activeTrack.outcomes?.length ? (
+                      <div className="path-outcomes">
+                        <h4>Path outcomes</h4>
+                        <ul className="check-list">
+                          {activeTrack.outcomes.map((o) => (
+                            <li key={o}>{o}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : null}
                   </>
                 ) : (
                   <p className="muted">Select a topic to read the docs.</p>
@@ -994,8 +1108,33 @@ export default function App() {
                     <h4>Stronger answer shape</h4>
                     <pre>{feedback.better_answer}</pre>
                     <p className="next">
-                      <strong>Next drill:</strong> {feedback.next_drill}
+                      <strong>Coach says:</strong> {feedback.next_drill}
                     </p>
+                    <div className="actions feedback-actions">
+                      <button
+                        type="button"
+                        className="btn primary"
+                        onClick={retrySameQuestion}
+                      >
+                        {feedback.score < 4
+                          ? 'Retry out loud (aim ≥4)'
+                          : 'Retry for polish'}
+                      </button>
+                      <button
+                        type="button"
+                        className="btn ghost"
+                        onClick={goNextQuestion}
+                      >
+                        Next question
+                      </button>
+                      <button
+                        type="button"
+                        className="btn ghost"
+                        onClick={() => setStep('learn')}
+                      >
+                        Review docs for gaps
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>

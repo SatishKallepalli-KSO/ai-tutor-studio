@@ -8,13 +8,15 @@
       "outcomes": [
         "Tell Staff-level ownership stories with metrics",
         "Design distributed systems with clear tradeoffs",
-        "Explain production AI guardrails (entitlements, audit, evals)"
+        "Explain production AI guardrails (entitlements, audit, evals)",
+        "Narrate influence and incident leadership under pressure"
       ],
       "study_plan": [
         "Day 1–2: Rewrite 3 ownership stories (Context → Action → Metric)",
-        "Day 3–4: Drill 2 system designs (sync engine, NLQ platform)",
-        "Day 5: Mock behavioral + deep dive on one production AI project",
-        "Day 6–7: Timed answers + tighten resume bullets to stories"
+        "Day 3–4: Drill 2 system designs (sync engine + API tradeoffs)",
+        "Day 5: Cross-team influence + production incident narrative",
+        "Day 6: Mock behavioral + deep dive on one production AI project",
+        "Day 7: Timed answers out loud — score ≥4 on each topic before moving on"
       ]
     },
     {
@@ -25,13 +27,15 @@
       "outcomes": [
         "Lead with people + delivery ownership, not only IC craft",
         "Run hiring / performance / incident stories cleanly",
-        "Show technical credibility without competing for IC tickets"
+        "Show technical credibility without competing for IC tickets",
+        "Prioritize roadmap vs reliability with clear options"
       ],
       "study_plan": [
         "Day 1: Memorize 30–40s EM opener",
         "Day 2–3: Team-from-scratch + vendor-to-in-house STAR cards",
-        "Day 4: Hiring loop + performance management scenarios",
-        "Day 5–7: Mock HM screen + conflict / prioritization drills"
+        "Day 4: Hiring bar + performance management scenarios",
+        "Day 5: Delivery / prioritization conflict drills",
+        "Day 6–7: Mock HM screen — speak every topic until score ≥4"
       ]
     },
     {
@@ -269,6 +273,92 @@
       ]
     },
     {
+      "id": "staff-influence",
+      "track_id": "staff-interview",
+      "topic_id": "staff-influence",
+      "category": "Behavioral",
+      "prompt": "Tell me about a time you influenced a technical decision across teams without formal authority. What was the disagreement, how did you get alignment, and what shipped?",
+      "hints": [
+        "State the decision and who disagreed",
+        "Show data / prototype / risk framing — not politics",
+        "End with what changed and the business outcome"
+      ],
+      "strong_answer_signals": [
+        "influence",
+        "alignment",
+        "tradeoff",
+        "stakeholder",
+        "prototype",
+        "decision",
+        "shipped"
+      ]
+    },
+    {
+      "id": "staff-api-tradeoff",
+      "track_id": "staff-interview",
+      "topic_id": "staff-design",
+      "category": "System design",
+      "prompt": "You need a public API used by multiple product teams. How do you design versioning, auth, rate limits, and backwards compatibility so the platform can evolve without breaking clients?",
+      "hints": [
+        "Separate public contracts from internal models",
+        "Talk versioning strategy and deprecation windows",
+        "Cover authn/authz, quotas, and observability per tenant"
+      ],
+      "strong_answer_signals": [
+        "version",
+        "compatibility",
+        "auth",
+        "rate limit",
+        "deprecat",
+        "contract",
+        "tenant",
+        "observability"
+      ]
+    },
+    {
+      "id": "staff-incident",
+      "track_id": "staff-interview",
+      "topic_id": "staff-incidents",
+      "category": "Production",
+      "prompt": "Walk me through a production incident you led or heavily influenced. How did you diagnose, mitigate, communicate, and prevent recurrence?",
+      "hints": [
+        "Timeline: detect → mitigate → communicate → root cause → follow-ups",
+        "Distinguish customer impact vs internal noise",
+        "Name a lasting fix (alert, runbook, code, process)"
+      ],
+      "strong_answer_signals": [
+        "incident",
+        "mitigate",
+        "root cause",
+        "customer",
+        "communicat",
+        "postmortem",
+        "alert",
+        "prevent"
+      ]
+    },
+    {
+      "id": "staff-mentor",
+      "track_id": "staff-interview",
+      "topic_id": "staff-stories",
+      "category": "Behavioral",
+      "prompt": "Describe how you raised the engineering bar for others — mentoring, design reviews, or standards — while still delivering your own Staff-level work.",
+      "hints": [
+        "Concrete before/after for a person or team practice",
+        "How you balanced delivery with coaching time",
+        "Evidence the bar actually rose (quality, speed, fewer incidents)"
+      ],
+      "strong_answer_signals": [
+        "mentor",
+        "review",
+        "standard",
+        "coaching",
+        "quality",
+        "bar",
+        "delivery"
+      ]
+    },
+    {
       "id": "em-opener",
       "track_id": "em-interview",
       "topic_id": "em-people",
@@ -326,6 +416,72 @@
         "roadmap",
         "option",
         "reliability"
+      ]
+    },
+    {
+      "id": "em-hiring-bar",
+      "track_id": "em-interview",
+      "topic_id": "em-hiring",
+      "category": "Hiring",
+      "prompt": "How do you run a hiring loop and keep the bar high when the team is under delivery pressure to 'just hire someone'?",
+      "hints": [
+        "Define the bar for the level before interviews",
+        "Structured signals + debrief discipline",
+        "What you do when stakeholders push to lower the bar"
+      ],
+      "strong_answer_signals": [
+        "hiring",
+        "bar",
+        "loop",
+        "debrief",
+        "level",
+        "signal",
+        "reject",
+        "stakeholder"
+      ]
+    },
+    {
+      "id": "em-performance",
+      "track_id": "em-interview",
+      "topic_id": "em-people",
+      "category": "People",
+      "prompt": "Tell me about managing an underperformer. How did you diagnose, coach, document, and decide whether to exit or recover?",
+      "hints": [
+        "Early, specific feedback with examples",
+        "Written plan + support, not surprise PIP",
+        "Fairness to the person and to the team"
+      ],
+      "strong_answer_signals": [
+        "performance",
+        "feedback",
+        "coach",
+        "document",
+        "plan",
+        "exit",
+        "fair",
+        "team"
+      ]
+    },
+    {
+      "id": "em-roadmap",
+      "track_id": "em-interview",
+      "topic_id": "em-delivery",
+      "category": "Delivery",
+      "prompt": "How do you build a quarterly roadmap with product when engineering capacity is constrained and reliability work is non-negotiable?",
+      "hints": [
+        "Make capacity and commitments visible",
+        "Offer explicit options (cut scope / slip / add capacity)",
+        "Protect a reliability / quality budget"
+      ],
+      "strong_answer_signals": [
+        "roadmap",
+        "capacity",
+        "priorit",
+        "reliab",
+        "option",
+        "commit",
+        "scope",
+        "stakeholder"
       ]
     },
     {

@@ -248,6 +248,18 @@ def _openai_feedback(
         "Return concise coaching. Score 1-5. Focus on clarity, correctness, and examples."
         + voice_extra
     )
+    if track.id == "staff-interview":
+        system += (
+            " This is a Staff Engineer loop. Score harshly on: personal ownership (not vague 'we'), "
+            "explicit tradeoffs, measurable outcomes, systems thinking, and cross-team influence. "
+            "Demand a spoken structure of ~90–120 seconds. next_drill must name the exact gap to retry."
+        )
+    elif track.id == "em-interview":
+        system += (
+            " This is an Engineering Manager loop. Score on: people ownership, hiring bar, "
+            "performance management, delivery prioritization, and stakeholder options — not IC heroics. "
+            "next_drill must tell them what to practice next out loud."
+        )
     user = (
         f"Track: {track.title}\n"
         f"Category: {question.category}\n"

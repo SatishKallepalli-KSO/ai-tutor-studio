@@ -1461,13 +1461,20 @@ a {
 }
 
 .progress-block {
-  max-width: 320px;
+  max-width: 360px;
 }
 
 .progress-label {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: var(--muted);
   margin-bottom: 0.35rem;
+  line-height: 1.35;
+}
+
+.progress-hint {
+  margin: 0.45rem 0 0;
+  font-size: 0.72rem;
+  line-height: 1.35;
 }
 
 .progress-bar {
@@ -1483,6 +1490,44 @@ a {
   border-radius: inherit;
   background: linear-gradient(90deg, var(--accent), var(--accent-2));
   transition: width 0.35s ease;
+}
+
+.pill.done {
+  margin-left: 0.35rem;
+  color: var(--accent);
+  background: rgba(61, 207, 154, 0.12);
+  border-color: rgba(61, 207, 154, 0.35);
+  font-size: 0.65rem;
+  vertical-align: middle;
+}
+
+.pill.good {
+  margin-left: 0.35rem;
+  color: var(--accent);
+  background: rgba(61, 207, 154, 0.1);
+  border-color: rgba(61, 207, 154, 0.28);
+  font-size: 0.65rem;
+  vertical-align: middle;
+}
+
+.pill.soft {
+  margin-left: 0.35rem;
+  color: var(--warn);
+  background: rgba(210, 150, 60, 0.1);
+  border-color: rgba(210, 150, 60, 0.28);
+  font-size: 0.65rem;
+  vertical-align: middle;
+}
+
+.path-outcomes {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+
+.feedback-actions {
+  margin-top: 1rem;
+  flex-wrap: wrap;
 }
 
 .mode-switch {

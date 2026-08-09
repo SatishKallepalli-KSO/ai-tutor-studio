@@ -42,6 +42,7 @@ Browser
 - [x] Staff / EM Pro tracks via demo upgrade
 - [x] Admin overview (`ADMIN_EMAILS` + `is_admin`)
 - [x] Neon backups: `./scripts/backup-db.sh --neon`
+- [x] Learn loop: deeper Staff/EM topics · local path progress · retry/next after coaching
 
 ## Operator docs
 
