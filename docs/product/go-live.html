@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Go-live runbook — AI Tutor Studio</title>
+    <meta
+      name="description"
+      content="Deploy AI Tutor Studio on any cloud with OpenAI coaching and Stripe payments."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;700&family=IBM+Plex+Sans:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <nav class="nav">
+        <a class="nav-brand" href="./">AI Tutor Studio Docs</a>
+        <div class="nav-links">
+          <a href="./">Overview</a>
+          <a href="./architecture.html">Architecture</a>
+          <a href="./monetization.html">Monetization</a>
+          <a href="./api.html">API</a>
+          <a class="active" href="./go-live.html">Go-live</a>
+          <a href="./sales-playbook.html">Sales</a>
+          <a href="../">Open app</a>
+        </div>
+      </nav>
+
+      <p class="eyebrow">Operations</p>
+      <h1>Go-live runbook</h1>
+      <p class="lede">
+        Launch AI Tutor Studio on any cloud with live AI coaching (OpenAI) and
+        real subscriptions (Stripe). Use this as your checklist from empty
+        hosting to first paid Pro user.
+      </p>
+
+      <div class="cta-row">
+        <a class="btn primary" href="./GO-LIVE.md">Markdown source</a>
+        <a class="btn" href="./monetization.html">Free / Pro matrix</a>
+        <a class="btn" href="./architecture.html">Architecture</a>
+      </div>
+
+      <h2>1. What you deploy</h2>
+      <div class="panel">
+        <table>
+          <thead>
+            <tr>
+              <th>Piece</th>
+              <th>Role</th>
+              <th>Production</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>API</strong> (<code>apps/api</code>)</td>
+              <td>Auth, plans, Stripe, AI feedback, admin metrics</td>
+              <td>Required</td>
+            </tr>
+            <tr>
+              <td><strong>Web</strong> (<code>apps/web</code>)</td>
+              <td>Tracks, practice, pricing, agentic path, admin</td>
+              <td>Required (bundled in Docker)</td>
+            </tr>
+            <tr>
+              <td><strong>Postgres</strong></td>
+              <td>Users, usage, feature events</td>
+              <td>Strongly recommended</td>
+            </tr>
+            <tr>
+              <td><strong>OpenAI</strong></td>
+              <td>Rich coaching (rubric fallback without key)</td>
+              <td>Recommended</td>
+            </tr>
+            <tr>
+              <td><strong>Stripe</strong></td>
+              <td>Checkout, portal, webhooks → Pro</td>
+              <td>Required to monetize</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="muted" style="margin-top: 0.85rem">
+          Recommended shape: one Docker service (API serves the built UI) +
+          managed Postgres + Stripe + OpenAI. Repo already includes
+          <code>Dockerfile</code>, <code>render.yaml</code>, and
+          <code>.env.example</code>.
+        </p>
+      </div>
+
+      <h2>2. Pre-flight</h2>
+      <div class="panel">
+        <ul>
+          <li>Public HTTPS URL decided (e.g. <code>https://app.yourdomain.com</code>)</li>
+          <li>OpenAI account with billing + API key</li>
+          <li>Stripe account (test mode first, then live)</li>
+          <li>Admin emails for <code>ADMIN_EMAILS</code></li>
+          <li>Strong random <code>JWT_SECRET</code> (32+ chars)</li>
+          <li>Postgres ready (avoid SQLite for real traffic)</li>
+          <li><code>ALLOW_DEMO_UPGRADE=false</code> in production</li>
+        </ul>
+        <pre>python3 -c "import secrets; print(secrets.token_urlsafe(48))"</pre>
+      </div>
+
+      <h2>3. Environment variables</h2>
+      <div class="panel">
+        <table>
+          <thead>
+            <tr>
+              <th>Variable</th>
+              <th>Required</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>JWT_SECRET</code></td>
+              <td>Yes</td>
+              <td>Long random string</td>
+            </tr>
+            <tr>
+              <td><code>APP_URL</code></td>
+              <td>Yes</td>
+              <td>Public UI origin for Stripe redirects</td>
+            </tr>
+            <tr>
+              <td><code>DATABASE_URL</code></td>
+              <td>Recommended</td>
+              <td><code>postgresql://user:pass@host:5432/db</code></td>
+            </tr>
+            <tr>
+              <td><code>OPENAI_API_KEY</code></td>
+              <td>Recommended</td>
+              <td>Enables model coaching</td>
+            </tr>
+            <tr>
+              <td><code>OPENAI_TUTOR_MODEL</code></td>
+              <td>No</td>
+              <td>Default <code>gpt-4o-mini</code></td>
+            </tr>
+            <tr>
+              <td><code>STRIPE_SECRET_KEY</code></td>
+              <td>For pay</td>
+              <td><code>sk_test_…</code> then <code>sk_live_…</code></td>
+            </tr>
+            <tr>
+              <td><code>STRIPE_PRICE_MONTHLY</code></td>
+              <td>For pay</td>
+              <td>Pro monthly Price ID</td>
+            </tr>
+            <tr>
+              <td><code>STRIPE_PRICE_YEARLY</code></td>
+              <td>Recommended</td>
+              <td>Pro yearly Price ID</td>
+            </tr>
+            <tr>
+              <td><code>STRIPE_WEBHOOK_SECRET</code></td>
+              <td>For pay</td>
+              <td>From Stripe webhook endpoint</td>
+            </tr>
+            <tr>
+              <td><code>ALLOW_DEMO_UPGRADE</code></td>
+              <td>Must be false live</td>
+              <td>Local-only Pro unlock when Stripe off</td>
+            </tr>
+            <tr>
+              <td><code>ADMIN_EMAILS</code></td>
+              <td>Recommended</td>
+              <td>Comma-separated → <code>/admin</code> access</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="muted" style="margin-top: 0.85rem">
+          If UI is hosted separately (e.g. GitHub Pages), build with
+          <code>VITE_API_BASE=https://YOUR-API</code> and matching
+          <code>VITE_BASE</code>. Docker default serves UI from the same host
+          with <code>VITE_BASE=/</code>.
+        </p>
+      </div>
+
+      <h2>4. Integrate AI (OpenAI)</h2>
+      <div class="grid-2">
+        <div class="card">
+          <span class="pill">Setup</span>
+          <strong>Create API key</strong>
+          <p class="muted">
+            platform.openai.com → API keys. Add billing. Set
+            <code>OPENAI_API_KEY</code>. Keep model on
+            <code>gpt-4o-mini</code> to start.
+          </p>
+        </div>
+        <div class="card">
+          <span class="pill">Behavior</span>
+          <strong>With / without key</strong>
+          <p class="muted">
+            With key: richer coaching on
+            <code>POST /v1/tutor/feedback</code>. Without key: rubric fallback
+            still works for demos.
+          </p>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Smoke test</h3>
+        <pre>curl -s https://YOUR_HOST/healthz
+
+# After register/login, POST feedback with Bearer JWT.
+# Confirm response "provider" reflects OpenAI when configured.</pre>
+        <p class="muted">
+          Free plan already caps 5 feedbacks/day — watch OpenAI usage the first
+          week once Pro unlimited is live.
+        </p>
+      </div>
+
+      <h2>5. Integrate payments (Stripe)</h2>
+      <ol>
+        <li>
+          Products → add <strong>AI Tutor Studio Pro</strong> with monthly
+          ($19) and yearly ($149) prices. Copy Price IDs into env.
+        </li>
+        <li>
+          Developers → API keys → set <code>STRIPE_SECRET_KEY</code>.
+        </li>
+        <li>
+          Webhooks → endpoint
+          <code>https://YOUR_HOST/v1/billing/webhook</code><br />
+          Events:
+          <code>checkout.session.completed</code>,
+          <code>customer.subscription.updated</code>,
+          <code>customer.subscription.deleted</code>.<br />
+          Copy signing secret → <code>STRIPE_WEBHOOK_SECRET</code>.
+        </li>
+        <li>
+          Enable Customer Portal (cancel / update payment). App uses
+          <code>POST /v1/billing/portal</code>.
+        </li>
+        <li>
+          Set <code>APP_URL</code> so success/cancel/portal redirects land on
+          your UI.
+        </li>
+      </ol>
+      <div class="panel">
+        <h3>Payment smoke test (test mode)</h3>
+        <ol>
+          <li>Register → <code>/pricing</code> → Upgrade → Checkout</li>
+          <li>Card <code>4242 4242 4242 4242</code></li>
+          <li>Confirm webhook delivered in Stripe</li>
+          <li>App shows Pro; Staff/EM unlock; unlimited feedback</li>
+          <li>Portal cancel → Free after webhook</li>
+        </ol>
+        <p class="muted">
+          Then switch Stripe to <strong>Live</strong>, create live prices,
+          replace env keys + webhook secret, redeploy with
+          <code>ALLOW_DEMO_UPGRADE=false</code>.
+        </p>
+      </div>
+
+      <h2>6. Deploy on any cloud</h2>
+
+      <h3>Option A — Render (fastest)</h3>
+      <div class="panel">
+        <ol>
+          <li>Push repo → Render → New → Blueprint (<code>render.yaml</code>)</li>
+          <li>Attach Postgres; set <code>DATABASE_URL</code></li>
+          <li>Fill env from §3</li>
+          <li>Health check path: <code>/healthz</code></li>
+          <li>Custom domain → update <code>APP_URL</code> + Stripe webhook URL</li>
+        </ol>
+      </div>
+
+      <h3>Option B — Railway / Fly / Cloud Run / Azure / AWS</h3>
+      <div class="panel">
+        <p class="muted">Same Docker image everywhere:</p>
+        <pre>docker build -t ai-tutor-studio .
+docker run --rm -p 8000:8000 \
+  -e JWT_SECRET=... \
+  -e APP_URL=https://YOUR_HOST \
+  -e DATABASE_URL=postgresql://... \
+  -e OPENAI_API_KEY=sk-... \
+  -e STRIPE_SECRET_KEY=sk_... \
+  -e STRIPE_PRICE_MONTHLY=price_... \
+  -e STRIPE_PRICE_YEARLY=price_... \
+  -e STRIPE_WEBHOOK_SECRET=whsec_... \
+  -e ALLOW_DEMO_UPGRADE=false \
+  -e ADMIN_EMAILS=you@example.com \
+  ai-tutor-studio</pre>
+        <ul>
+          <li><strong>Cloud Run / App Runner:</strong> port 8000; attach managed Postgres</li>
+          <li><strong>Fly.io:</strong> Dockerfile + <code>fly secrets set</code> + Fly Postgres</li>
+          <li><strong>Railway:</strong> Dockerfile + Postgres plugin + env</li>
+          <li><strong>Azure / K8s:</strong> container + managed Postgres + Ingress TLS</li>
+        </ul>
+      </div>
+
+      <h3>Option C — GitHub Pages UI + cloud API</h3>
+      <div class="panel">
+        <pre>cd apps/web
+VITE_BASE=/ai-tutor-studio/ \
+VITE_API_BASE=https://YOUR-API-HOST \
+npm run build
+# publish via ./scripts/publish-pages.sh (keeps docs/product/)</pre>
+        <p class="muted">
+          Prefer one Docker host for a sellable product — simpler Stripe
+          redirects and ops. Pages-only cannot store users or charge cards.
+        </p>
+      </div>
+
+      <h2>7. Admin dashboard</h2>
+      <div class="panel">
+        <ol>
+          <li>Set <code>ADMIN_EMAILS=you@example.com</code> on the API</li>
+          <li>Register or sign in with that email</li>
+          <li>Open <code>/admin</code> — signups, Free/Pro mix, feature usage</li>
+        </ol>
+        <p class="muted">
+          If Admin is missing from the nav, sign out and back in after the env
+          change.
+        </p>
+      </div>
+
+      <h2>8. Security checklist</h2>
+      <div class="panel">
+        <ul>
+          <li><code>JWT_SECRET</code> unique and private</li>
+          <li><code>ALLOW_DEMO_UPGRADE=false</code></li>
+          <li>Never commit <code>.env</code>; live Stripe keys only on prod</li>
+          <li>HTTPS everywhere; lock down <code>ADMIN_EMAILS</code></li>
+          <li>Postgres backups / provider snapshots</li>
+          <li>Monitor OpenAI spend + Stripe disputes week one</li>
+        </ul>
+      </div>
+
+      <h2>9. Launch-day verification (30 min)</h2>
+      <div class="panel">
+        <ol>
+          <li><code>/healthz</code> → ok</li>
+          <li>Register → user appears in <code>/admin</code></li>
+          <li>Free practice works; Staff locked</li>
+          <li>Feedback returns AI; Free quota increments</li>
+          <li>Checkout → webhook → Pro badge</li>
+          <li>Pro unlocks advanced tracks; unlimited feedback</li>
+          <li>Billing portal opens</li>
+          <li>Voice practice shows delivery tips</li>
+          <li>Agentic path loads; mark-complete works</li>
+          <li>Admin shows feature events</li>
+        </ol>
+      </div>
+
+      <h2>10. Fastest path to “sell tomorrow”</h2>
+      <div class="panel">
+        <ol>
+          <li>Deploy Docker to <strong>Render</strong> with Postgres</li>
+          <li>Set <code>JWT_SECRET</code>, <code>APP_URL</code>, <code>ADMIN_EMAILS</code></li>
+          <li>Add OpenAI key</li>
+          <li>Stripe <strong>test</strong> → webhook → prove Pro</li>
+          <li>Switch Stripe to <strong>live</strong></li>
+          <li>Custom domain → share <code>/pricing</code></li>
+        </ol>
+        <p class="muted">
+          You do not need GitHub Pages for monetization — the Docker image
+          already serves the full product.
+        </p>
+      </div>
+
+      <h2>Related</h2>
+      <div class="panel toc">
+        <a href="./GO-LIVE.md"><strong>GO-LIVE.md</strong> — full markdown runbook (print / share)</a>
+        <a href="./architecture.html"><strong>Architecture</strong> — system design</a>
+        <a href="./monetization.html"><strong>Monetization</strong> — Free vs Pro</a>
+        <a href="./api.html"><strong>API</strong> — endpoints</a>
+        <a href="./sales-playbook.html"><strong>Sales playbook</strong> — demo script</a>
+      </div>
+
+      <footer class="footer">
+        AI Tutor Studio · Go-live for cloud + AI + payments ·
+        <a href="https://github.com/SatishKallepalli-KSO/ai-tutor-studio">GitHub</a>
+        <br />© 2026 Kallepalli Labs. All rights reserved.
+      </footer>
+    </div>
+  </body>
+</html>

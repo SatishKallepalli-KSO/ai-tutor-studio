@@ -52,9 +52,35 @@ export type UserProfile = {
   plan: string
   subscription_status: string
   is_pro: boolean
+  is_admin?: boolean
   feedback_used_today: number
   feedback_limit_today: number | string
   free_practice_tracks: string[]
+}
+
+export type AdminOverview = {
+  total_users: number
+  free_users: number
+  pro_users: number
+  admin_users: number
+  signups_last_7d: number
+  signups_last_30d: number
+  events_last_7d: number
+  feedback_events_last_7d: number
+  free_feedback_today: number
+  signups_by_day: { day: string; count: number }[]
+  top_features: { key: string; count: number; label?: string | null }[]
+  top_paths: { key: string; count: number; label?: string | null }[]
+  top_tracks: { key: string; count: number; label?: string | null }[]
+  recent_users: {
+    id: number
+    email: string
+    name: string
+    plan: string
+    is_pro: boolean
+    is_admin: boolean
+    created_at: string
+  }[]
 }
 
 export type PlanCard = {
@@ -221,6 +247,10 @@ export const api = {
 
   async demoUpgrade(): Promise<{ ok: boolean; user: UserProfile }> {
     return request('/v1/billing/demo-upgrade', { method: 'POST' })
+  },
+
+  async adminOverview(days = 14): Promise<AdminOverview> {
+    return request(`/v1/admin/overview?days=${days}`)
   },
 }
 

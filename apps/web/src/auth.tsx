@@ -7,6 +7,7 @@ import {
   useState,
   type ReactNode,
 } from 'react'
+import { track } from './analytics'
 import { api, setToken, getToken, type UserProfile } from './api'
 
 type AuthContextValue = {
@@ -50,6 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const res = await api.login({ email, password })
     setToken(res.access_token)
     setUser(res.user)
+    track('login', { path: '/login' })
   }, [])
 
   const register = useCallback(
@@ -57,6 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const res = await api.register({ name, email, password })
       setToken(res.access_token)
       setUser(res.user)
+      track('register', { path: '/register' })
     },
     [],
   )

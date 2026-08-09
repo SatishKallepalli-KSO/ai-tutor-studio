@@ -1,5 +1,7 @@
 # AI Tutor Studio
 
+Built by **Kallepalli Labs** (Satish Kallepalli).
+
 Local-first **AI-assisted tutoring / upskilling** product with **Free + Pro** monetization
 (HackerRank-style freemium).
 
@@ -12,15 +14,19 @@ Local-first **AI-assisted tutoring / upskilling** product with **Free + Pro** mo
 
 Flow: **Register → Learn docs → Practice (type or speak) → AI feedback** (gated by plan).
 
-Also: **[/agentic-path](https://satishkallepalli-kso.github.io/ai-tutor-studio/agentic-path)** — ordered free YouTube curriculum from Java developer → Agentic AI engineer.
+Also:
+- **[/agentic-path](https://satishkallepalli-kso.github.io/ai-tutor-studio/agentic-path)** — ordered free YouTube curriculum from Java developer → Agentic AI engineer
+- **[/snowflake-path](https://satishkallepalli-kso.github.io/ai-tutor-studio/snowflake-path)** — Data Engineer → Snowflake + Agentic AI (Cortex, agents, interview prep)
 
 Voice practice uses the browser mic (Chrome/Edge/Safari). Feedback then coaches **content + spoken delivery** (fillers, grammar/clarity, pacing) — closer to real interviews.
 
 ## Product documentation (for selling)
 
-HTML microsite under **`docs/product/`** (architecture, user flows, monetization, API, sales playbook):
+HTML microsite under **`docs/product/`** (architecture, user flows, monetization, API, go-live, sales playbook):
 
 **https://satishkallepalli-kso.github.io/ai-tutor-studio/product/**
+
+**Cloud launch checklist (AI + Stripe):** [docs/product/GO-LIVE.md](docs/product/GO-LIVE.md) · [go-live.html](https://satishkallepalli-kso.github.io/ai-tutor-studio/product/go-live.html)
 
 Republish the app without wiping those docs:
 

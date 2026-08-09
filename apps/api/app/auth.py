@@ -24,6 +24,19 @@ JWT_ALG = "HS256"
 JWT_HOURS = int(os.getenv("JWT_HOURS", "168"))  # 7 days
 
 
+def admin_email_set() -> set[str]:
+    raw = os.getenv("ADMIN_EMAILS", "").strip()
+    return {e.strip().lower() for e in raw.split(",") if e.strip()}
+
+
+def apply_admin_flag(user: User) -> bool:
+    """Ensure ADMIN_EMAILS users get is_admin=True. Returns True if changed."""
+    if user.email.lower() in admin_email_set() and not user.is_admin:
+        user.is_admin = True
+        return True
+    return False
+
+
 class RegisterRequest(BaseModel):
     email: EmailStr
     password: str = Field(min_length=8, max_length=128)
@@ -42,6 +55,7 @@ class UserOut(BaseModel):
     plan: str
     subscription_status: str
     is_pro: bool
+    is_admin: bool = False
     feedback_used_today: int
     feedback_limit_today: int | str
     free_practice_tracks: list[str]
@@ -85,6 +99,9 @@ def feedback_usage(db: Session, user_id: int) -> int:
 
 
 def user_to_out(db: Session, user: User) -> UserOut:
+    if apply_admin_flag(user):
+        db.commit()
+        db.refresh(user)
     pro = is_pro(user.plan, user.subscription_status)
     used = feedback_usage(db, user.id)
     return UserOut(
@@ -94,6 +111,7 @@ def user_to_out(db: Session, user: User) -> UserOut:
         plan="pro" if pro else user.plan if user.plan == "free" else "free",
         subscription_status=user.subscription_status,
         is_pro=pro,
+        is_admin=bool(getattr(user, "is_admin", False)),
         feedback_used_today=used,
         feedback_limit_today="unlimited" if pro else FREE_FEEDBACK_PER_DAY,
         free_practice_tracks=sorted(FREE_PRACTICE_TRACKS),
@@ -143,6 +161,7 @@ def register(body: RegisterRequest, db: Session = Depends(get_db)) -> AuthRespon
         name=body.name.strip() or email.split("@")[0],
         plan="free",
         subscription_status="inactive",
+        is_admin=email in admin_email_set(),
     )
     db.add(user)
     db.commit()
@@ -157,6 +176,9 @@ def login(body: LoginRequest, db: Session = Depends(get_db)) -> AuthResponse:
     user = db.query(User).filter(User.email == email).first()
     if not user or not verify_password(body.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid email or password")
+    if apply_admin_flag(user):
+        db.commit()
+        db.refresh(user)
     token = create_access_token(user.id, user.email)
     return AuthResponse(access_token=token, user=user_to_out(db, user))
 

@@ -1,11 +1,17 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { AboutPage } from './AboutPage.tsx'
+import { AdminDashboardPage } from './AdminDashboardPage.tsx'
 import { AgenticPathPage } from './AgenticPathPage.tsx'
+import { AnalyticsRouteTracker } from './AnalyticsRouteTracker.tsx'
 import App from './App.tsx'
 import { AuthProvider } from './auth.tsx'
 import { LoginPage, RegisterPage } from './AuthPages.tsx'
+import { CompanyPage } from './CompanyPage.tsx'
+import { InvestorsPage } from './InvestorsPage.tsx'
 import { PricingPage } from './PricingPage.tsx'
+import { SnowflakePathPage } from './SnowflakePathPage.tsx'
 import './index.css'
 
 const basename = import.meta.env.BASE_URL.replace(/\/$/, '') || undefined
@@ -14,10 +20,16 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter basename={basename}>
       <AuthProvider>
+        <AnalyticsRouteTracker />
         <Routes>
           <Route path="/" element={<App />} />
           <Route path="/agentic-path" element={<AgenticPathPage />} />
+          <Route path="/snowflake-path" element={<SnowflakePathPage />} />
           <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/company" element={<CompanyPage />} />
+          <Route path="/investors" element={<InvestorsPage />} />
+          <Route path="/admin" element={<AdminDashboardPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />

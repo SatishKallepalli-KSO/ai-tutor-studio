@@ -8,6 +8,8 @@ import {
   type Track,
   type TutorQuestion,
 } from './api'
+import { AdSlot } from './AdSlot'
+import { track as trackEvent } from './analytics'
 import { useAuth } from './auth'
 import { getTopic, topicsForTrack, type Topic } from './curriculum'
 import { Shell, TRACK_GROUPS } from './Shell'
@@ -54,7 +56,7 @@ export default function App() {
     },
   })
 
-  const track = useMemo(
+  const activeTrack = useMemo(
     () => tracks.find((t) => t.id === trackId) ?? null,
     [trackId, tracks],
   )
@@ -117,6 +119,14 @@ export default function App() {
       setTopicId(firstTopic?.id ?? qs[0]?.topic_id ?? null)
       setQuestionId(qs[0]?.id ?? null)
       setStep('learn')
+      trackEvent('track_open', {
+        path: '/',
+        properties: { track_id: id },
+      })
+      trackEvent('learn_open', {
+        path: '/',
+        properties: { track_id: id },
+      })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load questions')
     } finally {
@@ -130,6 +140,10 @@ export default function App() {
     setAnswer('')
     const qs = questions.filter((q) => q.topic_id === next.id)
     setQuestionId(qs[0]?.id ?? null)
+    trackEvent('topic_open', {
+      path: '/',
+      properties: { track_id: trackId, topic_id: next.id },
+    })
   }
 
   function goPractice(forTopicId?: string) {
@@ -139,7 +153,7 @@ export default function App() {
     }
     if (trackId && !user.is_pro && !FREE_PRACTICE_TRACKS.has(trackId)) {
       setPaywall(
-        'This track is Pro-only. Upgrade to unlock Staff, EM, Java→AI, and advanced language tracks.',
+        'This path is Pro-only. Go Pro to unlock Staff, EM, Java→AI, and advanced language drills.',
       )
       return
     }
@@ -153,6 +167,10 @@ export default function App() {
     setAnswer('')
     setPaywall(null)
     setStep('practice')
+    trackEvent('practice_start', {
+      path: '/',
+      properties: { track_id: trackId, topic_id: id ?? topicId },
+    })
   }
 
   async function submitAnswer() {
@@ -189,14 +207,14 @@ export default function App() {
         const used = Number(localStorage.getItem(key) || '0')
         if (!user.is_pro && used >= 5) {
           setPaywall(
-            'Free daily feedback limit reached. Upgrade to Pro for unlimited coaching.',
+            'Free daily coaching limit reached. Go Pro for unlimited feedback.',
           )
         } else if (
           !user.is_pro &&
           trackId &&
           !FREE_PRACTICE_TRACKS.has(trackId)
         ) {
-          setPaywall('This track is Pro-only. Upgrade to unlock full access.')
+          setPaywall('This path is Pro-only. Go Pro to unlock full access.')
         } else {
           const result = api.localFeedback({
             track_id: trackId as Track['id'],
@@ -221,7 +239,7 @@ export default function App() {
       {paywall && (
         <div className="banner paywall reveal">
           <div>
-            <strong>Upgrade moment</strong>
+            <strong>Ready for Pro?</strong>
             <p>{paywall}</p>
           </div>
           <div className="actions">
@@ -231,7 +249,7 @@ export default function App() {
               </Link>
             ) : (
               <Link className="btn primary" to="/pricing">
-                View Pro plans
+                See Pro plans
               </Link>
             )}
           </div>
@@ -243,22 +261,26 @@ export default function App() {
           <section className="hero reveal">
             <p className="eyebrow">AI Tutor Studio</p>
             <h1>
-              Practice interviews
-              <span> the way they actually happen.</span>
+              Win the interview loop
+              <span>by practicing out loud.</span>
             </h1>
             <p className="hero-lede">
-              Study curated topic docs, answer out loud, and get AI coaching on
-              content plus spoken delivery — built to beat text-only prep tools.
+              Study sharp topic docs, answer like you would in the room, and get
+              coaching on substance plus delivery — built for Staff, EM, and
+              stack-switch candidates who outgrow text-only prep.
             </p>
             <div className="hero-cta">
-              <a className="btn primary" href="#tracks">
-                Browse tracks
+              <a className="btn primary" href="#paths">
+                Explore paths
               </a>
               <Link className="btn ghost" to="/agentic-path">
-                Java → Agentic video path
+                Backend → AI Engineer
+              </Link>
+              <Link className="btn ghost" to="/snowflake-path">
+                Data Eng → Snowflake
               </Link>
               <Link className="btn ghost" to="/pricing">
-                Compare Free vs Pro
+                Free vs Pro
               </Link>
             </div>
             <div className="hero-stage" aria-hidden="true">
@@ -271,30 +293,37 @@ export default function App() {
             </div>
           </section>
 
+          <AdSlot
+            id="home-below-hero"
+            variant="banner"
+            headline="Interview tools & hiring partners"
+            detail="Premium partner strip — kept below the brand composition on purpose."
+          />
+
           <section className="diff-row reveal">
             <div>
-              <strong>Voice-first</strong>
-              <p>Mic answers like the real room — not just typed essays.</p>
+              <strong>Speak, don’t type essays</strong>
+              <p>Mic answers under real timing pressure — the way panels hear you.</p>
             </div>
             <div>
-              <strong>Docs → drill</strong>
-              <p>Topic curriculum before feedback, not random chat prompts.</p>
+              <strong>Curriculum before coaching</strong>
+              <p>Topic docs first, then drills — not random chatbot prompts.</p>
             </div>
             <div>
-              <strong>Freemium that converts</strong>
-              <p>Learn free. Unlock Staff/EM and unlimited coaching on Pro.</p>
+              <strong>Free to train. Pro to compete.</strong>
+              <p>Starter paths free. Staff/EM + unlimited coaching on Pro.</p>
             </div>
           </section>
 
           <section className="compare reveal">
-            <h2>Built to compete with prep platforms</h2>
+            <h2>Why serious candidates switch here</h2>
             <div className="compare-table-wrap">
               <table className="compare-table">
                 <thead>
                   <tr>
                     <th></th>
                     <th>AI Tutor Studio</th>
-                    <th>Coding sites</th>
+                    <th>Coding platforms</th>
                     <th>Generic ChatGPT</th>
                   </tr>
                 </thead>
@@ -307,18 +336,18 @@ export default function App() {
                   </tr>
                   <tr>
                     <td>Structured topic docs</td>
-                    <td className="yes">Per-track curriculum</td>
+                    <td className="yes">Per-path curriculum</td>
                     <td>Problems only</td>
                     <td>No curriculum</td>
                   </tr>
                   <tr>
                     <td>Staff / EM loops</td>
-                    <td className="yes">Native tracks</td>
+                    <td className="yes">Native paths</td>
                     <td>Limited</td>
                     <td>Unstructured</td>
                   </tr>
                   <tr>
-                    <td>Free → Pro monetization</td>
+                    <td>Free → Pro path</td>
                     <td className="yes">Stripe-ready</td>
                     <td>Yes</td>
                     <td>No product</td>
@@ -328,73 +357,95 @@ export default function App() {
             </div>
           </section>
 
-          <section className="section" id="tracks">
+          <section className="section paths-layout" id="paths">
             <div className="section-title">
-              <h2>Choose your path</h2>
+              <h2>Pick the loop you’re training for</h2>
               <p className="muted">
-                {tracks.length} tracks · docs free on all · practice gated by plan
+                {tracks.length} paths · docs free on every path · practice by plan
               </p>
             </div>
 
-            {TRACK_GROUPS.map((group) => {
-              const items = group.trackIds
-                .map((id) => tracks.find((t) => t.id === id))
-                .filter(Boolean) as Track[]
-              if (!items.length) return null
-              return (
-                <div key={group.id} className="track-group reveal">
-                  <div className="track-group-head">
-                    <h3>{group.title}</h3>
-                    <p>{group.blurb}</p>
-                  </div>
-                  {group.id === 'career' && (
-                    <Link to="/agentic-path" className="path-banner">
-                      <strong>Full Agentic AI video path</strong>
-                      <span>
-                        Ordered YouTube curriculum for Java → Agentic AI
-                        engineer →
-                      </span>
-                    </Link>
-                  )}
-                  <div className="track-grid">
-                    {items.map((item) => {
-                      const count = topicsForTrack(item.id).length
-                      const locked =
-                        !FREE_PRACTICE_TRACKS.has(item.id) && !(user?.is_pro)
-                      return (
-                        <button
-                          key={item.id}
-                          className={`track-card ${locked ? 'locked' : ''}`}
-                          onClick={() => selectTrack(item.id)}
-                          disabled={loading}
-                        >
-                          <span className="pill-row">
-                            <span className="pill">{item.audience}</span>
-                            {locked ? (
-                              <span className="pill lock">Pro</span>
-                            ) : (
-                              <span className="pill free">Free practice</span>
-                            )}
-                          </span>
-                          <strong>{item.title}</strong>
-                          <p>{item.summary}</p>
-                          <span className="meta">
-                            {count} topics · Learn free · Practice{' '}
-                            {locked ? 'Pro' : 'included'}
-                          </span>
-                          <span className="track-go">Open track →</span>
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
-              )
-            })}
+            <div className="paths-with-ad">
+              <div className="paths-main">
+                {TRACK_GROUPS.map((group) => {
+                  const items = group.trackIds
+                    .map((id) => tracks.find((t) => t.id === id))
+                    .filter(Boolean) as Track[]
+                  if (!items.length) return null
+                  return (
+                    <div key={group.id} className="track-group reveal">
+                      <div className="track-group-head">
+                        <h3>{group.title}</h3>
+                        <p>{group.blurb}</p>
+                      </div>
+                      {group.id === 'career' && (
+                        <>
+                          <Link to="/agentic-path" className="path-banner">
+                            <strong>Full Agentic AI video curriculum</strong>
+                            <span>
+                              Backend → Python for AI → LLMs → agents →
+                              production →
+                            </span>
+                          </Link>
+                          <Link to="/snowflake-path" className="path-banner">
+                            <strong>
+                              Data Engineer → Snowflake + Agentic AI
+                            </strong>
+                            <span>
+                              Validated YouTube library: core → Cortex → agents
+                              → interview prep →
+                            </span>
+                          </Link>
+                        </>
+                      )}
+                      <div className="track-grid">
+                        {items.map((item) => {
+                          const count = topicsForTrack(item.id).length
+                          const locked =
+                            !FREE_PRACTICE_TRACKS.has(item.id) && !(user?.is_pro)
+                          return (
+                            <button
+                              key={item.id}
+                              className={`track-card ${locked ? 'locked' : ''}`}
+                              onClick={() => selectTrack(item.id)}
+                              disabled={loading}
+                            >
+                              <span className="pill-row">
+                                <span className="pill">{item.audience}</span>
+                                {locked ? (
+                                  <span className="pill lock">Pro</span>
+                                ) : (
+                                  <span className="pill free">Free practice</span>
+                                )}
+                              </span>
+                              <strong>{item.title}</strong>
+                              <p>{item.summary}</p>
+                              <span className="meta">
+                                {count} topics · Study free · Practice{' '}
+                                {locked ? 'Pro' : 'included'}
+                              </span>
+                              <span className="track-go">Open path →</span>
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+              <AdSlot
+                id="home-paths-sidebar"
+                variant="sidebar"
+                className="paths-ad"
+                headline="Career switch partners"
+                detail="Sidebar placement for bootcamps, certs, and hiring tools."
+              />
+            </div>
           </section>
         </>
       )}
 
-      {track && step !== 'tracks' && (
+      {activeTrack && step !== 'tracks' && (
         <section className="workspace reveal">
           <div className="workspace-head">
             <button
@@ -405,16 +456,16 @@ export default function App() {
                 setPaywall(null)
               }}
             >
-              ← All tracks
+              ← All paths
             </button>
             <div className="workspace-title">
               <h2>
-                {track.title}
+                {activeTrack.title}
                 {trackIsProOnly && !user?.is_pro && (
                   <span className="pill lock">Pro practice</span>
                 )}
               </h2>
-              <p>{track.summary}</p>
+              <p>{activeTrack.summary}</p>
             </div>
             <div className="progress-block">
               <div className="progress-label">
@@ -434,7 +485,7 @@ export default function App() {
               className={step === 'learn' ? 'mode active' : 'mode'}
               onClick={() => setStep('learn')}
             >
-              <span>01</span> Learn
+              <span>01</span> Study
             </button>
             <button
               type="button"
@@ -443,9 +494,17 @@ export default function App() {
               className={step === 'practice' ? 'mode active' : 'mode'}
               onClick={() => goPractice()}
             >
-              <span>02</span> Practice + coach
+              <span>02</span> Speak &amp; coach
             </button>
           </div>
+
+          <AdSlot
+            id="learn-practice-inline"
+            variant="inline"
+            className="workspace-inline-ad"
+            headline="Between study and the drill"
+            detail="Inline partner space — swap creatives via AdSlot props later."
+          />
 
           {step === 'learn' && (
             <div className="learn">
@@ -467,11 +526,17 @@ export default function App() {
                 <div className="panel plan-mini">
                   <h4>Study plan</h4>
                   <ol>
-                    {track.study_plan.map((item) => (
+                    {activeTrack.study_plan.map((item) => (
                       <li key={item}>{item}</li>
                     ))}
                   </ol>
                 </div>
+                <AdSlot
+                  id="learn-sidebar"
+                  variant="sidebar"
+                  headline="Study partners"
+                  detail="Compact placement while you read the curriculum."
+                />
               </aside>
 
               <div className="panel doc">
@@ -566,6 +631,13 @@ export default function App() {
                     </button>
                   )
                 })}
+
+                <AdSlot
+                  id="practice-sidebar"
+                  variant="sidebar"
+                  headline="Practice partners"
+                  detail="Reserved while you queue the next spoken answer."
+                />
 
                 <h3>Queue</h3>
                 {topicQuestions.map((q, idx) => (

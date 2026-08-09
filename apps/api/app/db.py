@@ -1,11 +1,11 @@
-"""SQLite persistence for users and usage."""
+"""SQLite / Postgres persistence for users, usage, and analytics."""
 
 from __future__ import annotations
 
 import os
 from pathlib import Path
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
@@ -34,7 +34,20 @@ def get_db():
         db.close()
 
 
+def _ensure_column(table: str, column: str, ddl: str) -> None:
+    """Add a missing column on existing SQLite/Postgres tables (create_all won't alter)."""
+    insp = inspect(engine)
+    if table not in insp.get_table_names():
+        return
+    existing = {c["name"] for c in insp.get_columns(table)}
+    if column in existing:
+        return
+    with engine.begin() as conn:
+        conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {ddl}"))
+
+
 def init_db() -> None:
     from app import models  # noqa: F401
 
     Base.metadata.create_all(bind=engine)
+    _ensure_column("users", "is_admin", "is_admin BOOLEAN DEFAULT 0")

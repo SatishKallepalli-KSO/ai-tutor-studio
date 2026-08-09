@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { AdSlot } from './AdSlot'
 import { api, type BillingPlans } from './api'
+import { track } from './analytics'
 import { useAuth } from './auth'
 import { Shell } from './Shell'
 
@@ -26,10 +28,10 @@ export function PricingPage() {
               price_monthly: '$0',
               price_yearly: '$0',
               features: [
-                'All topic documentation (Learn)',
+                'All topic documentation (Study)',
                 'Practice on HTML, CSS, JavaScript, Python',
-                'Java → Python transition track',
-                '5 feedback reviews per day',
+                'Java → Python career-switch path',
+                '5 coaching reviews per day',
                 'Local rubric coaching',
               ],
               limits: {},
@@ -41,8 +43,8 @@ export function PricingPage() {
               price_yearly: '$149',
               features: [
                 'Everything in Free',
-                'All tracks including Staff, EM, Java→AI',
-                'Unlimited practice + AI feedback',
+                'Staff, EM, Java→AI, and all language paths',
+                'Unlimited voice practice + AI coaching',
                 'Manage subscription in billing portal',
               ],
               limits: {},
@@ -68,12 +70,20 @@ export function PricingPage() {
     setLoading(true)
     setError(null)
     try {
+      track('checkout_start', {
+        path: '/pricing',
+        properties: {
+          interval,
+          stripe: Boolean(billing?.stripe_enabled),
+        },
+      })
       if (billing?.stripe_enabled) {
         const session = await api.checkout(interval)
         window.location.href = session.url
         return
       }
       const res = await api.demoUpgrade()
+      track('demo_upgrade', { path: '/pricing' })
       setUser(res.user)
       navigate('/')
     } catch (err) {
@@ -99,102 +109,114 @@ export function PricingPage() {
   return (
     <Shell>
       <div className="pricing-page reveal">
-        <p className="eyebrow">Plans</p>
-        <h1>Simple pricing that converts</h1>
-        <p className="muted">
-          Freemium like the platforms candidates already know — learn free,
-          unlock Staff/EM and unlimited voice coaching on Pro.
+        <p className="eyebrow">AI Tutor Studio · Plans</p>
+        <h1>Free to train. Pro when the loop matters.</h1>
+        <p className="muted pricing-lede">
+          Competitive freemium — study every path free, then unlock Staff/EM,
+          advanced switches, and unlimited voice coaching when you need the edge.
         </p>
 
-      {params.get('billing') === 'success' && (
-        <div className="banner success">Payment received — refreshing your Pro access…</div>
-      )}
-      {error && <div className="banner error">{error}</div>}
+        {params.get('billing') === 'success' && (
+          <div className="banner success">
+            Payment received — refreshing your Pro access…
+          </div>
+        )}
+        {error && <div className="banner error">{error}</div>}
 
-      <div className="billing-toggle">
-        <button
-          className={interval === 'month' ? 'tab active' : 'tab'}
-          onClick={() => setInterval('month')}
-          type="button"
-        >
-          Monthly
-        </button>
-        <button
-          className={interval === 'year' ? 'tab active' : 'tab'}
-          onClick={() => setInterval('year')}
-          type="button"
-        >
-          Yearly <span className="save">save ~35%</span>
-        </button>
-      </div>
+        <div className="billing-toggle">
+          <button
+            className={interval === 'month' ? 'tab active' : 'tab'}
+            onClick={() => setInterval('month')}
+            type="button"
+          >
+            Monthly
+          </button>
+          <button
+            className={interval === 'year' ? 'tab active' : 'tab'}
+            onClick={() => setInterval('year')}
+            type="button"
+          >
+            Yearly <span className="save">save ~35%</span>
+          </button>
+        </div>
 
-      <div className="pricing-grid">
-        {(billing?.plans ?? []).map((plan) => {
-          const price =
-            interval === 'year' ? plan.price_yearly : plan.price_monthly
-          const isCurrent =
-            (user?.is_pro && plan.id === 'pro') ||
-            (!user?.is_pro && plan.id === 'free')
-          return (
-            <article
-              key={plan.id}
-              className={plan.id === 'pro' ? 'price-card featured' : 'price-card'}
-            >
-              <p className="pill">{plan.name}</p>
-              <h2>
-                {price}
-                <small>/{interval === 'year' ? 'yr' : 'mo'}</small>
-              </h2>
-              <ul>
-                {plan.features.map((f) => (
-                  <li key={f}>{f}</li>
-                ))}
-              </ul>
-              {plan.id === 'free' ? (
-                <button className="btn" type="button" disabled={isCurrent}>
-                  {isCurrent ? 'Current plan' : 'Included free'}
-                </button>
-              ) : user?.is_pro ? (
-                <button
-                  className="btn primary"
-                  type="button"
-                  onClick={openPortal}
-                  disabled={loading || !billing?.stripe_enabled}
-                >
-                  {billing?.stripe_enabled
-                    ? 'Manage subscription'
-                    : 'Pro active (demo)'}
-                </button>
-              ) : (
-                <button
-                  className="btn primary"
-                  type="button"
-                  onClick={upgrade}
-                  disabled={loading}
-                >
-                  {loading
-                    ? 'Starting…'
-                    : billing?.stripe_enabled
-                      ? 'Upgrade with Stripe'
-                      : 'Unlock Pro (demo)'}
-                </button>
-              )}
-            </article>
-          )
-        })}
-      </div>
+        <div className="pricing-grid">
+          {(billing?.plans ?? []).map((plan) => {
+            const price =
+              interval === 'year' ? plan.price_yearly : plan.price_monthly
+            const isCurrent =
+              (user?.is_pro && plan.id === 'pro') ||
+              (!user?.is_pro && plan.id === 'free')
+            return (
+              <article
+                key={plan.id}
+                className={
+                  plan.id === 'pro' ? 'price-card featured' : 'price-card'
+                }
+              >
+                <p className="pill">{plan.name}</p>
+                <h2>
+                  {price}
+                  <small>/{interval === 'year' ? 'yr' : 'mo'}</small>
+                </h2>
+                <ul>
+                  {plan.features.map((f) => (
+                    <li key={f}>{f}</li>
+                  ))}
+                </ul>
+                {plan.id === 'free' ? (
+                  <button className="btn" type="button" disabled={isCurrent}>
+                    {isCurrent ? 'Your current plan' : 'Start free'}
+                  </button>
+                ) : user?.is_pro ? (
+                  <button
+                    className="btn primary"
+                    type="button"
+                    onClick={openPortal}
+                    disabled={loading || !billing?.stripe_enabled}
+                  >
+                    {billing?.stripe_enabled
+                      ? 'Manage subscription'
+                      : 'Pro active (demo)'}
+                  </button>
+                ) : (
+                  <button
+                    className="btn primary"
+                    type="button"
+                    onClick={upgrade}
+                    disabled={loading}
+                  >
+                    {loading
+                      ? 'Starting…'
+                      : billing?.stripe_enabled
+                        ? 'Go Pro with Stripe'
+                        : 'Unlock Pro (demo)'}
+                  </button>
+                )}
+              </article>
+            )
+          })}
+        </div>
 
-      {!billing?.stripe_enabled && (
-        <p className="muted center-note">
-          Stripe keys not configured yet — demo upgrade unlocks Pro locally.
-          Add <code>STRIPE_SECRET_KEY</code> + price IDs on the API for live
-          subscriptions.
-        </p>
-      )}
+        <AdSlot
+          id="pricing-footer"
+          variant="banner"
+          className="pricing-ad"
+          headline="Trusted by candidates leveling up"
+          detail="Non-intrusive partner strip below plans — never above the brand pitch."
+        />
+
+        {!billing?.stripe_enabled && (
+          <p className="muted center-note">
+            Stripe keys not configured yet — demo upgrade unlocks Pro locally.
+            Add <code>STRIPE_SECRET_KEY</code> + price IDs on the API for live
+            subscriptions.
+          </p>
+        )}
 
         <p className="center-note">
           <Link className="linkish" to="/">
-            ← Back to tracks
+            ← Back to paths
           </Link>
         </p>
       </div>

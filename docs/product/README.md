@@ -1,6 +1,6 @@
 # AI Tutor Studio — Product documentation
 
-Sellable docs live under **`docs/product/`** (HTML microsite on GitHub Pages).
+Built by **Kallepalli Labs** (Satish Kallepalli). Sellable docs live under **`docs/product/`** (HTML microsite on GitHub Pages).
 
 | Page | URL (Pages) | Purpose |
 |------|-------------|---------|
@@ -9,6 +9,7 @@ Sellable docs live under **`docs/product/`** (HTML microsite on GitHub Pages).
 | User flows | [user-flows.html](https://satishkallepalli-kso.github.io/ai-tutor-studio/product/user-flows.html) | Learn → practice → paywall |
 | Monetization | [monetization.html](https://satishkallepalli-kso.github.io/ai-tutor-studio/product/monetization.html) | Free/Pro + Stripe |
 | API | [api.html](https://satishkallepalli-kso.github.io/ai-tutor-studio/product/api.html) | Partner/integration reference |
+| Go-live | [go-live.html](https://satishkallepalli-kso.github.io/ai-tutor-studio/product/go-live.html) · [GO-LIVE.md](./GO-LIVE.md) | Cloud + OpenAI + Stripe launch checklist |
 | Sales playbook | [sales-playbook.html](https://satishkallepalli-kso.github.io/ai-tutor-studio/product/sales-playbook.html) | Pitch, demo, objections |
 
 > Note: `docs/` also hosts the React app build for GitHub Pages. Use `scripts/publish-pages.sh` so **`docs/product/` is preserved** when republishing the app.

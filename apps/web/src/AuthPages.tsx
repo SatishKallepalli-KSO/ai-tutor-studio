@@ -29,10 +29,10 @@ export function LoginPage() {
     <Shell>
       <div className="auth-page">
         <form className="auth-card reveal" onSubmit={onSubmit}>
-          <p className="eyebrow">Welcome back</p>
-          <h1>Sign in</h1>
+          <p className="eyebrow">AI Tutor Studio</p>
+          <h1>Welcome back</h1>
           <p className="muted">
-            Continue voice practice and AI coaching where you left off.
+            Pick up voice practice and coaching exactly where you left the loop.
           </p>
           {error && <div className="banner error">{error}</div>}
           <label>
@@ -95,11 +95,11 @@ export function RegisterPage() {
     <Shell>
       <div className="auth-page">
         <form className="auth-card reveal" onSubmit={onSubmit}>
-          <p className="eyebrow">Start free</p>
-          <h1>Create account</h1>
+          <p className="eyebrow">AI Tutor Studio</p>
+          <h1>Start practicing free</h1>
           <p className="muted">
-            Free includes docs, starter tracks, and Java → Python. Upgrade for
-            Staff/EM and unlimited coaching.
+            Free includes topic docs, starter paths, and Java → Python. Go Pro
+            for Staff/EM loops and unlimited coaching.
           </p>
           {error && <div className="banner error">{error}</div>}
           <label>

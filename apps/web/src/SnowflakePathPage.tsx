@@ -1,19 +1,19 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  AGENTIC_PATH,
+  SNOWFLAKE_PATH,
   allPathVideos,
   embedUrl,
   loadVideoProgress,
   saveVideoProgress,
   type PathVideo,
-} from './agenticPath'
+} from './snowflakePath'
 import { AdSlot } from './AdSlot'
 import { track } from './analytics'
 import { Shell } from './Shell'
 import './App.css'
 
-export function AgenticPathPage() {
+export function SnowflakePathPage() {
   const videos = useMemo(() => allPathVideos(), [])
   const [activeId, setActiveId] = useState(videos[0]?.id ?? '')
   const [done, setDone] = useState<Set<string>>(() => new Set())
@@ -26,7 +26,7 @@ export function AgenticPathPage() {
 
   const filteredPhases = useMemo(() => {
     const q = query.trim().toLowerCase()
-    return AGENTIC_PATH.map((phase) => {
+    return SNOWFLAKE_PATH.map((phase) => {
       if (phaseFilter !== 'all' && phase.id !== phaseFilter) {
         return { ...phase, videos: [] as PathVideo[] }
       }
@@ -60,7 +60,7 @@ export function AgenticPathPage() {
     }
   }, [filteredVideos, active])
 
-  const activePhase = AGENTIC_PATH.find((p) =>
+  const activePhase = SNOWFLAKE_PATH.find((p) =>
     p.videos.some((v) => v.id === active?.id),
   )
   const doneCount = [...done].filter((id) => videos.some((v) => v.id === id))
@@ -75,8 +75,8 @@ export function AgenticPathPage() {
       const markingDone = !next.has(id)
       if (markingDone) {
         next.add(id)
-        track('agentic_video_complete', {
-          path: '/agentic-path',
+        track('snowflake_video_complete', {
+          path: '/snowflake-path',
           properties: { video_id: id },
         })
       } else {
@@ -98,13 +98,12 @@ export function AgenticPathPage() {
     <Shell wide>
       <section className="path-hero reveal">
         <p className="eyebrow">AI Tutor Studio · Career switch</p>
-        <h1>Backend → Agentic AI Engineer</h1>
+        <h1>Data Engineer → Snowflake + Agentic AI</h1>
         <p className="hero-lede">
-          {videos.length} validated free YouTube courses &amp; playlists for
-          backend engineers: Python for AI → LLMs → APIs &amp; vectors →
-          tools/agents → RAG → LangGraph → prompting, evals &amp; production.
-          Search the library, watch in the player, mark complete, then drill
-          answers on Studio paths.
+          {videos.length} validated free YouTube courses &amp; playlists: DE
+          foundations → Snowflake core → Streams/Snowpark/dbt → Cortex AI →
+          Cortex Agents &amp; MCP. Search the library, watch in the player, mark
+          complete, then drill answers on Studio paths.
         </p>
         <div className="path-progress-head">
           <div>
@@ -133,7 +132,7 @@ export function AgenticPathPage() {
             aria-label="Filter by phase"
           >
             <option value="all">All phases</option>
-            {AGENTIC_PATH.map((p) => (
+            {SNOWFLAKE_PATH.map((p) => (
               <option key={p.id} value={p.id}>
                 Phase {p.step}: {p.title}
               </option>
@@ -150,23 +149,26 @@ export function AgenticPathPage() {
           <Link className="btn ghost" to="/">
             Practice on Studio paths
           </Link>
+          <Link className="btn ghost" to="/agentic-path">
+            Backend → AI Engineer
+          </Link>
         </div>
       </section>
 
       <AdSlot
-        id="agentic-below-hero"
+        id="snowflake-below-hero"
         variant="banner"
-        headline="AI career partners"
-        detail="Sponsored strip for tools that complement the Backend → AI Engineer path."
+        headline="Data platform partners"
+        detail="Sponsored strip for tools that complement the Snowflake + Agentic path."
       />
 
       <div className="path-layout" id="player">
         <aside className="path-sidebar reveal">
           <AdSlot
-            id="agentic-sidebar"
+            id="snowflake-sidebar"
             variant="sidebar"
             headline="Learning partners"
-            detail="Compact placement beside the video curriculum."
+            detail="Compact placement beside the Snowflake video curriculum."
           />
           {filteredPhases.length === 0 && (
             <p className="muted">No videos match that search.</p>
@@ -230,8 +232,7 @@ export function AgenticPathPage() {
                   <p className="lede">{active.why}</p>
                   {activePhase && (
                     <p className="java-bridge">
-                      <strong>Backend bridge:</strong>{' '}
-                      {activePhase.backendBridge}
+                      <strong>Interview angle:</strong> {activePhase.careerTip}
                     </p>
                   )}
                   <div className="actions">
@@ -265,12 +266,12 @@ export function AgenticPathPage() {
                 <h3>After watching, speak it back here</h3>
                 <ul>
                   <li>
-                    <Link to="/">Python / FastAPI drills</Link> — speak the
-                    syntax, typing, and service-design answers
+                    <Link to="/">Staff / EM loops</Link> — ownership &amp;
+                    architecture narratives
                   </li>
                   <li>
-                    <Link to="/">Production AI path</Link> — RAG / agents
-                    interview prompts (Java-friendly bridges included)
+                    <Link to="/agentic-path">Backend → AI Engineer</Link> — agents,
+                    tools, and production AI habits
                   </li>
                   <li>
                     <a href={`${import.meta.env.BASE_URL}product/`}>
@@ -288,7 +289,7 @@ export function AgenticPathPage() {
       <section className="panel path-map reveal">
         <h3>Full library by phase</h3>
         <ol className="path-map-list">
-          {AGENTIC_PATH.map((phase) => (
+          {SNOWFLAKE_PATH.map((phase) => (
             <li key={phase.id}>
               <strong>
                 {phase.step}. {phase.title}
