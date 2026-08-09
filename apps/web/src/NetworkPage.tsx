@@ -73,7 +73,6 @@ function initials(name: string): string {
 
 function makeLocalRequest(
   meId: number,
-  meName: string,
   person: LocalPerson,
   note: string,
 ): ConnectionView {
@@ -165,7 +164,7 @@ export function NetworkPage() {
     try {
       if (offline || !user) {
         const rows = loadLocalConnections()
-        const req = makeLocalRequest(meId, user?.name || 'You', person, note.trim())
+        const req = makeLocalRequest(meId, person, note.trim())
         // Demo: auto-create a mirrored incoming accept path — keep as outgoing pending
         // and also seed one sample incoming if empty
         const next = [req, ...rows]
