@@ -8,6 +8,7 @@ import {
   type MessageThread,
 } from './api'
 import { useAuth } from './auth'
+import { usePersona } from './persona'
 import { Shell } from './Shell'
 import './App.css'
 
@@ -56,6 +57,7 @@ function timeLabel(iso: string): string {
 
 export function MessagesPage() {
   const { user } = useAuth()
+  const { isRecruiter } = usePersona()
   const [params, setParams] = useSearchParams()
   const peerParam = params.get('with')
   const peerId = peerParam ? Number(peerParam) : null
@@ -236,7 +238,10 @@ export function MessagesPage() {
         <div className="page-head">
           <div>
             <h1>Chat</h1>
-            <p className="page-sub">Message people you&apos;re connected with.</p>
+            <p className="page-sub">
+              LinkedIn-style messaging — recruiters and learners chat after they
+              connect.
+            </p>
           </div>
           <Link className="btn ghost sm" to="/network">
             Network
@@ -252,9 +257,15 @@ export function MessagesPage() {
               <strong>Inbox</strong>
             </div>
             {threads.length === 0 && (
-              <p className="muted pad">
-                No chats yet. <Link to="/network">Connect first</Link>.
-              </p>
+              <div className="pad">
+                <p className="muted">
+                  No chats yet. Connect on Network, then message — or use Messaging
+                  (bottom right).
+                </p>
+                <Link className="btn primary sm" to="/network">
+                  Go to Network
+                </Link>
+              </div>
             )}
             {threads.map((t) => (
               <button
@@ -297,6 +308,10 @@ export function MessagesPage() {
             {!peerId ? (
               <div className="messages-empty">
                 <p>Select a conversation</p>
+                <p className="muted">
+                  Recruiters message about roles; learners share readiness and
+                  interview practice.
+                </p>
               </div>
             ) : (
               <>
@@ -308,10 +323,36 @@ export function MessagesPage() {
                     <strong>{peerName}</strong>
                     {peerHeadline && <p className="muted">{peerHeadline}</p>}
                   </div>
+                  {peerId > 0 && (
+                    <Link className="btn ghost sm" to={`/profile/${peerId}`}>
+                      Profile
+                    </Link>
+                  )}
                 </header>
                 <div className="messages-stream">
                   {messages.length === 0 && (
-                    <p className="muted center">Say hello to start.</p>
+                    <div className="chat-templates">
+                      <p className="muted center">Quick starters</p>
+                      {(isRecruiter
+                        ? [
+                            'Hi — I saw your open-to-work profile. Interested in a quick chat about a role?',
+                            'Thanks for applying. Could we schedule a short screen this week?',
+                          ]
+                        : [
+                            'Thanks for connecting — happy to share my practice readiness.',
+                            'I applied to your role and practiced the loop on AI Tutor Studio.',
+                          ]
+                      ).map((t) => (
+                        <button
+                          key={t}
+                          type="button"
+                          className="chat-template"
+                          onClick={() => setBody(t)}
+                        >
+                          {t}
+                        </button>
+                      ))}
+                    </div>
                   )}
                   {messages.map((m) => (
                     <div
@@ -328,7 +369,9 @@ export function MessagesPage() {
                   <input
                     value={body}
                     onChange={(e) => setBody(e.target.value)}
-                    placeholder="Write a message…"
+                    placeholder={
+                      isRecruiter ? 'Message candidate…' : 'Message recruiter…'
+                    }
                     maxLength={4000}
                     aria-label="Message"
                   />

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from './auth'
 import { BRAND, PERSONAS, type Persona } from './brand'
+import { ChatDock } from './ChatDock'
 import { usePersona } from './persona'
 
 function MoreMenu({
@@ -146,6 +147,8 @@ export function Shell({
       </header>
 
       <main className="shell-main">{children}</main>
+
+      <ChatDock />
 
       <footer className="site-footer">
         <div className="site-footer-copy">

@@ -3503,3 +3503,129 @@ a.ad-slot:hover {
     grid-column: 1 / -1;
   }
 }
+
+/* —— LinkedIn-style floating messaging dock —— */
+.chat-dock {
+  position: fixed;
+  right: 1.1rem;
+  bottom: 1.1rem;
+  z-index: 40;
+}
+
+.chat-dock-fab {
+  border: 1px solid var(--line);
+  background: rgba(12, 14, 16, 0.94);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 0.7rem 1.1rem;
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+}
+
+.chat-dock-fab:hover {
+  border-color: rgba(61, 207, 154, 0.4);
+}
+
+.chat-dock-panel {
+  width: min(360px, calc(100vw - 1.5rem));
+  height: min(480px, calc(100vh - 5rem));
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(10, 12, 14, 0.97);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.chat-dock-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 0.85rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.chat-dock-head-actions {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.chat-dock-list {
+  overflow: auto;
+  padding: 0.5rem;
+  display: grid;
+  gap: 0.35rem;
+  align-content: start;
+}
+
+.chat-dock-stream {
+  overflow: auto;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.chat-dock-composer {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.4rem;
+  padding: 0.65rem 0.75rem;
+  border-top: 1px solid var(--line);
+}
+
+.chat-dock-composer input {
+  min-height: 40px;
+  padding: 0.45rem 0.7rem;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--ink);
+  font: inherit;
+}
+
+.chat-templates {
+  display: grid;
+  gap: 0.45rem;
+  margin-bottom: 0.5rem;
+}
+
+.chat-template {
+  text-align: left;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--muted);
+  border-radius: 12px;
+  padding: 0.55rem 0.7rem;
+  font: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+  line-height: 1.4;
+}
+
+.chat-template:hover {
+  color: var(--ink);
+  border-color: rgba(61, 207, 154, 0.3);
+}
+
+.hint-line.error {
+  color: #ffb4b4;
+  padding: 0 0.75rem;
+}
+
+@media (max-width: 600px) {
+  .chat-dock {
+    right: 0.65rem;
+    bottom: 0.65rem;
+  }
+
+  .chat-dock-panel {
+    width: min(100vw - 1.2rem, 360px);
+  }
+}

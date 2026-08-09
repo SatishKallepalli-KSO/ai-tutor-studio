@@ -491,6 +491,21 @@ export function JobsBoardPage() {
                       Express interest
                     </a>
                   )}
+                  {active.posted_by_user_id > 0 &&
+                    user &&
+                    active.posted_by_user_id !== user.id && (
+                      <Link
+                        className="btn ghost"
+                        to={`/messages?with=${active.posted_by_user_id}`}
+                      >
+                        Message recruiter
+                      </Link>
+                    )}
+                  {isRecruiter && (
+                    <Link className="btn ghost" to="/network">
+                      Message talent
+                    </Link>
+                  )}
                   {(active.is_owner ||
                     (user && active.posted_by_user_id === user.id)) &&
                     active.id > 0 && (
