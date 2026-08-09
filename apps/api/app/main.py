@@ -24,6 +24,7 @@ from app.events import record_event, router as events_router
 from app.jobs import router as jobs_router
 from app.models import User
 from app.plans import can_practice_track
+from app.profiles import router as profiles_router
 from app.stats import router as stats_router
 from app.tutor import (
     TRACKS,
@@ -42,8 +43,8 @@ STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
 
 app = FastAPI(
     title="AI Tutor Studio API",
-    version="0.4.0",
-    description="Talent studio: learn, practice, hire — with job board, auth, Stripe, analytics",
+    version="0.5.0",
+    description="Talent studio: learn, practice, hire — profiles, jobs, auth, Stripe, analytics",
 )
 
 app.add_middleware(
@@ -60,6 +61,7 @@ app.include_router(events_router)
 app.include_router(admin_router)
 app.include_router(stats_router)
 app.include_router(jobs_router)
+app.include_router(profiles_router)
 
 
 @app.on_event("startup")

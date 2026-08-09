@@ -34,6 +34,7 @@ export function Shell({
           {isLearner ? (
             <>
               <Link to="/">Learn</Link>
+              <Link to="/profile">Profile</Link>
               <Link to="/jobs">Jobs</Link>
               <Link to="/agentic-path">Agentic AI</Link>
               <Link to="/snowflake-path">Snowflake</Link>
@@ -44,6 +45,7 @@ export function Shell({
           ) : (
             <>
               <Link to="/jobs">Jobs</Link>
+              <Link to="/profile">Talent</Link>
               <Link to="/for-companies">Hiring studio</Link>
               <Link to="/compare">Compare</Link>
               <Link to="/company">Company</Link>
@@ -78,6 +80,9 @@ export function Shell({
                   </span>
                 )}
               </span>
+              <Link className="btn ghost sm" to="/profile" title={user.email}>
+                {user.name?.split(' ')[0] || 'Profile'}
+              </Link>
               {!user.is_pro && isLearner && (
                 <Link className="btn primary sm" to="/pricing">
                   Go Pro
@@ -123,6 +128,7 @@ export function Shell({
         </div>
         <div className="site-footer-links">
           <Link to="/">Learn</Link>
+          <Link to="/profile">Profile</Link>
           <Link to="/jobs">Jobs</Link>
           <Link to="/for-companies">Hire</Link>
           <Link to="/about">About</Link>

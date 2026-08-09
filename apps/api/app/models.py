@@ -73,3 +73,25 @@ class JobPost(Base):
     status: Mapped[str] = mapped_column(String(20), default="open", index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class LearnerProfile(Base):
+    """LinkedIn-style public talent profile."""
+
+    __tablename__ = "learner_profiles"
+
+    user_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    headline: Mapped[str] = mapped_column(String(220), default="")
+    location: Mapped[str] = mapped_column(String(160), default="")
+    about: Mapped[str] = mapped_column(Text, default="")
+    open_to_work: Mapped[bool] = mapped_column(Boolean, default=True)
+    current_role: Mapped[str] = mapped_column(String(160), default="")
+    current_company: Mapped[str] = mapped_column(String(160), default="")
+    skills: Mapped[str] = mapped_column(Text, default="[]")  # JSON list[str]
+    experience: Mapped[str] = mapped_column(Text, default="[]")  # JSON list[dict]
+    education: Mapped[str] = mapped_column(Text, default="[]")  # JSON list[dict]
+    target_roles: Mapped[str] = mapped_column(Text, default="[]")  # JSON list[str]
+    website_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    linkedin_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    visibility: Mapped[str] = mapped_column(String(20), default="public")  # public | private
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

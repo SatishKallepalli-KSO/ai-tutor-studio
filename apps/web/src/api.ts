@@ -311,6 +311,92 @@ export const api = {
   async deleteJob(id: number): Promise<{ ok: boolean }> {
     return request(`/v1/jobs/${id}`, { method: 'DELETE' })
   },
+
+  async myProfile(): Promise<LearnerProfileView> {
+    return request('/v1/profiles/me')
+  },
+
+  async updateMyProfile(input: ProfileUpdateInput): Promise<LearnerProfileView> {
+    return request('/v1/profiles/me', {
+      method: 'PATCH',
+      body: JSON.stringify(input),
+    })
+  },
+
+  async getProfile(userId: number): Promise<LearnerProfileView> {
+    return request(`/v1/profiles/${userId}`)
+  },
+
+  async listTalent(params?: {
+    q?: string
+    open_to_work?: boolean
+    limit?: number
+  }): Promise<LearnerProfileView[]> {
+    const sp = new URLSearchParams()
+    if (params?.q) sp.set('q', params.q)
+    if (params?.open_to_work != null) sp.set('open_to_work', String(params.open_to_work))
+    if (params?.limit) sp.set('limit', String(params.limit))
+    const qs = sp.toString()
+    return request(qs ? `/v1/profiles/?${qs}` : '/v1/profiles/')
+  },
+}
+
+export type ExperienceItem = {
+  title: string
+  company: string
+  location: string
+  start: string
+  end: string
+  description: string
+}
+
+export type EducationItem = {
+  school: string
+  degree: string
+  field: string
+  start: string
+  end: string
+}
+
+export type LearnerProfileView = {
+  user_id: number
+  name: string
+  email?: string | null
+  persona: string
+  plan: string
+  is_pro: boolean
+  headline: string
+  location: string
+  about: string
+  open_to_work: boolean
+  current_role: string
+  current_company: string
+  skills: string[]
+  experience: ExperienceItem[]
+  education: EducationItem[]
+  target_roles: string[]
+  website_url: string | null
+  linkedin_url: string | null
+  visibility: string
+  is_owner: boolean
+  updated_at: string | null
+}
+
+export type ProfileUpdateInput = {
+  name?: string
+  headline?: string
+  location?: string
+  about?: string
+  open_to_work?: boolean
+  current_role?: string
+  current_company?: string
+  skills?: string[]
+  experience?: ExperienceItem[]
+  education?: EducationItem[]
+  target_roles?: string[]
+  website_url?: string | null
+  linkedin_url?: string | null
+  visibility?: 'public' | 'private'
 }
 
 export type JobPost = {

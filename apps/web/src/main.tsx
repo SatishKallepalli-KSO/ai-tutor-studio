@@ -15,6 +15,7 @@ import { InvestorsPage } from './InvestorsPage.tsx'
 import { JobsBoardPage } from './JobsBoardPage.tsx'
 import { PersonaProvider } from './persona.tsx'
 import { PricingPage } from './PricingPage.tsx'
+import { ProfilePage } from './ProfilePage.tsx'
 import { SnowflakePathPage } from './SnowflakePathPage.tsx'
 import './index.css'
 
@@ -35,6 +36,8 @@ createRoot(document.getElementById('root')!).render(
             <Route path="/company" element={<CompanyPage />} />
             <Route path="/for-companies" element={<ForCompaniesPage />} />
             <Route path="/jobs" element={<JobsBoardPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/profile/:userId" element={<ProfilePage />} />
             <Route path="/compare" element={<ComparePage />} />
             <Route path="/investors" element={<InvestorsPage />} />
             <Route path="/admin" element={<AdminDashboardPage />} />
