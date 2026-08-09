@@ -1,14 +1,8 @@
-# Free-tier live stack on Render (Blueprint)
-# One-click: https://render.com/deploy?repo=https://github.com/SatishKallepalli-KSO/ai-tutor-studio
+# Free-tier live stack on Render (web) + Neon Free (Postgres)
+# App: https://ai-tutor-studio.onrender.com
 #
-# Free URL after deploy: https://ai-tutor-studio.onrender.com
-# (cold-starts on free plan after idle — normal for free hosting)
-
-databases:
-  - name: ai-tutor-studio-db
-    plan: free
-    region: oregon
-    postgresMajorVersion: "16"
+# DATABASE_URL must be set in the Render dashboard to your Neon pooled
+# connection string (do not commit secrets). Neon project: steep-sunset-42393062
 
 services:
   - type: web
@@ -22,15 +16,13 @@ services:
         generateValue: true
       - key: APP_URL
         value: https://ai-tutor-studio.onrender.com
-      # Free launch without Stripe — Pro via Demo upgrade; set false when Stripe is live
       - key: ALLOW_DEMO_UPGRADE
         value: "true"
       - key: OPENAI_TUTOR_MODEL
         value: gpt-4o-mini
+      # Set in dashboard: Neon pooled URL (postgresql://...@...-pooler.../aitutor?sslmode=require)
       - key: DATABASE_URL
-        fromDatabase:
-          name: ai-tutor-studio-db
-          property: connectionString
+        sync: false
       - key: ADMIN_EMAILS
         sync: false
       - key: OPENAI_API_KEY

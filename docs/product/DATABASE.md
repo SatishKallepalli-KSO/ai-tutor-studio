@@ -1,72 +1,51 @@
-# Database cost, expiry & backup
+# Database — Neon Free (active)
 
-## What happens when Render Free Postgres expires?
+Live app **https://ai-tutor-studio.onrender.com** uses **Neon Free Postgres**.
 
-Your DB (`ai-tutor-studio-db`) was created **2026-08-09** and **expires 2026-09-08**.
+| | |
+|--|--|
+| Neon project | `ai-tutor-studio` (`steep-sunset-42393062`) |
+| Region | `aws-us-west-2` |
+| Database / role | `aitutor` |
+| Plan | Free ($0, no 30-day expiry) |
+| App `DATABASE_URL` | Neon **pooled** connection (set on Render) |
+| Snapshot | `post-migration-20260809` |
 
-| Stage | What happens |
-|-------|----------------|
-| **Day 30** | Free DB expires — app **cannot connect** until you upgrade or migrate |
-| **+14 days grace** | You can still **upgrade to paid** and keep the data |
-| **After grace** | Render **deletes the database and all data permanently** |
-
-Free Render Postgres also has **no managed backups**, 1 GB storage max, and only **one free DB** per workspace.
-
-Email reminders come before expiry and before delete.
-
----
-
-## Paid Render Postgres (cheapest on Render)
-
-| Plan | Price | Notes |
-|------|-------|--------|
-| **Basic-256mb** | **~$6/month** + storage (~$0.30/GB-mo) | Cheapest paid Render option; keeps data; enables backups |
-| Basic-1gb | ~$19/month | More RAM |
-| Free | $0 for 30 days | Expires; no backups |
-
-Upgrade in dashboard: https://dashboard.render.com/d/dpg-d9s1aeijnfac738kde70-a → change instance type.
+Neon Free includes ~0.5 GB storage, 100 CU-hours/mo, scale-to-zero when idle, 6h restore history, and **1 manual snapshot**.
 
 ---
 
-## Cheapest durable option (recommended)
+## Old Render Free Postgres (safe to delete)
 
-| Option | Cost | Expires? | Backup / restore | Verdict |
-|--------|------|----------|------------------|---------|
-| **Neon Free** | **$0** | No (permanent free tier) | 6h restore history + 1 manual snapshot | **Best cheap path** |
-| Supabase Free | $0 | Pauses after ~7 days idle | Built-in | OK; project pause risk |
-| Render Basic-256mb | ~$6/mo | No | Managed backups | Simplest if you stay on Render |
-| Neon Launch | pay-as-you-go | No | Longer history | When you outgrow Free |
+Render DB `ai-tutor-studio-db` expires **2026-09-08**. After migration it is unused.
 
-**Recommendation:** before **2026-09-08**, migrate to **Neon Free** ($0, no expiry) *or* upgrade Render to **Basic-256mb (~$6/mo)** if you want zero migration work.
+You can delete it in the [Render dashboard](https://dashboard.render.com/d/dpg-d9s1aeijnfac738kde70-a) to avoid confusion / free-slot limits.
 
-Neon Free limits (enough for early users): ~0.5 GB storage, 100 CU-hours/mo, scales to zero when idle.
+If you ever stayed on Render paid instead: **Basic-256mb ≈ $6/month**.
 
 ---
 
-## Backup (already set up)
-
-A dump was taken locally:
+## Backups
 
 ```bash
-./scripts/backup-db.sh
-# writes backups/ai-tutor-studio-*.sql.gz and backups/latest.sql.gz
+# Dump from Neon (recommended now)
+./scripts/backup-db.sh --neon
+
+# Or dump whatever DATABASE_URL points at
+DATABASE_URL="$(neonctl connection-string --project-id steep-sunset-42393062 --database-name aitutor --role-name aitutor)" \
+  ./scripts/backup-db.sh --url
 ```
 
-- Folder `backups/` is **gitignored** (contains user data).
-- External access was opened on the Render DB IP allow list so `pg_dump` works from your machine.
-- Restore example:
+Local dumps land in `backups/` (gitignored).
+
+Restore:
 
 ```bash
-gunzip -c backups/latest.sql.gz | psql "$DATABASE_URL"
+gunzip -c backups/latest.sql.gz | psql "$(neonctl connection-string --project-id steep-sunset-42393062 --database-name aitutor --role-name aitutor)"
 ```
 
-### Move to Neon (when ready)
+Create another Neon snapshot:
 
 ```bash
-neonctl auth
-neonctl projects create --name ai-tutor-studio --region aws-us-west-2
-neonctl connection-string --project-id <id> --pooled
-# set that URL as DATABASE_URL on Render, then:
-gunzip -c backups/latest.sql.gz | psql "$NEON_DATABASE_URL"
-# redeploy / restart the web service
+neonctl snapshots create --project-id steep-sunset-42393062 --name "manual-$(date -u +%Y%m%d)"
 ```
