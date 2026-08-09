@@ -29,10 +29,10 @@ export function Shell({
         <nav className="site-links" aria-label="Primary">
           <Link to="/">Paths</Link>
           <Link to="/agentic-path">Agentic AI</Link>
+          <Link to="/snowflake-path">Snowflake</Link>
           <Link to="/pricing">Plans</Link>
           <Link to="/about">About</Link>
           <Link to="/company">Company</Link>
-          <Link to="/investors">Investors</Link>
           {user?.is_admin && <Link to="/admin">Admin</Link>}
           <a href={docsHref}>Docs</a>
         </nav>
@@ -119,7 +119,7 @@ export const TRACK_GROUPS: {
     id: 'career',
     title: 'Career switches',
     blurb:
-      'Backend → Python / AI switch tracks, Agentic video curriculum, plus Data Engineer → Snowflake.',
+      'Java → Python, Java → AI, Agentic video curriculum, plus Data Engineer → Snowflake.',
     trackIds: ['java-to-python', 'java-to-ai'],
   },
   {
