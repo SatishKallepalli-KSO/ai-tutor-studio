@@ -3656,3 +3656,44 @@ a.ad-slot:hover {
   font-family: var(--display);
   font-size: 1.35rem;
 }
+
+.magnet-proof {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+  margin: 0.35rem 0 1.25rem;
+  padding: 0.25rem 0 0.5rem;
+}
+
+.magnet-proof strong {
+  display: block;
+  font-family: var(--display);
+  font-size: 1.05rem;
+  margin-bottom: 0.25rem;
+}
+
+.magnet-proof p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.path-banner-btn {
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+
+.path-banner.muted-path {
+  opacity: 0.78;
+  border-style: dashed;
+}
+
+@media (max-width: 800px) {
+  .magnet-proof {
+    grid-template-columns: 1fr;
+  }
+}

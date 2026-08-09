@@ -264,17 +264,17 @@ export default function App() {
           <section className="hero reveal">
             <p className="eyebrow">{BRAND.product}</p>
             <h1>
-              {isRecruiter ? 'Hire with structure' : 'Your learning paths'}
+              {isRecruiter ? 'Hire practice-ready talent' : BRAND.magnet}
               <span>
                 {isRecruiter
-                  ? 'Post jobs and reach practice-ready talent.'
-                  : 'Study structured paths, practice out loud, then browse open roles.'}
+                  ? 'Secondary surface — post jobs after candidates train here.'
+                  : 'Speak answers. Get coached. Walk into the loop ready.'}
               </span>
             </h1>
             <p className="hero-lede">
               {isRecruiter
                 ? AUDIENCES.companies.blurb
-                : 'Pick a track below — docs are free; practice unlocks by plan. Jobs posted by recruiters stay one click away.'}
+                : BRAND.magnetSub}
             </p>
             <div className="hero-cta">
               {isRecruiter ? (
@@ -282,18 +282,31 @@ export default function App() {
                   <Link className="btn primary" to="/jobs">
                     Browse &amp; post jobs
                   </Link>
-                  <Link className="btn ghost" to="/for-companies">
-                    Hiring studio
+                  <Link className="btn ghost" to="/">
+                    See learner product
                   </Link>
                 </>
               ) : (
                 <>
-                  <a className="btn primary" href="#paths">
-                    Browse learning paths
+                  <button
+                    type="button"
+                    className="btn primary"
+                    disabled={loading}
+                    onClick={() => void selectTrack('staff-interview')}
+                  >
+                    Start Staff practice
+                  </button>
+                  <button
+                    type="button"
+                    className="btn ghost"
+                    disabled={loading}
+                    onClick={() => void selectTrack('em-interview')}
+                  >
+                    Start EM practice
+                  </button>
+                  <a className="btn ghost" href="#paths">
+                    All paths
                   </a>
-                  <Link className="btn ghost" to="/jobs">
-                    See all jobs
-                  </Link>
                 </>
               )}
             </div>
@@ -301,10 +314,12 @@ export default function App() {
               <div className="hero-orbit" />
               <div className="hero-panel">
                 <span className="pulse-dot" />
-                {isRecruiter ? 'Hiring studio · early access' : 'Learn · Practice · Apply'}
+                {isRecruiter
+                  ? 'Hiring · phase 2'
+                  : 'Voice practice · Staff / EM'}
                 <em>
                   {isRecruiter
-                    ? '“Same scorecard across every panelist.”'
+                    ? '“Reach candidates who already practiced out loud.”'
                     : '“I owned the migration end-to-end… latency dropped 40%.”'}
                 </em>
               </div>
@@ -312,14 +327,49 @@ export default function App() {
           </section>
 
           {!isRecruiter && (
+            <section className="magnet-proof reveal" aria-label="Why this works">
+              <div>
+                <strong>1. Study the topic</strong>
+                <p>Staff &amp; EM docs — ownership, conflict, design narrative.</p>
+              </div>
+              <div>
+                <strong>2. Speak the answer</strong>
+                <p>Mic or type — same pressure as a real panel screen.</p>
+              </div>
+              <div>
+                <strong>3. Get coached</strong>
+                <p>Score, gaps, stronger shape, delivery tips — free daily quota.</p>
+              </div>
+            </section>
+          )}
+
+          {!isRecruiter && (
             <section className="learner-path-highlights reveal" aria-label="Featured paths">
-              <Link to="/agentic-path" className="path-banner">
-                <strong>Agentic AI learning path</strong>
-                <span>Backend → Python for AI → LLMs → agents → production</span>
+              <button
+                type="button"
+                className="path-banner path-banner-btn"
+                disabled={loading}
+                onClick={() => void selectTrack('staff-interview')}
+              >
+                <strong>Staff Engineer loop</strong>
+                <span>Ownership · design · AI safety — practice out loud →</span>
+              </button>
+              <button
+                type="button"
+                className="path-banner path-banner-btn"
+                disabled={loading}
+                onClick={() => void selectTrack('em-interview')}
+              >
+                <strong>Engineering Manager loop</strong>
+                <span>People · conflict · org narratives — speak them →</span>
+              </button>
+              <Link to="/agentic-path" className="path-banner muted-path">
+                <strong>Also: Agentic AI path</strong>
+                <span>Career switch curriculum (secondary)</span>
               </Link>
-              <Link to="/snowflake-path" className="path-banner">
-                <strong>Snowflake + Agentic path</strong>
-                <span>Data Engineer → Cortex → agents → interview prep</span>
+              <Link to="/snowflake-path" className="path-banner muted-path">
+                <strong>Also: Snowflake path</strong>
+                <span>Data Engineer → Cortex (secondary)</span>
               </Link>
             </section>
           )}
@@ -331,7 +381,7 @@ export default function App() {
                 <h3>{AUDIENCES.talent.title}</h3>
                 <p>{AUDIENCES.talent.blurb}</p>
                 <Link className="btn ghost sm" to="/">
-                  Learner view
+                  Learner product
                 </Link>
               </div>
               <div className="dual-card dual-card-accent">
@@ -348,40 +398,38 @@ export default function App() {
           <AdSlot
             id="home-below-hero"
             variant="banner"
-            headline="Learning & hiring partners"
-            detail="Premium partner strip — kept below the brand composition on purpose."
+            headline="Interview prep partners"
+            detail="Partner strip under the Staff/EM magnet — not in the hero."
           />
 
           {isRecruiter ? (
             <section className="diff-row reveal">
               <div>
-                <strong>Learn with structure</strong>
-                <p>Topic docs and career paths — not random chatbot prompts.</p>
+                <strong>Practice-ready talent</strong>
+                <p>Candidates who train voice loops before they apply.</p>
               </div>
               <div>
-                <strong>Practice out loud</strong>
-                <p>Mic answers under timing pressure — how real screens sound.</p>
+                <strong>Job board</strong>
+                <p>Post roles where learners already practice.</p>
               </div>
               <div>
-                <strong>Hire with consistency</strong>
-                <p>Same interview bar for panels — scorecards and readiness signals.</p>
+                <strong>Network</strong>
+                <p>Connect and message — phase-2 hire surface.</p>
               </div>
             </section>
           ) : (
             <section className="diff-row reveal">
               <div>
-                <strong>Structured paths</strong>
-                <p>Topic docs under every track — clear what to study next.</p>
+                <strong>Not another LeetCode</strong>
+                <p>Oral Staff/EM narrative — not puzzle grinding.</p>
               </div>
               <div>
-                <strong>Practice out loud</strong>
-                <p>Type or speak answers; get coaching on content and delivery.</p>
+                <strong>Not raw ChatGPT</strong>
+                <p>Curriculum + quotas + coaching product, not a blank prompt.</p>
               </div>
               <div>
-                <strong>Then apply</strong>
-                <p>
-                  Browse every open job recruiters post — when you&apos;re ready.
-                </p>
+                <strong>Free → Pro</strong>
+                <p>Starter practice free; Staff/EM depth on Pro.</p>
               </div>
             </section>
           )}
@@ -389,7 +437,7 @@ export default function App() {
           {isRecruiter && (
           <section className="compare reveal">
             <div className="section-title">
-              <h2>Built bigger than interview prep alone</h2>
+              <h2>Why teams look here later</h2>
               <Link className="linkish" to="/compare">
                 Full comparison →
               </Link>
@@ -440,10 +488,12 @@ export default function App() {
               <h2>
                 {isRecruiter
                   ? 'Paths talent trains on'
-                  : 'Pick your learning path'}
+                  : 'Start with Staff or EM — then explore'}
               </h2>
               <p className="muted">
-                {tracks.length} paths · docs free on every path · practice by plan
+                {isRecruiter
+                  ? `${tracks.length} paths learners use before they apply`
+                  : 'Primary: Staff & EM voice loops · Also: languages, career switches, video paths'}
               </p>
             </div>
 
@@ -528,13 +578,13 @@ export default function App() {
           {!isRecruiter && (
             <section className="learner-jobs-strip reveal" aria-label="Open jobs">
               <div className="section-title">
-                <h2>Open jobs from recruiters</h2>
+                <h2>When you&apos;re ready — open jobs</h2>
                 <p className="muted">
-                  After you practice, browse every role users have posted.
+                  Secondary: browse roles recruiters post after you practice.
                 </p>
               </div>
-              <Link className="btn primary" to="/jobs">
-                View all open jobs
+              <Link className="btn ghost" to="/jobs">
+                View open jobs
               </Link>
             </section>
           )}
