@@ -9,6 +9,7 @@ DB_ID="${RENDER_POSTGRES_ID:-dpg-d9s1aeijnfac738kde70-a}"
 mkdir -p "${OUT_DIR}"
 
 export PATH="/opt/homebrew/opt/libpq/bin:/usr/local/opt/libpq/bin:${PATH}"
+export OUT_DIR RENDER_POSTGRES_ID
 
 if ! command -v pg_dump >/dev/null 2>&1; then
   echo "pg_dump not found. Install with: brew install libpq" >&2
@@ -21,7 +22,7 @@ from datetime import datetime, timezone
 from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
 db_id = os.environ.get("RENDER_POSTGRES_ID", "dpg-d9s1aeijnfac738kde70-a")
-out_dir = pathlib.Path(os.environ["OUT_DIR"])
+out_dir = pathlib.Path(os.environ.get("OUT_DIR", "backups"))
 
 api_key = os.environ.get("RENDER_API_KEY")
 if not api_key:
