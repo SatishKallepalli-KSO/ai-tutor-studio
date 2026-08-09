@@ -275,6 +275,73 @@ export const api = {
   async publicStats(): Promise<PublicStats> {
     return request('/v1/stats/public')
   },
+
+  async listJobs(params?: {
+    q?: string
+    workplace?: string
+    mine?: boolean
+    status?: 'open' | 'closed' | 'all'
+  }): Promise<JobPost[]> {
+    const sp = new URLSearchParams()
+    if (params?.q) sp.set('q', params.q)
+    if (params?.workplace) sp.set('workplace', params.workplace)
+    if (params?.mine) sp.set('mine', 'true')
+    if (params?.status) sp.set('status', params.status)
+    const qs = sp.toString()
+    return request(`/v1/jobs${qs ? `?${qs}` : ''}`)
+  },
+
+  async createJob(input: JobCreateInput): Promise<JobPost> {
+    return request('/v1/jobs', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    })
+  },
+
+  async updateJob(
+    id: number,
+    input: Partial<JobCreateInput> & { status?: 'open' | 'closed' },
+  ): Promise<JobPost> {
+    return request(`/v1/jobs/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(input),
+    })
+  },
+
+  async deleteJob(id: number): Promise<{ ok: boolean }> {
+    return request(`/v1/jobs/${id}`, { method: 'DELETE' })
+  },
+}
+
+export type JobPost = {
+  id: number
+  title: string
+  company_name: string
+  location: string
+  employment_type: string
+  workplace: string
+  description: string
+  requirements: string
+  salary_range: string | null
+  apply_url: string | null
+  status: string
+  posted_by_user_id: number
+  poster_name?: string | null
+  created_at: string
+  updated_at: string
+  is_owner?: boolean
+}
+
+export type JobCreateInput = {
+  title: string
+  company_name: string
+  location?: string
+  employment_type?: string
+  workplace?: string
+  description: string
+  requirements?: string
+  salary_range?: string | null
+  apply_url?: string | null
 }
 
 export const FREE_PRACTICE_TRACKS = new Set([

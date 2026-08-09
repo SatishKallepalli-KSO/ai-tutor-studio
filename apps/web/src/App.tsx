@@ -280,8 +280,11 @@ export default function App() {
             <div className="hero-cta">
               {isRecruiter ? (
                 <>
-                  <Link className="btn primary" to="/for-companies">
-                    Open hiring studio
+                  <Link className="btn primary" to="/jobs">
+                    Post &amp; browse jobs
+                  </Link>
+                  <Link className="btn ghost" to="/for-companies">
+                    Hiring studio
                   </Link>
                   <a
                     className="btn ghost"
@@ -289,9 +292,6 @@ export default function App() {
                   >
                     Talk to sales
                   </a>
-                  <Link className="btn ghost" to="/compare">
-                    Compare
-                  </Link>
                 </>
               ) : (
                 <>

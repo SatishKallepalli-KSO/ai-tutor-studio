@@ -46,11 +46,11 @@ export function ForCompaniesPage() {
             >
               Talk to us about hiring
             </a>
+            <Link className="btn ghost" to="/jobs">
+              Post a job
+            </Link>
             <Link className="btn ghost" to="/">
               See talent experience
-            </Link>
-            <Link className="btn ghost" to="/compare">
-              Compare the market
             </Link>
           </div>
         </section>

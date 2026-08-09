@@ -12,6 +12,7 @@ import { CompanyPage } from './CompanyPage.tsx'
 import { ComparePage } from './ComparePage.tsx'
 import { ForCompaniesPage } from './ForCompaniesPage.tsx'
 import { InvestorsPage } from './InvestorsPage.tsx'
+import { JobsBoardPage } from './JobsBoardPage.tsx'
 import { PersonaProvider } from './persona.tsx'
 import { PricingPage } from './PricingPage.tsx'
 import { SnowflakePathPage } from './SnowflakePathPage.tsx'
@@ -33,6 +34,7 @@ createRoot(document.getElementById('root')!).render(
             <Route path="/about" element={<AboutPage />} />
             <Route path="/company" element={<CompanyPage />} />
             <Route path="/for-companies" element={<ForCompaniesPage />} />
+            <Route path="/jobs" element={<JobsBoardPage />} />
             <Route path="/compare" element={<ComparePage />} />
             <Route path="/investors" element={<InvestorsPage />} />
             <Route path="/admin" element={<AdminDashboardPage />} />

@@ -22,7 +22,7 @@ export function Shell({
       <div className="film-grain" aria-hidden="true" />
 
       <header className="site-nav">
-        <Link to={isRecruiter ? '/for-companies' : '/'} className="brand">
+        <Link to={isRecruiter ? '/jobs' : '/'} className="brand">
           <span className="brand-mark" aria-hidden="true" />
           <span className="brand-text">
             <strong>{BRAND.product}</strong>
@@ -34,19 +34,19 @@ export function Shell({
           {isLearner ? (
             <>
               <Link to="/">Learn</Link>
+              <Link to="/jobs">Jobs</Link>
               <Link to="/agentic-path">Agentic AI</Link>
               <Link to="/snowflake-path">Snowflake</Link>
               <Link to="/pricing">Plans</Link>
               <Link to="/for-companies">Hire</Link>
               <Link to="/compare">Compare</Link>
-              <Link to="/company">Company</Link>
             </>
           ) : (
             <>
-              <Link to="/for-companies">Hire</Link>
+              <Link to="/jobs">Jobs</Link>
+              <Link to="/for-companies">Hiring studio</Link>
               <Link to="/compare">Compare</Link>
               <Link to="/company">Company</Link>
-              <Link to="/investors">Partners</Link>
               <Link to="/">Talent view</Link>
             </>
           )}
@@ -123,6 +123,7 @@ export function Shell({
         </div>
         <div className="site-footer-links">
           <Link to="/">Learn</Link>
+          <Link to="/jobs">Jobs</Link>
           <Link to="/for-companies">Hire</Link>
           <Link to="/about">About</Link>
           <Link to="/company">Company</Link>

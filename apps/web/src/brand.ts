@@ -25,8 +25,8 @@ export const PERSONAS: Record<
   recruiter: {
     label: 'Recruiter / hiring',
     short: 'Hire',
-    homePath: '/for-companies',
-    blurb: 'Run structured interviews and hire with confidence.',
+    homePath: '/jobs',
+    blurb: 'Post jobs and hire with structured interviews.',
   },
 }
 

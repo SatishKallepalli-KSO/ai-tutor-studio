@@ -52,3 +52,24 @@ class FeatureEvent(Base):
     path: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
     properties: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON string
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+
+
+class JobPost(Base):
+    """Recruiter job listings (LinkedIn-style board)."""
+
+    __tablename__ = "job_posts"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    posted_by_user_id: Mapped[int] = mapped_column(Integer, index=True)
+    title: Mapped[str] = mapped_column(String(200))
+    company_name: Mapped[str] = mapped_column(String(160))
+    location: Mapped[str] = mapped_column(String(160), default="")
+    employment_type: Mapped[str] = mapped_column(String(40), default="full-time")
+    workplace: Mapped[str] = mapped_column(String(40), default="remote")
+    description: Mapped[str] = mapped_column(Text, default="")
+    requirements: Mapped[str] = mapped_column(Text, default="")
+    salary_range: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
+    apply_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    status: Mapped[str] = mapped_column(String(20), default="open", index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

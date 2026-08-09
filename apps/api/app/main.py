@@ -21,6 +21,7 @@ from app.auth import (
 from app.billing import router as billing_router
 from app.db import SessionLocal, get_db, init_db
 from app.events import record_event, router as events_router
+from app.jobs import router as jobs_router
 from app.models import User
 from app.plans import can_practice_track
 from app.stats import router as stats_router
@@ -41,8 +42,8 @@ STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
 
 app = FastAPI(
     title="AI Tutor Studio API",
-    version="0.3.0",
-    description="AI tutoring with Free/Pro plans, auth, Stripe, and product admin analytics",
+    version="0.4.0",
+    description="Talent studio: learn, practice, hire — with job board, auth, Stripe, analytics",
 )
 
 app.add_middleware(
@@ -58,6 +59,7 @@ app.include_router(billing_router)
 app.include_router(events_router)
 app.include_router(admin_router)
 app.include_router(stats_router)
+app.include_router(jobs_router)
 
 
 @app.on_event("startup")
