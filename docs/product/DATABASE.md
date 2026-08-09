@@ -13,6 +13,8 @@ Live app **https://ai-tutor-studio.onrender.com** uses **Neon Free Postgres**.
 
 Neon Free includes ~0.5 GB storage, 100 CU-hours/mo, scale-to-zero when idle, 6h restore history, and **1 manual snapshot**.
 
+See also: [PRODUCTION.md](./PRODUCTION.md) · [DEPLOY-FREE.md](./DEPLOY-FREE.md)
+
 ---
 
 ## Old Render Free Postgres

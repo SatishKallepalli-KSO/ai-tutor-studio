@@ -52,9 +52,11 @@
       <p class="eyebrow">Technical design</p>
       <h1>System architecture</h1>
       <p class="lede">
-        Dual-audience talent studio: React client, FastAPI (v0.6), identity +
-        social + jobs store, Stripe, optional OpenAI — plus static GitHub Pages
-        demos with local fallbacks.
+        Dual-audience talent studio: React client, FastAPI, Neon Postgres,
+        OpenAI coaching, Stripe-ready billing — plus a static GitHub Pages docs
+        mirror. <strong>Production:</strong>
+        <a href="https://ai-tutor-studio.onrender.com">ai-tutor-studio.onrender.com</a>
+        (Render Free + Neon + OpenAI).
       </p>
 
       <h2>High-level topology</h2>
@@ -63,9 +65,9 @@ flowchart LR
   L[Learner] --> W[Web React + Vite]
   R[Recruiter] --> W
   W -->|JWT + REST| A[FastAPI API]
-  A --> DB[(Postgres or SQLite)]
-  A --> S[Stripe]
-  A --> O[OpenAI optional]
+  A --> DB[(Neon Postgres)]
+  A --> S[Stripe optional]
+  A --> O[OpenAI gpt-4o-mini]
   W -.->|Pages demo| LOC[Local rubric + localStorage]
   S --> A
   DB --- U[Users personas]

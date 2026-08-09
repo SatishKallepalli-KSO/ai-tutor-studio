@@ -1,127 +1,119 @@
 # Free live deploy — AI Tutor Studio
 
-Deploy a **real running app** (API + UI in one Docker service) on **Render Free**, with a free product URL.
+**Production today:** https://ai-tutor-studio.onrender.com  
+Full status: [PRODUCTION.md](./PRODUCTION.md) · Database: [DATABASE.md](./DATABASE.md)
 
-## One-click deploy (recommended)
+Current free stack:
 
-1. Open this link (sign in / create a free Render account — no credit card required for free web):
+- **Compute:** Render Free Docker web
+- **Database:** Neon Free Postgres (not Render Postgres — that expires in 30 days)
+- **AI:** OpenAI `gpt-4o-mini` (prepaid credits)
+- **Pay:** Demo Pro upgrade (`ALLOW_DEMO_UPGRADE=true`) until Stripe
+
+---
+
+## One-click / Blueprint deploy
+
+1. Render account (card on file may be required even for free web).
+2. Open:
 
    **https://render.com/deploy?repo=https://github.com/SatishKallepalli-KSO/ai-tutor-studio**
 
-2. Confirm Blueprint → service name **`ai-tutor-studio`**.
-3. Optional env (can skip for first launch):
-   - `ADMIN_EMAILS` = your email
-   - `OPENAI_API_KEY` = if you want richer AI coaching
-4. Click **Apply**. Wait 5–10 minutes for the first Docker build.
+3. After the web service is up, create a **Neon Free** project and set `DATABASE_URL` to the **pooled** connection string (see [DATABASE.md](./DATABASE.md)).
+4. Set env on the web service:
 
-### Your free live URL
+   | Key | Value |
+   |-----|--------|
+   | `APP_URL` | `https://ai-tutor-studio.onrender.com` |
+   | `JWT_SECRET` | long random |
+   | `DATABASE_URL` | Neon pooled URL |
+   | `OPENAI_API_KEY` | from platform.openai.com (add ~$5 credits) |
+   | `OPENAI_TUTOR_MODEL` | `gpt-4o-mini` |
+   | `ALLOW_DEMO_UPGRADE` | `true` (until Stripe) |
+   | `ADMIN_EMAILS` | your login email |
 
-```
-https://ai-tutor-studio.onrender.com
-```
-
-Smoke checks:
+5. Deploy / restart. Smoke:
 
 ```bash
 curl -s https://ai-tutor-studio.onrender.com/healthz
-open https://ai-tutor-studio.onrender.com
+curl -s https://ai-tutor-studio.onrender.com/v1/stats/public
 ```
 
-Register → practice → Pro via **Demo upgrade** on `/pricing` (Stripe optional later).
+Practice → coaching should store `provider: "openai"` in `feature_events` (not `local-rubric`).
 
-> Free Render web services **spin down** after ~15 minutes idle. First request after sleep can take 30–60s.
-
----
-
-## Free domain options (relevant names)
-
-| Option | Example | Cost | Notes |
-|--------|---------|------|--------|
-| **Render subdomain (included)** | `ai-tutor-studio.onrender.com` | Free | Best for launch today |
-| **NxtDev** | `aitutor.nxtdev.xyz` | Free | Claim at [nxtdev.xyz](https://www.nxtdev.xyz/) → CNAME to Render |
-| **vexr.dev** | `aitutor.vexr.dev` | Free | GitHub login; CNAME to Render |
-| **is-a.dev** | `aitutor.is-a.dev` | Free | PR-based; personal/non-commercial |
-| **Buy cheap brand domain** | `aitutor.studio` / `practiceloop.app` | ~$10–15/yr | Best long-term; Cloudflare DNS free |
-
-### Point a free custom subdomain at Render
-
-1. Deploy on Render first (get `ai-tutor-studio.onrender.com`).
-2. Claim e.g. `aitutor.nxtdev.xyz`.
-3. Add **CNAME** → `ai-tutor-studio.onrender.com`
-4. In Render → your service → **Custom Domains** → add `aitutor.nxtdev.xyz`
-5. Set `APP_URL=https://aitutor.nxtdev.xyz` and redeploy
-
-Suggested names: `aitutor`, `staffpractice`, `emloop`, `practiceloop`.
+> Free Render web **spins down** after ~15 minutes idle. First request can take 30–60s.
 
 ---
 
-## Proper free infra shape
+## Free domain options
+
+| Option | Example | Cost |
+|--------|---------|------|
+| Render subdomain | `ai-tutor-studio.onrender.com` | Free (live now) |
+| NxtDev / vexr / is-a.dev | `aitutor.nxtdev.xyz` | Free CNAME |
+| Brand domain | `aitutor.studio` | ~$10–15/yr |
+
+Point CNAME → `ai-tutor-studio.onrender.com`, add custom domain in Render, update `APP_URL`.
+
+---
+
+## Infra shape
 
 ```
 Browser
    │
    ▼
-https://ai-tutor-studio.onrender.com   ← free TLS
+https://ai-tutor-studio.onrender.com   ← free TLS (Render)
    │
    ▼
-Docker (this repo Dockerfile)
+Docker (Dockerfile)
    ├── React SPA  (/static)
    └── FastAPI    (/v1, /healthz)
-         │
-         ├── Render Free Postgres (DATABASE_URL) — SQLite only as local fallback
-         ├── OpenAI (optional)
-         └── Stripe (optional; demo upgrade enabled on free Blueprint)
+         ├── Neon Free Postgres (DATABASE_URL)
+         ├── OpenAI gpt-4o-mini
+         └── Demo upgrade / Stripe later
 ```
 
 | Piece | Free choice |
 |-------|-------------|
 | Compute | Render Free Docker web |
-| DB | Render Free Postgres (30-day free DB) or [Neon](https://neon.tech) free Postgres; SQLite only as local fallback |
-| AI | Skip, or OpenAI prepaid |
+| DB | **[Neon](https://neon.tech) Free** (recommended) |
+| AI | OpenAI prepaid (`gpt-4o-mini`) |
 | Pay | Demo upgrade now; Stripe when ready |
 | Domain | `*.onrender.com` then free CNAME |
 
+Local laptop only: omit `DATABASE_URL` → SQLite under `apps/api/data/`.
+
 ---
 
-## CLI deploy (after `render login`)
+## CLI helpers
 
 ```bash
-# one-time
 render login
-
-# from repo root — or use Dashboard Blueprint if CLI blueprints differ by plan
-open "https://render.com/deploy?repo=https://github.com/SatishKallepalli-KSO/ai-tutor-studio"
-```
-
-Generate secrets locally if needed:
-
-```bash
-python3 -c "import secrets; print(secrets.token_urlsafe(48))"
+./scripts/deploy-free.sh
+./scripts/backup-db.sh --neon
 ```
 
 ---
 
 ## After go-live checklist
 
-- [ ] `/healthz` returns ok
-- [ ] Register + login works
-- [ ] Staff path → Speak & coach returns feedback
-- [ ] `/pricing` → Demo upgrade unlocks Pro (until Stripe)
-- [ ] Set `ADMIN_EMAILS` and open `/admin`
-- [ ] Confirm `DATABASE_URL` points at Render/Neon Postgres (not SQLite)
-- [ ] (Optional) Custom free subdomain CNAME
-- [ ] (Optional) Point GitHub Pages at API later with `VITE_API_BASE`
+- [x] `/healthz` OK on production
+- [x] Neon `DATABASE_URL` (Render free Postgres deleted)
+- [x] OpenAI key + credits → `provider: openai`
+- [x] `ADMIN_EMAILS` + `/admin`
+- [x] Demo Pro upgrade for Staff/EM testing
+- [ ] Stripe live + `ALLOW_DEMO_UPGRADE=false`
+- [ ] Optional vanity domain CNAME
 
 ---
 
-## Why not “any” free cloud?
+## Why this shape?
 
 | Host | Fit |
 |------|-----|
-| **Render Free** | Best match — Blueprint + Docker already in repo |
-| Fly.io free | Good; needs `fly launch` + card sometimes |
-| Railway trial | Credits, not forever-free |
-| Vercel/Netlify | Frontend only — still need an API host |
-| GitHub Pages | Static demo only (no durable auth/jobs) |
+| **Render Free + Neon Free** | Current production — durable DB, $0 compute/DB |
+| Render Free Postgres alone | Expires in 30 days — **avoid for production** |
+| GitHub Pages | Docs/static only — no durable auth |
 
-**Recommendation:** ship on Render Free today → add Neon Postgres → claim `aitutor.nxtdev.xyz` (or buy `aitutor.studio` when revenue starts).
+**Recommendation:** keep Render web + Neon Free; buy a brand domain when revenue starts.

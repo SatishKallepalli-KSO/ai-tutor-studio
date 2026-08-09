@@ -4,6 +4,9 @@
 
 **Outcome:** a public URL where users can register, practice, get AI feedback, upgrade to Pro, and where you can open `/admin` for product metrics.
 
+> **Already live:** https://ai-tutor-studio.onrender.com — Render Free + Neon Free + OpenAI.  
+> See **[PRODUCTION.md](PRODUCTION.md)** for current status. Use this runbook for Stripe / domains / rebuilding elsewhere.
+
 ---
 
 ## 1. What you are deploying
@@ -12,8 +15,8 @@
 |-------|------|------------------------|
 | **API** (`apps/api`) | Auth + personas, Free/Pro, Stripe, AI feedback, jobs, profiles, connections, chat, admin metrics | **Yes** |
 | **Web** (`apps/web`) | Learn/Practice, Jobs, Profile, Network, Chat, paths, pricing, admin | **Yes** (bundled into API Docker image, or hosted separately) |
-| **Postgres** | Persistent users + social + jobs + events (SQLite OK for demos only) | **Strongly recommended** |
-| **OpenAI** | Richer coaching feedback | Optional at launch (rubric fallback works); **recommended for Pro quality** |
+| **Postgres** | Persistent users + social + jobs + events (**Neon Free** in production; SQLite OK for local demos only) | **Yes for production** |
+| **OpenAI** | Richer coaching feedback (`provider: openai`) | **Yes in production** (rubric fallback if unset) |
 | **Stripe** | Real subscriptions | **Yes for monetization** |
 | **GitHub Pages** | Optional static marketing/UI mirror | Optional |
 
@@ -186,8 +189,8 @@ Set `APP_URL` to the public UI origin. The API builds:
 1. Push repo to GitHub (Blueprint reads `render.yaml` from `main`).
 2. One-click: https://render.com/deploy?repo=https://github.com/SatishKallepalli-KSO/ai-tutor-studio  
    Or Render → **New** → **Blueprint** → select repo.
-3. Free launch: skip Postgres (SQLite) and Stripe; Blueprint sets `ALLOW_DEMO_UPGRADE=true`.  
-   Production: attach **Postgres** / Neon → set `DATABASE_URL`; fill Stripe + OpenAI + `ADMIN_EMAILS`.
+3. Free launch: set **Neon** `DATABASE_URL` (prefer over Render free Postgres — 30-day expiry). Blueprint / env: `ALLOW_DEMO_UPGRADE=true`.  
+   Production: Neon + OpenAI + `ADMIN_EMAILS`; Stripe when charging. Details: [DATABASE.md](DATABASE.md), [PRODUCTION.md](PRODUCTION.md).
 4. Deploy. Health check: `/healthz` → live URL `https://ai-tutor-studio.onrender.com`.
 5. Optional custom / free subdomain; update `APP_URL` + Stripe webhook URL.
 

@@ -41,9 +41,21 @@
         and Stripe. Checklist from empty hosting to first paid Pro user — plus
         persistent jobs, profiles, and chat.
       </p>
+      <div class="panel">
+        <p>
+          <strong>Already live:</strong>
+          <a href="https://ai-tutor-studio.onrender.com">ai-tutor-studio.onrender.com</a>
+          — Render Free + Neon Free Postgres + OpenAI
+          <code>gpt-4o-mini</code>. See
+          <a href="./PRODUCTION.md">PRODUCTION.md</a>,
+          <a href="./DEPLOY-FREE.md">DEPLOY-FREE.md</a>,
+          <a href="./DATABASE.md">DATABASE.md</a>.
+        </p>
+      </div>
 
       <div class="cta-row">
-        <a class="btn primary" href="./GO-LIVE.md">Markdown source</a>
+        <a class="btn primary" href="https://ai-tutor-studio.onrender.com">Open live app</a>
+        <a class="btn" href="./GO-LIVE.md">Markdown source</a>
         <a class="btn" href="./monetization.html">Free / Pro matrix</a>
         <a class="btn" href="./architecture.html">Architecture</a>
       </div>
@@ -78,12 +90,12 @@
             <tr>
               <td><strong>Postgres</strong></td>
               <td>Users, social, jobs, usage, feature events</td>
-              <td>Strongly recommended</td>
+              <td>Neon Free in production; SQLite local only</td>
             </tr>
             <tr>
               <td><strong>OpenAI</strong></td>
-              <td>Rich coaching (rubric fallback without key)</td>
-              <td>Recommended</td>
+              <td>Staff/EM coaching via <code>/v1/tutor/feedback</code></td>
+              <td>Live (<code>gpt-4o-mini</code>); rubric fallback</td>
             </tr>
             <tr>
               <td><strong>Stripe</strong></td>
@@ -93,10 +105,11 @@
           </tbody>
         </table>
         <p class="muted" style="margin-top: 0.85rem">
-          Product: <strong>Learn. Practice. Hire.</strong> Recommended shape: one
-          Docker service (API serves the built UI) + managed Postgres + Stripe +
-          OpenAI. Repo includes <code>Dockerfile</code>, <code>render.yaml</code>,
-          and <code>.env.example</code>.
+          Product: <strong>Learn. Practice. Hire.</strong> Live shape: Render Free
+          Docker + <strong>Neon Free</strong> + OpenAI. Stripe when charging.
+          See <a href="./PRODUCTION.md">PRODUCTION.md</a>. Repo includes
+          <code>Dockerfile</code>, <code>render.yaml</code>, and
+          <code>.env.example</code>.
         </p>
       </div>
 
