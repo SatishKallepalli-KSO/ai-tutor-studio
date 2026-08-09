@@ -2,37 +2,33 @@
 
 Built by **Kallepalli Labs** (Satish Kallepalli).
 
-Local-first **AI-assisted tutoring / upskilling** product with **Free + Pro** monetization
-(HackerRank-style freemium).
+**Learn. Practice. Hire.** — a freemium talent studio for candidates and hiring teams.
 
 ## Product
 
+| Audience | What they get |
+|----------|----------------|
+| **Learners** | Tracks + docs, voice practice, AI coaching, profile, network, chat, job browse |
+| **Recruiters** | Job posts, talent browse, connections, messaging, hiring studio |
+
 | Plan | What you get |
 |------|----------------|
-| **Free** | All Learn docs · practice HTML/CSS/JS/Python · **Java → Python** track · 5 feedbacks/day |
-| **Pro ($19/mo or $149/yr)** | All tracks (Staff, EM, Java→AI, Java, TS, React, Node) · unlimited AI feedback · Stripe billing portal |
-
-Flow: **Register → Learn docs → Practice (type or speak) → AI feedback** (gated by plan).
+| **Free** | All Learn docs + video paths · practice HTML/CSS/JS/Python · Java→Python · 5 feedbacks/day · profile/network/jobs |
+| **Pro ($19/mo or $149/yr)** | Staff, EM, Java→AI, languages · unlimited AI feedback · Stripe portal |
 
 Also:
-- **[/agentic-path](https://satishkallepalli-kso.github.io/ai-tutor-studio/agentic-path)** — ordered free YouTube curriculum from Java developer → Agentic AI engineer
-- **[/snowflake-path](https://satishkallepalli-kso.github.io/ai-tutor-studio/snowflake-path)** — Data Engineer → Snowflake + Agentic AI (Cortex, agents, interview prep)
+- **[/agentic-path](https://satishkallepalli-kso.github.io/ai-tutor-studio/agentic-path)** — Backend → Agentic AI YouTube curriculum
+- **[/snowflake-path](https://satishkallepalli-kso.github.io/ai-tutor-studio/snowflake-path)** — Data Engineer → Snowflake + Cortex
+- **[/jobs](https://satishkallepalli-kso.github.io/ai-tutor-studio/jobs)** · **[/profile](https://satishkallepalli-kso.github.io/ai-tutor-studio/profile)** · **[/network](https://satishkallepalli-kso.github.io/ai-tutor-studio/network)** · **[/messages](https://satishkallepalli-kso.github.io/ai-tutor-studio/messages)**
 
-Voice practice uses the browser mic (Chrome/Edge/Safari). Feedback then coaches **content + spoken delivery** (fillers, grammar/clarity, pacing) — closer to real interviews.
-
-## Product documentation (for selling)
-
-HTML microsite under **`docs/product/`** (architecture, user flows, monetization, API, go-live, sales playbook):
+## Product documentation
 
 **https://satishkallepalli-kso.github.io/ai-tutor-studio/product/**
 
-**Cloud launch checklist (AI + Stripe):** [docs/product/GO-LIVE.md](docs/product/GO-LIVE.md) · [go-live.html](https://satishkallepalli-kso.github.io/ai-tutor-studio/product/go-live.html)
-
-Republish the app without wiping those docs:
+Architecture, flows, monetization, API, go-live, sales playbook — updated for the latest Learn · Practice · Hire design.
 
 ```bash
-chmod +x scripts/publish-pages.sh
-./scripts/publish-pages.sh
+./scripts/publish-pages.sh   # republish app; preserves docs/product/
 ```
 
 ## Quick start
@@ -48,20 +44,6 @@ cp ../../.env.example .env   # set JWT_SECRET at minimum
 uvicorn app.main:app --reload --port 8000
 ```
 
-Optional:
-
-```bash
-export OPENAI_API_KEY=sk-...
-# Stripe (live subscriptions)
-export STRIPE_SECRET_KEY=sk_test_...
-export STRIPE_PRICE_MONTHLY=price_...
-export STRIPE_PRICE_YEARLY=price_...
-export STRIPE_WEBHOOK_SECRET=whsec_...
-export APP_URL=http://localhost:5173
-```
-
-Without Stripe keys, **Demo upgrade** on `/pricing` unlocks Pro for local testing.
-
 ### 2) Web
 
 ```bash
@@ -72,54 +54,31 @@ npm run dev
 
 Open **http://localhost:5173** — Vite proxies `/v1` to the API.
 
-## Auth & billing APIs
+## Key APIs
 
-| Endpoint | Purpose |
-|----------|---------|
-| `POST /v1/auth/register` | Create account |
-| `POST /v1/auth/login` | Sign in (JWT) |
-| `GET /v1/auth/me` | Current user + quota |
-| `GET /v1/billing/plans` | Free/Pro catalog |
-| `POST /v1/billing/checkout` | Stripe Checkout session |
-| `POST /v1/billing/portal` | Stripe Customer Portal |
-| `POST /v1/billing/webhook` | Stripe subscription events |
-| `POST /v1/billing/demo-upgrade` | Local Pro unlock (no Stripe) |
-| `POST /v1/tutor/feedback` | **Requires auth** + plan entitlement |
+| Area | Endpoints |
+|------|-----------|
+| Auth | `/v1/auth/register` · `login` · `me` · `me/persona` |
+| Tutor | `/v1/tutor/tracks` · `feedback` |
+| Profiles | `/v1/profiles/me` · `/v1/profiles/` · `/v1/profiles/{id}` |
+| Jobs | `/v1/jobs` |
+| Network | `/v1/connections/` · `/v1/messages/` |
+| Billing | `/v1/billing/plans` · `checkout` · `portal` · `webhook` |
+| Admin | `/v1/admin/overview` · `/v1/stats/public` |
 
-## Stripe setup (production)
-
-1. Create a Product **AI Tutor Studio Pro** in Stripe.
-2. Add monthly + yearly recurring prices; copy Price IDs into env.
-3. Webhook endpoint: `https://YOUR_API/v1/billing/webhook`  
-   Events: `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`.
-4. Set `APP_URL` to your public frontend URL (success/cancel redirects).
-5. Set a strong `JWT_SECRET`.
+Full reference: [docs/product/api.html](https://satishkallepalli-kso.github.io/ai-tutor-studio/product/api.html)
 
 ## Deploy
 
-### Render (recommended for monetization)
+- **GitHub Pages:** https://satishkallepalli-kso.github.io/ai-tutor-studio/ (demo fallbacks without API)
+- **Render/Docker:** auth, Stripe, OpenAI, Postgres — see [GO-LIVE.md](docs/product/GO-LIVE.md)
 
-Auth + Stripe need a real API. Use the Docker Blueprint (`render.yaml`):
-
-1. Render → New → Blueprint → this repo  
-2. Set env vars: `JWT_SECRET`, `APP_URL`, Stripe keys, optional `OPENAI_API_KEY`  
-3. Optional: attach a Postgres DB and set `DATABASE_URL` (otherwise SQLite on disk)
-
-### GitHub Pages (static UI only)
-
-Live UI: **https://satishkallepalli-kso.github.io/ai-tutor-studio/**
-
-For signed-in billing against a hosted API, rebuild with:
-
-```bash
-VITE_BASE=/ai-tutor-studio/ VITE_API_BASE=https://YOUR-RENDER-URL npm run build
-# copy apps/web/dist → docs/
-```
-
-## Monorepo layout
+## Monorepo
 
 ```
-apps/api   FastAPI — auth, plans, Stripe, tutoring
-apps/web   React — Learn / Practice / Pricing / Sign in
-docs/      GitHub Pages build output
+apps/api   FastAPI — auth, tutor, jobs, profiles, connections, chat, Stripe
+apps/web   React — Learn / Jobs / Network / Chat / Profile / Pricing
+docs/      GitHub Pages build + docs/product/ microsite
 ```
+
+© 2026 Kallepalli Labs. All rights reserved.

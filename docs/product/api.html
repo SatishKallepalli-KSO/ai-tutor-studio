@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;700&family=IBM+Plex+Sans:wght@400;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;700&family=Sora:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./styles.css" />
@@ -15,15 +15,17 @@
   <body>
     <div class="wrap">
       <nav class="nav">
-        <a class="nav-brand" href="./">AI Tutor Studio Docs</a>
+        <a class="nav-brand" href="./"
+          >AI Tutor Studio Docs<span>Learn · Practice · Hire</span></a
+        >
         <div class="nav-links">
           <a href="./">Overview</a>
           <a href="./architecture.html">Architecture</a>
-          <a href="./user-flows.html">User flows</a>
+          <a href="./user-flows.html">Flows</a>
           <a href="./monetization.html">Monetization</a>
           <a class="active" href="./api.html">API</a>
           <a href="./go-live.html">Go-live</a>
-          <a href="./sales-playbook.html">Sales playbook</a>
+          <a href="./sales-playbook.html">Sales</a>
           <a href="../">Open app</a>
         </div>
       </nav>
@@ -31,7 +33,7 @@
       <p class="eyebrow">Integration</p>
       <h1>API reference</h1>
       <p class="lede">
-        FastAPI surface for partners, mobile clients, or white-label frontends.
+        FastAPI v0.6 surface for the web app, partners, and white-label clients.
         Interactive docs: <code>/docs</code> on a running API.
       </p>
 
@@ -39,23 +41,32 @@
       <div class="panel">
         <table>
           <thead>
-            <tr><th>Method</th><th>Path</th><th>Notes</th></tr>
+            <tr>
+              <th>Method</th>
+              <th>Path</th>
+              <th>Notes</th>
+            </tr>
           </thead>
           <tbody>
             <tr>
               <td>POST</td>
               <td><code>/v1/auth/register</code></td>
-              <td>Body: email, password (≥8), name → JWT + user</td>
+              <td>email, password, name, <code>persona</code> learner|recruiter</td>
             </tr>
             <tr>
               <td>POST</td>
               <td><code>/v1/auth/login</code></td>
-              <td>Body: email, password → JWT + user</td>
+              <td>→ JWT + user</td>
             </tr>
             <tr>
               <td>GET</td>
               <td><code>/v1/auth/me</code></td>
-              <td>Bearer token → plan, quota, free tracks</td>
+              <td>plan, quota, persona, is_admin</td>
+            </tr>
+            <tr>
+              <td>PATCH</td>
+              <td><code>/v1/auth/me/persona</code></td>
+              <td><code>{ "persona": "learner"|"recruiter" }</code></td>
             </tr>
           </tbody>
         </table>
@@ -65,18 +76,22 @@
       <div class="panel">
         <table>
           <thead>
-            <tr><th>Method</th><th>Path</th><th>Notes</th></tr>
+            <tr>
+              <th>Method</th>
+              <th>Path</th>
+              <th>Notes</th>
+            </tr>
           </thead>
           <tbody>
             <tr>
               <td>GET</td>
               <td><code>/v1/tutor/tracks</code></td>
-              <td>Catalog of tracks</td>
+              <td>Catalog</td>
             </tr>
             <tr>
               <td>GET</td>
               <td><code>/v1/tutor/tracks/{id}/questions</code></td>
-              <td>Practice bank with <code>topic_id</code></td>
+              <td>Bank with <code>topic_id</code></td>
             </tr>
             <tr>
               <td>GET</td>
@@ -86,7 +101,7 @@
             <tr>
               <td>POST</td>
               <td><code>/v1/tutor/feedback</code></td>
-              <td>Auth required. Body includes <code>input_mode: text|voice</code></td>
+              <td>Auth · <code>input_mode: text|voice</code></td>
             </tr>
           </tbody>
         </table>
@@ -100,59 +115,186 @@
   "input_mode": "voice"
 }</pre>
 
-      <h3>Feedback response (shape)</h3>
-      <pre>{
-  "score": 4,
-  "summary": "…",
-  "strengths": ["…"],
-  "gaps": ["…"],
-  "better_answer": "…",
-  "next_drill": "…",
-  "provider": "openai|local-rubric",
-  "delivery_tips": ["Reduce filler words…"],
-  "input_mode": "voice"
-}</pre>
-
-      <h3>Paywall errors</h3>
-      <p class="muted">HTTP <strong>402</strong> with structured detail:</p>
-      <pre>{
-  "detail": {
-    "code": "track_locked|quota_exceeded",
-    "message": "Human-readable upgrade prompt"
-  }
-}</pre>
-
-      <h2>Billing</h2>
+      <h2>Profiles</h2>
       <div class="panel">
         <table>
           <thead>
-            <tr><th>Method</th><th>Path</th><th>Notes</th></tr>
+            <tr>
+              <th>Method</th>
+              <th>Path</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>GET / PATCH</td>
+              <td><code>/v1/profiles/me</code></td>
+              <td>Own talent card</td>
+            </tr>
+            <tr>
+              <td>GET</td>
+              <td><code>/v1/profiles/{user_id}</code></td>
+              <td>Public unless private</td>
+            </tr>
+            <tr>
+              <td>GET</td>
+              <td><code>/v1/profiles/</code></td>
+              <td>Talent browse · <code>q</code>, <code>open_to_work</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Jobs</h2>
+      <div class="panel">
+        <table>
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Path</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>GET</td>
+              <td><code>/v1/jobs</code></td>
+              <td><code>q</code>, workplace, mine, status</td>
+            </tr>
+            <tr>
+              <td>POST</td>
+              <td><code>/v1/jobs</code></td>
+              <td>Recruiter persona (or admin)</td>
+            </tr>
+            <tr>
+              <td>PATCH / DELETE</td>
+              <td><code>/v1/jobs/{id}</code></td>
+              <td>Owner updates / close</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Connections</h2>
+      <div class="panel">
+        <table>
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Path</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>GET</td>
+              <td><code>/v1/connections/</code></td>
+              <td>status · direction filters</td>
+            </tr>
+            <tr>
+              <td>GET</td>
+              <td><code>/v1/connections/with/{user_id}</code></td>
+              <td>Relationship with peer</td>
+            </tr>
+            <tr>
+              <td>POST</td>
+              <td><code>/v1/connections/</code></td>
+              <td>Send request + optional note</td>
+            </tr>
+            <tr>
+              <td>PATCH</td>
+              <td><code>/v1/connections/{id}</code></td>
+              <td>accepted | declined | withdrawn</td>
+            </tr>
+            <tr>
+              <td>DELETE</td>
+              <td><code>/v1/connections/{id}</code></td>
+              <td>Remove</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Messages</h2>
+      <div class="panel">
+        <table>
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Path</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>GET</td>
+              <td><code>/v1/messages/threads</code></td>
+              <td>Inbox list</td>
+            </tr>
+            <tr>
+              <td>GET</td>
+              <td><code>/v1/messages/with/{peer_id}</code></td>
+              <td>Requires accepted connection</td>
+            </tr>
+            <tr>
+              <td>POST</td>
+              <td><code>/v1/messages/</code></td>
+              <td><code>recipient_id</code> + <code>body</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Billing · Admin · Stats</h2>
+      <div class="panel">
+        <table>
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Path</th>
+              <th>Notes</th>
+            </tr>
           </thead>
           <tbody>
             <tr>
               <td>GET</td>
               <td><code>/v1/billing/plans</code></td>
-              <td>Public plan cards + stripe_enabled flag</td>
+              <td>Public plan cards</td>
             </tr>
             <tr>
               <td>POST</td>
               <td><code>/v1/billing/checkout</code></td>
-              <td>Auth · <code>{ "interval": "month"|"year" }</code> → Checkout URL</td>
+              <td>month | year → Checkout URL</td>
             </tr>
             <tr>
               <td>POST</td>
               <td><code>/v1/billing/portal</code></td>
-              <td>Auth · Stripe Customer Portal URL</td>
+              <td>Customer Portal</td>
             </tr>
             <tr>
               <td>POST</td>
               <td><code>/v1/billing/webhook</code></td>
-              <td>Stripe events (no JWT)</td>
+              <td>Stripe events</td>
             </tr>
             <tr>
               <td>POST</td>
               <td><code>/v1/billing/demo-upgrade</code></td>
-              <td>Auth · local/pilot Pro when Stripe unset</td>
+              <td>Pilot Pro when Stripe unset</td>
+            </tr>
+            <tr>
+              <td>GET</td>
+              <td><code>/v1/admin/overview</code></td>
+              <td>Admin-only product metrics</td>
+            </tr>
+            <tr>
+              <td>POST</td>
+              <td><code>/v1/events</code></td>
+              <td>Feature analytics</td>
+            </tr>
+            <tr>
+              <td>GET</td>
+              <td><code>/v1/stats/public</code></td>
+              <td>Safe aggregates for marketing UI</td>
             </tr>
           </tbody>
         </table>
@@ -163,10 +305,12 @@
 
       <div class="cta-row">
         <a class="btn primary" href="./architecture.html">Architecture</a>
-        <a class="btn" href="./sales-playbook.html">Sales playbook</a>
+        <a class="btn" href="./go-live.html">Go-live</a>
       </div>
 
-      <footer class="footer">AI Tutor Studio · API<br />© 2026 Kallepalli Labs. All rights reserved.</footer>
+      <footer class="footer">
+        AI Tutor Studio · API<br />© 2026 Kallepalli Labs. All rights reserved.
+      </footer>
     </div>
   </body>
 </html>

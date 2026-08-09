@@ -10,12 +10,14 @@
 
 | Piece | Role | Required for go-live? |
 |-------|------|------------------------|
-| **API** (`apps/api`) | Auth, Free/Pro gates, Stripe webhooks, AI feedback, admin metrics, analytics events | **Yes** |
-| **Web** (`apps/web`) | React UI (tracks, practice, pricing, agentic path, admin) | **Yes** (bundled into API Docker image, or hosted separately) |
-| **Postgres** | Persistent users + events (SQLite is OK for demos only) | **Strongly recommended** |
+| **API** (`apps/api`) | Auth + personas, Free/Pro, Stripe, AI feedback, jobs, profiles, connections, chat, admin metrics | **Yes** |
+| **Web** (`apps/web`) | Learn/Practice, Jobs, Profile, Network, Chat, paths, pricing, admin | **Yes** (bundled into API Docker image, or hosted separately) |
+| **Postgres** | Persistent users + social + jobs + events (SQLite OK for demos only) | **Strongly recommended** |
 | **OpenAI** | Richer coaching feedback | Optional at launch (rubric fallback works); **recommended for Pro quality** |
 | **Stripe** | Real subscriptions | **Yes for monetization** |
 | **GitHub Pages** | Optional static marketing/UI mirror | Optional |
+
+**Product positioning:** Learn. Practice. Hire. — learners study/practice; recruiters post jobs and network with talent.
 
 **Recommended production shape:** one Docker web service (API serves built UI from `/static`) + managed Postgres + Stripe + OpenAI.
 

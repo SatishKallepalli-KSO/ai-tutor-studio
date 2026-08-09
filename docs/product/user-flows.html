@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;700&family=IBM+Plex+Sans:wght@400;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;700&family=Sora:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./styles.css" />
@@ -18,15 +18,15 @@
         theme: 'dark',
         themeVariables: {
           primaryColor: '#12352c',
-          primaryTextColor: '#edf1f4',
-          primaryBorderColor: '#3dd6a5',
-          lineColor: '#9aa6b2',
-          secondaryColor: '#121820',
-          tertiaryColor: '#0b1017',
-          background: '#0b1017',
-          mainBkg: '#121820',
-          nodeBorder: '#3dd6a5',
-          fontFamily: 'IBM Plex Sans',
+          primaryTextColor: '#f4f1ea',
+          primaryBorderColor: '#3dcf9a',
+          lineColor: '#9a968c',
+          secondaryColor: '#101214',
+          tertiaryColor: '#060708',
+          background: '#060708',
+          mainBkg: '#101214',
+          nodeBorder: '#3dcf9a',
+          fontFamily: 'Sora',
         },
       })
     </script>
@@ -34,15 +34,17 @@
   <body>
     <div class="wrap">
       <nav class="nav">
-        <a class="nav-brand" href="./">AI Tutor Studio Docs</a>
+        <a class="nav-brand" href="./"
+          >AI Tutor Studio Docs<span>Learn · Practice · Hire</span></a
+        >
         <div class="nav-links">
           <a href="./">Overview</a>
           <a href="./architecture.html">Architecture</a>
-          <a class="active" href="./user-flows.html">User flows</a>
+          <a class="active" href="./user-flows.html">Flows</a>
           <a href="./monetization.html">Monetization</a>
           <a href="./api.html">API</a>
           <a href="./go-live.html">Go-live</a>
-          <a href="./sales-playbook.html">Sales playbook</a>
+          <a href="./sales-playbook.html">Sales</a>
           <a href="../">Open app</a>
         </div>
       </nav>
@@ -50,121 +52,100 @@
       <p class="eyebrow">Experience design</p>
       <h1>User flows</h1>
       <p class="lede">
-        Core journeys buyers care about: acquisition through free docs, practice
-        conversion, voice interview simulation, and paid upgrade.
+        Learner and recruiter journeys: study → practice → profile → network →
+        jobs, plus paywall conversion.
       </p>
 
-      <h2>1) Primary learning loop</h2>
+      <h2>1) Learner learning loop</h2>
       <div class="mermaid">
 flowchart TD
-  A[Land on tracks] --> B[Pick a track]
-  B --> C[Learn: topic documentation]
-  C --> D{Ready to practice?}
-  D -->|Yes| E[Practice question]
+  A[Land Learn] --> B[Pick track or video path]
+  B --> C[Topic docs]
+  C --> D{Ready?}
+  D -->|Practice| E[Speak or type]
   D -->|Keep reading| C
-  E --> F[Type or Speak answer]
-  F --> G[Get AI / rubric feedback]
-  G --> H[Next drill / next topic]
-  H --> C
-      </div>
-      <div class="panel">
-        <p class="muted">
-          <strong>Sellable insight:</strong> Docs are free for every track so
-          users feel progress before hitting a paywall — same pattern as
-          freemium coding platforms.
-        </p>
+  E --> F[AI / rubric feedback]
+  F --> G[Next topic / drill]
+  G --> C
       </div>
 
-      <h2>2) Registration &amp; first value</h2>
+      <h2>2) Recruiter hiring loop</h2>
+      <div class="mermaid">
+flowchart TD
+  A[Switch to Recruiter] --> B[Post job]
+  B --> C[Talent browse / open-to-work]
+  C --> D[Connect request]
+  D --> E{Accepted?}
+  E -->|Yes| F[Message]
+  E -->|Pending| D
+  F --> G[Invite to practice / interview]
+      </div>
+
+      <h2>3) Registration &amp; persona</h2>
       <div class="mermaid">
 flowchart LR
-  A[Start free] --> B[Register email + password]
-  B --> C[JWT stored locally]
-  C --> D[Pricing page optional]
-  C --> E[Practice free tracks]
-  E --> F[Feedback within daily quota]
+  A[Register] --> B[Pick Learner or Recruiter]
+  B --> C[JWT + persona]
+  C --> D[Learner home /]
+  C --> E[Recruiter home /jobs]
+  D --> F[Profile Network Chat]
+  E --> F
       </div>
       <ol>
-        <li>Create account from <code>/register</code>.</li>
-        <li>Immediately practice HTML/CSS/JS/Python with voice or text.</li>
-        <li>See coaching (score, gaps, delivery tips).</li>
-        <li>Hit Staff/EM or quota → Upgrade CTA.</li>
+        <li>Sign up with persona picker (or switch anytime in header).</li>
+        <li>Learners land on tracks; recruiters prefer Jobs.</li>
+        <li>Same account can switch roles without a second signup.</li>
       </ol>
 
-      <h2>3) Voice interview practice</h2>
+      <h2>4) Network &amp; chat</h2>
+      <div class="mermaid">
+sequenceDiagram
+  actor A as User A
+  actor B as User B
+  participant Net as /network
+  participant API
+  participant Chat as /messages
+
+  A->>Net: Discover → Connect + note
+  Net->>API: POST /v1/connections
+  B->>Net: Incoming → Accept
+  Net->>API: PATCH accepted
+  A->>Chat: Open thread
+  Chat->>API: POST /v1/messages
+  API-->>Chat: Deliver if connected
+      </div>
+
+      <h2>5) Voice practice</h2>
       <div class="mermaid">
 sequenceDiagram
   actor Candidate
   participant UI as Practice UI
-  participant Mic as Browser Speech API
-  participant Coach as Feedback engine
+  participant Mic as Web Speech API
+  participant Coach as Feedback
 
   Candidate->>UI: Hear question TTS
   Candidate->>UI: Speak answer
-  UI->>Mic: continuous recognition
-  Mic-->>UI: transcript into answer box
-  Candidate->>UI: Get voice + content feedback
+  UI->>Mic: recognition
+  Mic-->>UI: transcript editable
   UI->>Coach: input_mode=voice
-  Coach-->>UI: content coaching + delivery_tips
-  UI-->>Candidate: Spoken grammar / fillers / pacing
-      </div>
-      <div class="panel">
-        <ul>
-          <li>Interviews are oral — product mirrors that with mic-first practice.</li>
-          <li>Transcript is editable before submit (fix speech-to-text mistakes).</li>
-          <li>Works in Chrome / Edge / Safari; typed fallback always available.</li>
-        </ul>
+  Coach-->>UI: content + delivery_tips
       </div>
 
-      <h2>4) Paywall &amp; upgrade</h2>
+      <h2>6) Paywall</h2>
       <div class="mermaid">
 flowchart TD
-  A[Attempt practice / feedback] --> B{Signed in?}
-  B -->|No| C[Prompt create account]
+  A[Practice / feedback] --> B{Signed in?}
+  B -->|No| C[Register]
   B -->|Yes| D{Pro or free track?}
-  D -->|Pro-only track| E[Show Pro paywall]
-  D -->|Free track| F{Daily quota left?}
-  F -->|No| E
-  F -->|Yes| G[Return coaching]
-  E --> H[Pricing: monthly / yearly]
-  H --> I{Stripe configured?}
-  I -->|Yes| J[Checkout session]
-  I -->|No| K[Demo upgrade for pilots]
-  J --> L[Webhook → plan=pro]
-  K --> L
-  L --> G
-      </div>
-
-      <h2>5) Personas &amp; happy paths</h2>
-      <div class="grid-2">
-        <div class="card">
-          <strong>IC candidate (Staff)</strong>
-          <p class="muted">
-            Browse Staff docs free → upgrade for mock ownership / design /
-            AI-safety questions → voice STAR answers.
-          </p>
-        </div>
-        <div class="card">
-          <strong>Engineering Manager</strong>
-          <p class="muted">
-            Study people + vendor transition docs → Pro practice opener /
-            conflict stories out loud.
-          </p>
-        </div>
-        <div class="card">
-          <strong>Java → AI upskiller</strong>
-          <p class="muted">
-            Path + RAG + Agents docs → practice explaining systems in spoken
-            form for internal mobility interviews.
-          </p>
-        </div>
-        <div class="card">
-          <strong>Language learner</strong>
-          <p class="muted">
-            Free HTML/CSS/JS/Python loop → convert to Pro for TS/React/Java/Node
-            interview depth.
-          </p>
-        </div>
+  D -->|Locked| E[Pricing]
+  D -->|Free track| F{Quota?}
+  F -->|Empty| E
+  F -->|OK| G[Coaching]
+  E --> H{Stripe?}
+  H -->|Yes| I[Checkout]
+  H -->|No| J[Demo upgrade]
+  I --> G
+  J --> G
       </div>
 
       <h2>Screen map</h2>
@@ -177,10 +158,42 @@ flowchart TD
             </tr>
           </thead>
           <tbody>
-            <tr><td><code>/</code></td><td>Tracks · Learn · Practice · voice + feedback</td></tr>
-            <tr><td><code>/register</code> · <code>/login</code></td><td>Account creation / sign-in</td></tr>
-            <tr><td><code>/pricing</code></td><td>Free vs Pro, Stripe or demo upgrade</td></tr>
-            <tr><td><code>/product/</code></td><td>This documentation microsite</td></tr>
+            <tr>
+              <td><code>/</code></td>
+              <td>Tracks · Learn · Practice</td>
+            </tr>
+            <tr>
+              <td><code>/jobs</code></td>
+              <td>Job board · post / browse</td>
+            </tr>
+            <tr>
+              <td><code>/profile</code> · <code>/profile/:id</code></td>
+              <td>Talent card · Connect / Message</td>
+            </tr>
+            <tr>
+              <td><code>/network</code></td>
+              <td>Connections · requests · discover</td>
+            </tr>
+            <tr>
+              <td><code>/messages</code></td>
+              <td>Chat inbox</td>
+            </tr>
+            <tr>
+              <td><code>/agentic-path</code> · <code>/snowflake-path</code></td>
+              <td>YouTube learning curricula</td>
+            </tr>
+            <tr>
+              <td><code>/for-companies</code> · <code>/pricing</code></td>
+              <td>Hiring studio · Free/Pro</td>
+            </tr>
+            <tr>
+              <td><code>/admin</code></td>
+              <td>Product analytics (admins)</td>
+            </tr>
+            <tr>
+              <td><code>/product/</code></td>
+              <td>This documentation microsite</td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -190,7 +203,10 @@ flowchart TD
         <a class="btn" href="./sales-playbook.html">Sales playbook</a>
       </div>
 
-      <footer class="footer">AI Tutor Studio · User flows<br />© 2026 Kallepalli Labs. All rights reserved.</footer>
+      <footer class="footer">
+        AI Tutor Studio · User flows<br />© 2026 Kallepalli Labs. All rights
+        reserved.
+      </footer>
     </div>
   </body>
 </html>

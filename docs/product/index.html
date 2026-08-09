@@ -6,12 +6,12 @@
     <title>AI Tutor Studio — Product Documentation</title>
     <meta
       name="description"
-      content="Sellable product docs for AI Tutor Studio: architecture, user flows, monetization, and go-to-market."
+      content="Learn. Practice. Hire. Product docs for AI Tutor Studio — talent studio for learners and hiring teams."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;700&family=IBM+Plex+Sans:wght@400;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;700&family=Sora:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./styles.css" />
@@ -19,80 +19,140 @@
   <body>
     <div class="wrap">
       <nav class="nav">
-        <a class="nav-brand" href="./">AI Tutor Studio Docs</a>
+        <a class="nav-brand" href="./"
+          >AI Tutor Studio Docs<span>Learn · Practice · Hire</span></a
+        >
         <div class="nav-links">
           <a class="active" href="./">Overview</a>
-          <a href="../agentic-path">Agentic video path</a>
-          <a href="../snowflake-path">Snowflake path</a>
           <a href="./architecture.html">Architecture</a>
-          <a href="./user-flows.html">User flows</a>
+          <a href="./user-flows.html">Flows</a>
           <a href="./monetization.html">Monetization</a>
           <a href="./api.html">API</a>
           <a href="./go-live.html">Go-live</a>
-          <a href="./sales-playbook.html">Sales playbook</a>
+          <a href="./sales-playbook.html">Sales</a>
           <a href="../">Open app</a>
         </div>
       </nav>
 
       <p class="eyebrow">Product documentation</p>
-      <h1>Interview prep that feels like the real room</h1>
+      <h1>Learn. Practice. Hire.</h1>
+      <p class="tagline">
+        <b>Talent studio</b> for candidates and hiring teams · by Kallepalli Labs
+      </p>
       <p class="lede">
-        AI Tutor Studio is a freemium tutoring product: curated tracks, topic
-        documentation, typed or spoken practice, and AI coaching — with Free vs
-        Pro plans and Stripe subscriptions. Use these docs to demo, sell, and
-        operate the product.
+        One product surface: learners study and practice out loud; recruiters post
+        jobs, browse talent profiles, and connect. Free + Pro freemium with Stripe.
+        Use these docs to demo, sell, and operate.
       </p>
 
       <div class="cta-row">
         <a class="btn primary" href="../">Try the live product</a>
-        <a class="btn" href="./sales-playbook.html">Sales one-pager &amp; demo script</a>
         <a class="btn" href="./architecture.html">System architecture</a>
+        <a class="btn" href="./sales-playbook.html">Sales playbook</a>
       </div>
 
-      <h2>What buyers get</h2>
+      <h2>Two audiences</h2>
+      <div class="grid-2">
+        <div class="card">
+          <span class="pill jade">Learners</span>
+          <strong>Learn &amp; practice</strong>
+          <p class="muted">
+            Tracks, topic docs, voice practice, AI coaching, LinkedIn-style
+            profile, network, and job applications.
+          </p>
+        </div>
+        <div class="card">
+          <span class="pill">Recruiters</span>
+          <strong>Hire with structure</strong>
+          <p class="muted">
+            Post jobs, browse open-to-work talent, connect and message, run
+            consistent interview readiness loops.
+          </p>
+        </div>
+      </div>
+
+      <h2>Product pillars</h2>
       <div class="grid-2">
         <div class="card">
           <span class="pill">Learn</span>
-          <strong>Topic docs under every track</strong>
+          <strong>Docs + video paths</strong>
           <p class="muted">
-            Overview, key points, examples, common mistakes, and “before you
-            practice” prompts — a one-stop study surface.
+            Topic docs under every track · Agentic AI YouTube path · Snowflake +
+            Cortex path.
           </p>
         </div>
         <div class="card">
           <span class="pill">Practice</span>
-          <strong>Type or speak answers</strong>
+          <strong>Type or speak</strong>
           <p class="muted">
-            Mic dictation mirrors voice interviews. Coaching covers content plus
-            fillers, grammar, and pacing.
+            Mic dictation mirrors interviews. Coaching covers content, fillers,
+            grammar, and pacing.
           </p>
         </div>
         <div class="card">
-          <span class="pill">Coach</span>
-          <strong>AI or rubric feedback</strong>
+          <span class="pill">Network</span>
+          <strong>Profile · connections · chat</strong>
           <p class="muted">
-            Score, strengths, gaps, stronger answer shape, delivery tips, and a
-            next drill — works even without an OpenAI key.
+            Talent cards, friend requests, and messaging — LinkedIn-style social
+            layer for learners and recruiters.
           </p>
         </div>
         <div class="card">
-          <span class="pill">Monetize</span>
-          <strong>Free + Pro + Stripe</strong>
+          <span class="pill">Hire</span>
+          <strong>Jobs + Free/Pro</strong>
           <p class="muted">
-            HackerRank-style freemium: starter tracks free, Staff/EM and
-            unlimited coaching on Pro.
+            Job board for recruiters · Free starter practice · Pro for Staff/EM
+            and unlimited coaching.
           </p>
         </div>
       </div>
 
       <h2>Documentation map</h2>
       <div class="panel toc">
-        <a href="./architecture.html"><strong>System architecture</strong> — components, data, deploy topology</a>
-        <a href="./user-flows.html"><strong>User flows</strong> — learn → practice → feedback, voice, paywall</a>
-        <a href="./monetization.html"><strong>Monetization</strong> — Free vs Pro matrix, Stripe lifecycle</a>
-        <a href="./api.html"><strong>API reference</strong> — auth, billing, tutor endpoints</a>
-        <a href="./go-live.html"><strong>Go-live runbook</strong> — cloud deploy + OpenAI + Stripe checklist</a>
-        <a href="./sales-playbook.html"><strong>Sales playbook</strong> — pitch, objection handling, demo path</a>
+        <a href="./architecture.html"
+          ><strong>Architecture</strong> — components, data model, deploy
+          topology</a
+        >
+        <a href="./user-flows.html"
+          ><strong>User flows</strong> — learner + recruiter journeys, paywall</a
+        >
+        <a href="./monetization.html"
+          ><strong>Monetization</strong> — Free vs Pro, Stripe lifecycle</a
+        >
+        <a href="./api.html"
+          ><strong>API</strong> — auth, tutor, jobs, profiles, connections,
+          chat</a
+        >
+        <a href="./go-live.html"
+          ><strong>Go-live</strong> — cloud + OpenAI + Stripe checklist</a
+        >
+        <a href="./sales-playbook.html"
+          ><strong>Sales playbook</strong> — pitch, demo, objections</a
+        >
+      </div>
+
+      <h2>App surface (lean nav)</h2>
+      <div class="panel">
+        <table>
+          <thead>
+            <tr>
+              <th>Primary</th>
+              <th>Under More</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Learn · Jobs · Network · Chat</td>
+              <td>Profile · Agentic · Snowflake · Plans · Hire · Docs</td>
+            </tr>
+            <tr>
+              <td colspan="2">
+                Role switcher: <strong>Learner</strong> ↔
+                <strong>Recruiter / hiring</strong>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       <h2>Plans at a glance</h2>
@@ -107,17 +167,12 @@
           </thead>
           <tbody>
             <tr>
-              <td>Learn docs (all tracks)</td>
+              <td>Learn docs + video paths</td>
               <td>Yes</td>
               <td>Yes</td>
             </tr>
             <tr>
-              <td>Practice HTML / CSS / JS / Python</td>
-              <td>Yes</td>
-              <td>Yes</td>
-            </tr>
-            <tr>
-              <td>Java → Python developer track</td>
+              <td>Practice HTML / CSS / JS / Python / Java→Python</td>
               <td>Yes</td>
               <td>Yes</td>
             </tr>
@@ -132,8 +187,8 @@
               <td>Unlimited</td>
             </tr>
             <tr>
-              <td>Voice answers + delivery coaching</td>
-              <td>Yes (quota applies)</td>
+              <td>Profile · Network · Chat · Jobs</td>
+              <td>Yes</td>
               <td>Yes</td>
             </tr>
             <tr>
@@ -145,19 +200,11 @@
         </table>
       </div>
 
-      <h2>Tracks shipped</h2>
-      <div class="panel">
-        <ul>
-          <li><strong>Interview:</strong> Staff Engineer, Engineering Manager, Java → Production AI</li>
-          <li><strong>Career switch:</strong> Java → Python Developer + ordered <a href="../agentic-path">Agentic AI YouTube path</a> + <a href="../snowflake-path">Data Engineer → Snowflake + Agentic AI</a></li>
-          <li><strong>Languages:</strong> Java, Python, JavaScript, TypeScript, React, Node.js, HTML, CSS</li>
-        </ul>
-      </div>
-
       <footer class="footer">
-        AI Tutor Studio · Product docs for demos, investors, and customers ·
-        <a href="https://github.com/SatishKallepalli-KSO/ai-tutor-studio">GitHub</a>
-        <br />
+        AI Tutor Studio · Kallepalli Labs ·
+        <a href="https://github.com/SatishKallepalli-KSO/ai-tutor-studio"
+          >GitHub</a
+        ><br />
         © 2026 Kallepalli Labs. All rights reserved.
       </footer>
     </div>

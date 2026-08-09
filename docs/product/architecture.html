@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;700&family=IBM+Plex+Sans:wght@400;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;700&family=Sora:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./styles.css" />
@@ -18,15 +18,15 @@
         theme: 'dark',
         themeVariables: {
           primaryColor: '#12352c',
-          primaryTextColor: '#edf1f4',
-          primaryBorderColor: '#3dd6a5',
-          lineColor: '#9aa6b2',
-          secondaryColor: '#121820',
-          tertiaryColor: '#0b1017',
-          background: '#0b1017',
-          mainBkg: '#121820',
-          nodeBorder: '#3dd6a5',
-          fontFamily: 'IBM Plex Sans',
+          primaryTextColor: '#f4f1ea',
+          primaryBorderColor: '#3dcf9a',
+          lineColor: '#9a968c',
+          secondaryColor: '#101214',
+          tertiaryColor: '#060708',
+          background: '#060708',
+          mainBkg: '#101214',
+          nodeBorder: '#3dcf9a',
+          fontFamily: 'Sora',
         },
       })
     </script>
@@ -34,15 +34,17 @@
   <body>
     <div class="wrap">
       <nav class="nav">
-        <a class="nav-brand" href="./">AI Tutor Studio Docs</a>
+        <a class="nav-brand" href="./"
+          >AI Tutor Studio Docs<span>Learn · Practice · Hire</span></a
+        >
         <div class="nav-links">
           <a href="./">Overview</a>
           <a class="active" href="./architecture.html">Architecture</a>
-          <a href="./user-flows.html">User flows</a>
+          <a href="./user-flows.html">Flows</a>
           <a href="./monetization.html">Monetization</a>
           <a href="./api.html">API</a>
           <a href="./go-live.html">Go-live</a>
-          <a href="./sales-playbook.html">Sales playbook</a>
+          <a href="./sales-playbook.html">Sales</a>
           <a href="../">Open app</a>
         </div>
       </nav>
@@ -50,21 +52,28 @@
       <p class="eyebrow">Technical design</p>
       <h1>System architecture</h1>
       <p class="lede">
-        A production-shaped freemium tutoring stack: React client, FastAPI
-        backend, SQLite/Postgres identity &amp; usage store, Stripe billing, and
-        optional OpenAI coaching — with a static GitHub Pages mode for demos.
+        Dual-audience talent studio: React client, FastAPI (v0.6), identity +
+        social + jobs store, Stripe, optional OpenAI — plus static GitHub Pages
+        demos with local fallbacks.
       </p>
 
       <h2>High-level topology</h2>
       <div class="mermaid">
 flowchart LR
-  U[Learner / Buyer] --> W[Web app React + Vite]
+  L[Learner] --> W[Web React + Vite]
+  R[Recruiter] --> W
   W -->|JWT + REST| A[FastAPI API]
-  A --> DB[(Users / usage SQLite or Postgres)]
-  A --> S[Stripe Checkout Portal Webhooks]
+  A --> DB[(Postgres or SQLite)]
+  A --> S[Stripe]
   A --> O[OpenAI optional]
-  W -.->|static Pages demo| L[Local rubric + browser speech]
+  W -.->|Pages demo| LOC[Local rubric + localStorage]
   S --> A
+  DB --- U[Users personas]
+  DB --- P[Profiles]
+  DB --- J[Jobs]
+  DB --- C[Connections]
+  DB --- M[Messages]
+  DB --- E[Feature events]
       </div>
 
       <h2>Logical components</h2>
@@ -72,31 +81,61 @@ flowchart LR
         <div class="card">
           <strong>apps/web</strong>
           <p class="muted">
-            Tracks, Learn docs, Practice (text/voice), Pricing, Auth UI.
-            SpeechRecognition for dictation; SpeechSynthesis for “Hear question”.
+            Learn/Practice · Jobs · Profile · Network · Chat · Paths · Pricing ·
+            Admin. Persona switcher (learner / recruiter). Lean primary nav +
+            More menu.
           </p>
         </div>
         <div class="card">
           <strong>apps/api</strong>
           <p class="muted">
-            Auth (register/login/JWT), entitlements, Stripe, tutor feedback,
-            optional static SPA hosting from Docker.
+            Auth + persona · entitlements · Stripe · tutor feedback · jobs ·
+            profiles · connections · messages · admin analytics · public stats.
           </p>
         </div>
         <div class="card">
-          <strong>Curriculum layer</strong>
+          <strong>Curriculum</strong>
           <p class="muted">
-            <code>curriculum.ts</code> topic docs + <code>data.ts</code> /
-            <code>content.json</code> questions linked by <code>topic_id</code>.
+            <code>curriculum.ts</code> topic docs · question banks ·
+            <code>agenticPath.ts</code> / <code>snowflakePath.ts</code> video
+            curricula.
           </p>
         </div>
         <div class="card">
           <strong>docs/ + docs/product/</strong>
           <p class="muted">
-            GitHub Pages ships the app build; <code>docs/product/</code> holds
-            this sellable documentation site (preserved on publish).
+            Pages ships the app build; <code>docs/product/</code> is this
+            microsite (preserved by <code>publish-pages.sh</code>).
           </p>
         </div>
+      </div>
+
+      <h2>Domain model</h2>
+      <div class="panel">
+        <pre>User
+  id, email, password_hash, name
+  plan, stripe_*, subscription_status
+  persona: learner | recruiter
+  is_admin
+
+LearnerProfile
+  user_id, headline, location, about
+  open_to_work, skills[], experience[], education[]
+  target_roles[], visibility: public | private
+
+JobPost
+  posted_by_user_id, title, company, location
+  employment_type, workplace, description, status
+
+Connection
+  requester_id, addressee_id
+  status: pending | accepted | declined | withdrawn
+  note
+
+ChatMessage
+  sender_id, recipient_id, body, read_at
+
+UsageCounter · FeatureEvent</pre>
       </div>
 
       <h2>Request path — practice feedback</h2>
@@ -110,41 +149,61 @@ sequenceDiagram
 
   User->>Web: Speak or type answer
   Web->>API: POST /v1/tutor/feedback + JWT
-  API->>DB: Load user plan + daily usage
+  API->>DB: Load plan + daily usage
   alt Free quota exceeded or Pro track locked
     API-->>Web: 402 paywall
-    Web-->>User: Upgrade CTA
   else Allowed
-    API->>LLM: Coach JSON (if key set)
-    alt No LLM
-      API->>API: Local rubric + delivery tips
-    end
-    API->>DB: Increment free usage
+    API->>LLM: Coach JSON if key set
+    API->>DB: Increment usage + feature event
     API-->>Web: Score strengths gaps delivery tips
-    Web-->>User: Coaching panel
   end
       </div>
 
-      <h2>Auth &amp; billing data model</h2>
-      <div class="panel">
-        <pre>User
-  id, email, password_hash, name
-  plan: free | pro
-  stripe_customer_id, stripe_subscription_id
-  subscription_status: inactive | active | trialing | demo | canceled…
+      <h2>Request path — hire &amp; network</h2>
+      <div class="mermaid">
+sequenceDiagram
+  actor Recruiter
+  actor Learner
+  participant Web
+  participant API
+  participant DB
 
-UsageCounter
-  user_id, day, feedback_count</pre>
+  Recruiter->>Web: Post job
+  Web->>API: POST /v1/jobs
+  API->>DB: JobPost open
+  Learner->>Web: Browse jobs / Easy apply
+  Learner->>Web: Edit profile open-to-work
+  Recruiter->>Web: Connect request
+  Web->>API: POST /v1/connections
+  Learner->>API: PATCH accept
+  Recruiter->>API: POST /v1/messages
+  Note over API,DB: Messaging requires accepted connection
       </div>
 
       <h2>Entitlements</h2>
       <div class="panel">
         <ul>
-          <li><strong>Learn:</strong> all tracks always readable (acquisition funnel).</li>
-          <li><strong>Free practice tracks:</strong> html, css, javascript, python.</li>
-          <li><strong>Free feedback:</strong> 5 / UTC day.</li>
-          <li><strong>Pro:</strong> all tracks + unlimited feedback; Stripe portal.</li>
-          <li><strong>Demo upgrade:</strong> local Pro unlock when Stripe is not configured.</li>
+          <li><strong>Learn:</strong> all tracks + video paths always readable.</li>
+          <li>
+            <strong>Free practice:</strong> html, css, javascript, python,
+            java-to-python · 5 feedbacks / UTC day.
+          </li>
+          <li><strong>Pro:</strong> all tracks · unlimited feedback · Stripe portal.</li>
+          <li>
+            <strong>Social + jobs:</strong> available on Free and Pro (persist
+            with API; localStorage fallback on Pages).
+          </li>
+          <li><strong>Admin:</strong> <code>ADMIN_EMAILS</code> → <code>/admin</code>.</li>
+        </ul>
+      </div>
+
+      <h2>UI architecture (current)</h2>
+      <div class="panel">
+        <ul>
+          <li>Editorial dark theme: Fraunces + Sora · jade + champagne accents.</li>
+          <li>Primary nav: Learn · Jobs · Network · Chat (+ More).</li>
+          <li>Compact page heads: title + one-line sub + single CTA.</li>
+          <li>Pages-only mode: demo jobs, profiles, connections, chat in browser.</li>
         </ul>
       </div>
 
@@ -153,16 +212,16 @@ UsageCounter
 flowchart TB
   subgraph pages [GitHub Pages]
     SPA[Static React build]
-    PRODDOCS[docs/product microsite]
+    DOCS[docs/product microsite]
   end
-  subgraph render [Render Docker]
-    BOX[FastAPI + built static]
-    SQLITE[(SQLite volume or Postgres)]
-    BOX --> SQLITE
+  subgraph cloud [Render / Docker]
+    BOX[FastAPI + static UI]
+    PG[(Postgres)]
+    BOX --> PG
   end
   Buyer --> pages
-  Buyer --> render
-  pages -.->|VITE_API_BASE| render
+  Buyer --> cloud
+  pages -.->|VITE_API_BASE| cloud
       </div>
 
       <div class="panel">
@@ -177,30 +236,30 @@ flowchart TB
           <tbody>
             <tr>
               <td>GitHub Pages</td>
-              <td>Marketing + light demos</td>
-              <td>Browser rubric; auth/billing need API URL</td>
+              <td>Marketing + demos</td>
+              <td>Local fallbacks; wire <code>VITE_API_BASE</code> for real auth/jobs</td>
             </tr>
             <tr>
-              <td>Render Docker</td>
+              <td>Docker / Render</td>
               <td>Paid product</td>
-              <td>JWT, Stripe, OpenAI, SQLite/Postgres</td>
+              <td>JWT, Stripe, OpenAI, Postgres</td>
             </tr>
             <tr>
               <td>Local monorepo</td>
-              <td>Sales demos on laptop</td>
+              <td>Dev / sales laptop</td>
               <td>Vite proxy → :8000</td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <h2>Security posture (sales-ready talking points)</h2>
+      <h2>Security talking points</h2>
       <ul>
-        <li>Passwords hashed with bcrypt; JWT bearer tokens.</li>
-        <li>Stripe secrets only on server; webhook signature support.</li>
-        <li>Feedback and checkout require authenticated sessions.</li>
-        <li>CORS configurable; production should set strong <code>JWT_SECRET</code>.</li>
-        <li>Voice stays in-browser (Web Speech API) — audio is not uploaded by default.</li>
+        <li>bcrypt passwords · JWT bearer · Stripe secrets server-side only.</li>
+        <li>Feedback, checkout, messaging, and job posts require auth where gated.</li>
+        <li>Private profiles hidden from public talent browse.</li>
+        <li>Chat only between accepted connections.</li>
+        <li>Voice stays in-browser (Web Speech API) by default.</li>
       </ul>
 
       <div class="cta-row">
@@ -208,7 +267,10 @@ flowchart TB
         <a class="btn" href="./api.html">API reference</a>
       </div>
 
-      <footer class="footer">AI Tutor Studio · Architecture<br />© 2026 Kallepalli Labs. All rights reserved.</footer>
+      <footer class="footer">
+        AI Tutor Studio · Architecture<br />© 2026 Kallepalli Labs. All rights
+        reserved.
+      </footer>
     </div>
   </body>
 </html>
