@@ -64,13 +64,124 @@ a {
 .atmosphere {
   position: fixed;
   inset: 0;
-  z-index: -3;
+  z-index: -4;
   background:
     radial-gradient(920px 520px at 8% -12%, rgba(61, 207, 154, 0.14), transparent 58%),
     radial-gradient(780px 480px at 92% 0%, rgba(201, 180, 152, 0.09), transparent 55%),
     radial-gradient(640px 420px at 50% 110%, rgba(61, 207, 154, 0.05), transparent 60%),
     radial-gradient(420px 280px at 72% 38%, rgba(201, 180, 152, 0.04), transparent 70%),
     linear-gradient(165deg, #0c0e11 0%, #070809 38%, #050607 100%);
+  animation: atmosphereBreathe 18s ease-in-out infinite alternate;
+}
+
+/* Voice/signal ambient field — rich but quiet so copy stays primary */
+.ambient-field {
+  position: fixed;
+  inset: 0;
+  z-index: -3;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.ambient-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(48px);
+  will-change: transform, opacity;
+}
+
+.ambient-orb-a {
+  width: min(48vw, 420px);
+  height: min(48vw, 420px);
+  left: -8%;
+  top: 12%;
+  background: radial-gradient(circle, rgba(61, 207, 154, 0.22), transparent 68%);
+  animation: orbDriftA 22s ease-in-out infinite alternate;
+}
+
+.ambient-orb-b {
+  width: min(42vw, 380px);
+  height: min(42vw, 380px);
+  right: -6%;
+  top: 4%;
+  background: radial-gradient(circle, rgba(201, 180, 152, 0.16), transparent 70%);
+  animation: orbDriftB 26s ease-in-out infinite alternate;
+}
+
+.ambient-orb-c {
+  width: min(56vw, 520px);
+  height: min(56vw, 520px);
+  left: 28%;
+  bottom: -18%;
+  background: radial-gradient(circle, rgba(61, 207, 154, 0.1), transparent 72%);
+  animation: orbDriftC 30s ease-in-out infinite alternate;
+}
+
+.ambient-ring {
+  position: absolute;
+  left: 72%;
+  top: 22%;
+  width: min(34vw, 280px);
+  height: min(34vw, 280px);
+  margin: 0;
+  border: 1px solid rgba(61, 207, 154, 0.14);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: ringPulse 7.5s ease-out infinite;
+}
+
+.ambient-ring-2 {
+  animation-delay: 2.4s;
+  border-color: rgba(201, 180, 152, 0.12);
+}
+
+.ambient-ring-3 {
+  animation-delay: 4.8s;
+  border-color: rgba(61, 207, 154, 0.1);
+}
+
+.ambient-beam {
+  position: absolute;
+  left: -20%;
+  top: 38%;
+  width: 140%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(61, 207, 154, 0.08),
+    rgba(201, 180, 152, 0.14),
+    rgba(61, 207, 154, 0.08),
+    transparent
+  );
+  transform: rotate(-8deg);
+  animation: beamSweep 14s ease-in-out infinite alternate;
+  opacity: 0.7;
+}
+
+.ambient-wave {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 8%;
+  width: 100%;
+  height: min(18vh, 140px);
+  opacity: 0.35;
+}
+
+.ambient-wave-path {
+  stroke-width: 1.25;
+  stroke-linecap: round;
+}
+
+.ambient-wave-path-a {
+  stroke: rgba(61, 207, 154, 0.45);
+  animation: waveSlide 9s ease-in-out infinite alternate;
+}
+
+.ambient-wave-path-b {
+  stroke: rgba(201, 180, 152, 0.35);
+  animation: waveSlide 11s ease-in-out infinite alternate-reverse;
 }
 
 .film-grain {
@@ -95,6 +206,80 @@ a {
   mask-image: radial-gradient(ellipse at center, black 18%, transparent 72%);
   pointer-events: none;
   animation: gridDrift 36s linear infinite;
+}
+
+@keyframes atmosphereBreathe {
+  from {
+    filter: saturate(1) brightness(1);
+  }
+  to {
+    filter: saturate(1.08) brightness(1.04);
+  }
+}
+
+@keyframes orbDriftA {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.85;
+  }
+  to {
+    transform: translate3d(12%, 10%, 0) scale(1.12);
+    opacity: 1;
+  }
+}
+
+@keyframes orbDriftB {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(-14%, 16%, 0) scale(1.08);
+  }
+}
+
+@keyframes orbDriftC {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(8%, -12%, 0) scale(1.15);
+  }
+}
+
+@keyframes ringPulse {
+  0% {
+    transform: translate(-50%, -50%) scale(0.55);
+    opacity: 0.55;
+  }
+  70% {
+    opacity: 0.12;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.55);
+    opacity: 0;
+  }
+}
+
+@keyframes beamSweep {
+  from {
+    transform: rotate(-10deg) translateY(-12px);
+    opacity: 0.35;
+  }
+  to {
+    transform: rotate(-4deg) translateY(18px);
+    opacity: 0.8;
+  }
+}
+
+@keyframes waveSlide {
+  from {
+    transform: translateX(-2%);
+    opacity: 0.45;
+  }
+  to {
+    transform: translateX(2%);
+    opacity: 0.85;
+  }
 }
 
 @keyframes gridDrift {
@@ -1994,6 +2179,11 @@ a.ad-slot:hover {
   .reveal,
   .grid-glow,
   .film-grain,
+  .atmosphere,
+  .ambient-orb,
+  .ambient-ring,
+  .ambient-beam,
+  .ambient-wave-path,
   .hero-orbit,
   .pulse-dot,
   .track-card,
@@ -2006,6 +2196,12 @@ a.ad-slot:hover {
 
   .film-grain {
     opacity: 0.03;
+  }
+
+  .ambient-ring,
+  .ambient-beam,
+  .ambient-wave {
+    opacity: 0.2;
   }
 }
 

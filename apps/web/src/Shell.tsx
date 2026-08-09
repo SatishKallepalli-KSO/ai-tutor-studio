@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
+import { AmbientField } from './AmbientField'
 import { useAuth } from './auth'
 import { BRAND, PERSONAS, type Persona } from './brand'
 import { ChatDock } from './ChatDock'
@@ -57,6 +58,7 @@ export function Shell({
   return (
     <div className={wide ? 'shell shell-wide' : 'shell'}>
       <div className="atmosphere" aria-hidden="true" />
+      <AmbientField />
       <div className="grid-glow" aria-hidden="true" />
       <div className="film-grain" aria-hidden="true" />
 
