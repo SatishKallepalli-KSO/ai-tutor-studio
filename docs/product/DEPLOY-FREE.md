@@ -108,7 +108,7 @@ python3 -c "import secrets; print(secrets.token_urlsafe(48))"
 - [ ] Staff path → Speak & coach returns feedback
 - [ ] `/pricing` → Demo upgrade unlocks Pro (until Stripe)
 - [ ] Set `ADMIN_EMAILS` and open `/admin`
-- [ ] (Optional) Neon `DATABASE_URL` so users survive redeploys
+- [ ] Confirm `DATABASE_URL` points at Render/Neon Postgres (not SQLite)
 - [ ] (Optional) Custom free subdomain CNAME
 - [ ] (Optional) Point GitHub Pages at API later with `VITE_API_BASE`
 
