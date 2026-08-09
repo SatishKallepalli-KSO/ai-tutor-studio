@@ -15,13 +15,9 @@ Neon Free includes ~0.5 GB storage, 100 CU-hours/mo, scale-to-zero when idle, 6h
 
 ---
 
-## Old Render Free Postgres (safe to delete)
+## Old Render Free Postgres
 
-Render DB `ai-tutor-studio-db` expires **2026-09-08**. After migration it is unused.
-
-You can delete it in the [Render dashboard](https://dashboard.render.com/d/dpg-d9s1aeijnfac738kde70-a) to avoid confusion / free-slot limits.
-
-If you ever stayed on Render paid instead: **Basic-256mb ≈ $6/month**.
+**Deleted** (2026-08-09). App runs only on Neon Free now.
 
 ---
 
