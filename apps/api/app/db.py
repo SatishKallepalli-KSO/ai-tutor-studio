@@ -51,3 +51,4 @@ def init_db() -> None:
 
     Base.metadata.create_all(bind=engine)
     _ensure_column("users", "is_admin", "is_admin BOOLEAN DEFAULT 0")
+    _ensure_column("users", "persona", "persona VARCHAR(32) DEFAULT 'learner'")

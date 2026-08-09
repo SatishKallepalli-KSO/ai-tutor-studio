@@ -10,6 +10,26 @@ export const BRAND = {
   contactEmail: 'hello@kallepallilabs.com',
 } as const
 
+export type Persona = 'learner' | 'recruiter'
+
+export const PERSONAS: Record<
+  Persona,
+  { label: string; short: string; homePath: string; blurb: string }
+> = {
+  learner: {
+    label: 'Learner',
+    short: 'Learn',
+    homePath: '/',
+    blurb: 'Study paths, practice out loud, get coached.',
+  },
+  recruiter: {
+    label: 'Recruiter / hiring',
+    short: 'Hire',
+    homePath: '/for-companies',
+    blurb: 'Run structured interviews and hire with confidence.',
+  },
+}
+
 export const AUDIENCES = {
   talent: {
     label: 'For talent',

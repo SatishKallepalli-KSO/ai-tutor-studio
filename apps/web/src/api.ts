@@ -53,6 +53,7 @@ export type UserProfile = {
   subscription_status: string
   is_pro: boolean
   is_admin?: boolean
+  persona?: 'learner' | 'recruiter'
   feedback_used_today: number
   feedback_limit_today: number | string
   free_practice_tracks: string[]
@@ -217,6 +218,7 @@ export const api = {
     email: string
     password: string
     name: string
+    persona?: 'learner' | 'recruiter'
   }): Promise<{ access_token: string; user: UserProfile }> {
     return request('/v1/auth/register', {
       method: 'POST',
@@ -236,6 +238,15 @@ export const api = {
 
   async me(): Promise<UserProfile> {
     return request('/v1/auth/me')
+  },
+
+  async updatePersona(
+    persona: 'learner' | 'recruiter',
+  ): Promise<UserProfile> {
+    return request('/v1/auth/me/persona', {
+      method: 'PATCH',
+      body: JSON.stringify({ persona }),
+    })
   },
 
   async plans(): Promise<BillingPlans> {

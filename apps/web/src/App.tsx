@@ -13,6 +13,7 @@ import { track as trackEvent } from './analytics'
 import { useAuth } from './auth'
 import { AUDIENCES, BRAND } from './brand'
 import { getTopic, topicsForTrack, type Topic } from './curriculum'
+import { usePersona } from './persona'
 import { Shell, TRACK_GROUPS } from './Shell'
 import { TrustStats } from './TrustStats'
 import { speakText, stopSpeaking, useSpeechAnswer } from './useSpeechAnswer'
@@ -30,6 +31,7 @@ function speakSeconds(words: number) {
 
 export default function App() {
   const { user, refresh } = useAuth()
+  const { isRecruiter } = usePersona()
   const [params] = useSearchParams()
   const [tracks, setTracks] = useState<Track[]>([])
   const [trackId, setTrackId] = useState<string | null>(null)
@@ -263,30 +265,61 @@ export default function App() {
           <section className="hero reveal">
             <p className="eyebrow">{BRAND.product}</p>
             <h1>
-              {BRAND.tagline}
-              <span>One studio for talent and hiring teams.</span>
+              {isRecruiter ? 'Hire with structure' : BRAND.tagline}
+              <span>
+                {isRecruiter
+                  ? 'Recruiter view — interviews and readiness.'
+                  : 'One studio for talent and hiring teams.'}
+              </span>
             </h1>
-            <p className="hero-lede">{BRAND.oneLiner}</p>
+            <p className="hero-lede">
+              {isRecruiter
+                ? AUDIENCES.companies.blurb
+                : BRAND.oneLiner}
+            </p>
             <div className="hero-cta">
-              <a className="btn primary" href="#paths">
-                Learn &amp; practice
-              </a>
-              <Link className="btn ghost" to="/for-companies">
-                Hire candidates
-              </Link>
-              <Link className="btn ghost" to="/agentic-path">
-                Backend → AI
-              </Link>
-              <Link className="btn ghost" to="/compare">
-                Compare
-              </Link>
+              {isRecruiter ? (
+                <>
+                  <Link className="btn primary" to="/for-companies">
+                    Open hiring studio
+                  </Link>
+                  <a
+                    className="btn ghost"
+                    href={`mailto:${BRAND.contactEmail}?subject=Hiring%20pilot`}
+                  >
+                    Talk to sales
+                  </a>
+                  <Link className="btn ghost" to="/compare">
+                    Compare
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <a className="btn primary" href="#paths">
+                    Learn &amp; practice
+                  </a>
+                  <Link className="btn ghost" to="/for-companies">
+                    Hire candidates
+                  </Link>
+                  <Link className="btn ghost" to="/agentic-path">
+                    Backend → AI
+                  </Link>
+                  <Link className="btn ghost" to="/compare">
+                    Compare
+                  </Link>
+                </>
+              )}
             </div>
             <div className="hero-stage" aria-hidden="true">
               <div className="hero-orbit" />
               <div className="hero-panel">
                 <span className="pulse-dot" />
-                Live practice · hiring-ready
-                <em>“I owned the migration end-to-end… latency dropped 40%.”</em>
+                {isRecruiter ? 'Hiring studio · early access' : 'Live practice · hiring-ready'}
+                <em>
+                  {isRecruiter
+                    ? '“Same scorecard across every panelist.”'
+                    : '“I owned the migration end-to-end… latency dropped 40%.”'}
+                </em>
               </div>
             </div>
           </section>

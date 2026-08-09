@@ -27,6 +27,8 @@ class User(Base):
     stripe_subscription_id: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
     subscription_status: Mapped[str] = mapped_column(String(40), default="inactive")
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
+    # learner = talent learn/practice · recruiter = hiring teams
+    persona: Mapped[str] = mapped_column(String(32), default="learner")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
 

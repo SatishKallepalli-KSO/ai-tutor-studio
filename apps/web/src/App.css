@@ -642,6 +642,80 @@ a {
   color: var(--accent-2);
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.persona-switch select {
+  min-height: 36px;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: rgba(244, 241, 234, 0.04);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.persona-pick {
+  margin: 0 0 0.85rem;
+  padding: 0;
+  border: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.persona-pick legend {
+  margin-bottom: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+}
+
+.persona-pick label {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.85rem 0.95rem;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.persona-pick label.active {
+  border-color: rgba(61, 207, 154, 0.45);
+  background: rgba(61, 207, 154, 0.08);
+}
+
+.persona-pick input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.persona-pick strong {
+  font-family: var(--display);
+  font-size: 1.05rem;
+}
+
+.persona-pick span {
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
 @media (max-width: 760px) {
   .dual-audience {
     grid-template-columns: 1fr;

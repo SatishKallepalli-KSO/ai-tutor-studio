@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from './auth'
-import { BRAND } from './brand'
+import { BRAND, PERSONAS, type Persona } from './brand'
+import { usePersona } from './persona'
 import type { ReactNode } from 'react'
 
 export function Shell({
@@ -11,6 +12,7 @@ export function Shell({
   wide?: boolean
 }) {
   const { user, loading, logout } = useAuth()
+  const { persona, setPersona, isLearner, isRecruiter } = usePersona()
   const docsHref = `${import.meta.env.BASE_URL}product/`
 
   return (
@@ -20,7 +22,7 @@ export function Shell({
       <div className="film-grain" aria-hidden="true" />
 
       <header className="site-nav">
-        <Link to="/" className="brand">
+        <Link to={isRecruiter ? '/for-companies' : '/'} className="brand">
           <span className="brand-mark" aria-hidden="true" />
           <span className="brand-text">
             <strong>{BRAND.product}</strong>
@@ -29,34 +31,65 @@ export function Shell({
         </Link>
 
         <nav className="site-links" aria-label="Primary">
-          <Link to="/">Learn</Link>
-          <Link to="/for-companies">Hire</Link>
-          <Link to="/agentic-path">Agentic AI</Link>
-          <Link to="/snowflake-path">Snowflake</Link>
-          <Link to="/pricing">Plans</Link>
-          <Link to="/compare">Compare</Link>
-          <Link to="/company">Company</Link>
+          {isLearner ? (
+            <>
+              <Link to="/">Learn</Link>
+              <Link to="/agentic-path">Agentic AI</Link>
+              <Link to="/snowflake-path">Snowflake</Link>
+              <Link to="/pricing">Plans</Link>
+              <Link to="/for-companies">Hire</Link>
+              <Link to="/compare">Compare</Link>
+              <Link to="/company">Company</Link>
+            </>
+          ) : (
+            <>
+              <Link to="/for-companies">Hire</Link>
+              <Link to="/compare">Compare</Link>
+              <Link to="/company">Company</Link>
+              <Link to="/investors">Partners</Link>
+              <Link to="/">Talent view</Link>
+            </>
+          )}
           {user?.is_admin && <Link to="/admin">Admin</Link>}
           <a href={docsHref}>Docs</a>
         </nav>
 
         <div className="site-actions">
+          <label className="persona-switch" title="Switch role context">
+            <span className="sr-only">Role</span>
+            <select
+              value={persona}
+              onChange={(e) => void setPersona(e.target.value as Persona)}
+              aria-label="View as learner or recruiter"
+            >
+              <option value="learner">{PERSONAS.learner.label}</option>
+              <option value="recruiter">{PERSONAS.recruiter.label}</option>
+            </select>
+          </label>
           {loading ? (
             <span className="plan-badge">…</span>
           ) : user ? (
             <>
               <span className={user.is_pro ? 'plan-badge pro' : 'plan-badge'}>
                 {user.is_pro ? 'Pro' : 'Free'}
-                {!user.is_pro && (
+                {!user.is_pro && isLearner && (
                   <span className="quota">
                     {user.feedback_used_today}/{user.feedback_limit_today}
                   </span>
                 )}
               </span>
-              {!user.is_pro && (
+              {!user.is_pro && isLearner && (
                 <Link className="btn primary sm" to="/pricing">
                   Go Pro
                 </Link>
+              )}
+              {isRecruiter && (
+                <a
+                  className="btn primary sm"
+                  href={`mailto:${BRAND.contactEmail}?subject=Hiring%20pilot`}
+                >
+                  Talk to sales
+                </a>
               )}
               <button
                 type="button"
@@ -73,7 +106,7 @@ export function Shell({
                 Sign in
               </Link>
               <Link className="btn primary sm" to="/register">
-                Start free
+                {isRecruiter ? 'Join as recruiter' : 'Start free'}
               </Link>
             </>
           )}
@@ -90,14 +123,12 @@ export function Shell({
         </div>
         <div className="site-footer-links">
           <Link to="/">Learn</Link>
-          <Link to="/for-companies">For companies</Link>
+          <Link to="/for-companies">Hire</Link>
           <Link to="/about">About</Link>
           <Link to="/company">Company</Link>
           <Link to="/compare">Compare</Link>
           <Link to="/investors">Partner &amp; invest</Link>
           <Link to="/pricing">Plans</Link>
-          <Link to="/agentic-path">Agentic AI</Link>
-          <Link to="/snowflake-path">Snowflake</Link>
           <a href={docsHref}>Product docs</a>
         </div>
       </footer>
@@ -127,7 +158,8 @@ export const TRACK_GROUPS: {
   {
     id: 'languages',
     title: 'Language & stack depth',
-    blurb: 'Sharp fundamentals for day-to-day engineering interviews and on-the-job growth.',
+    blurb:
+      'Sharp fundamentals for day-to-day engineering interviews and on-the-job growth.',
     trackIds: [
       'java',
       'python',

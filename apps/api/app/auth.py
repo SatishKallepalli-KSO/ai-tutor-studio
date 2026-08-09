@@ -41,11 +41,16 @@ class RegisterRequest(BaseModel):
     email: EmailStr
     password: str = Field(min_length=8, max_length=128)
     name: str = Field(default="", max_length=120)
+    persona: str = Field(default="learner", pattern="^(learner|recruiter)$")
 
 
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str = Field(min_length=1, max_length=128)
+
+
+class PersonaUpdate(BaseModel):
+    persona: str = Field(pattern="^(learner|recruiter)$")
 
 
 class UserOut(BaseModel):
@@ -56,6 +61,7 @@ class UserOut(BaseModel):
     subscription_status: str
     is_pro: bool
     is_admin: bool = False
+    persona: str = "learner"
     feedback_used_today: int
     feedback_limit_today: int | str
     free_practice_tracks: list[str]
@@ -112,6 +118,7 @@ def user_to_out(db: Session, user: User) -> UserOut:
         subscription_status=user.subscription_status,
         is_pro=pro,
         is_admin=bool(getattr(user, "is_admin", False)),
+        persona=(getattr(user, "persona", None) or "learner"),
         feedback_used_today=used,
         feedback_limit_today="unlimited" if pro else FREE_FEEDBACK_PER_DAY,
         free_practice_tracks=sorted(FREE_PRACTICE_TRACKS),
@@ -155,6 +162,7 @@ def register(body: RegisterRequest, db: Session = Depends(get_db)) -> AuthRespon
     email = body.email.lower().strip()
     if db.query(User).filter(User.email == email).first():
         raise HTTPException(status_code=400, detail="Email already registered")
+    persona = body.persona if body.persona in {"learner", "recruiter"} else "learner"
     user = User(
         email=email,
         password_hash=hash_password(body.password),
@@ -162,6 +170,7 @@ def register(body: RegisterRequest, db: Session = Depends(get_db)) -> AuthRespon
         plan="free",
         subscription_status="inactive",
         is_admin=email in admin_email_set(),
+        persona=persona,
     )
     db.add(user)
     db.commit()
@@ -185,6 +194,18 @@ def login(body: LoginRequest, db: Session = Depends(get_db)) -> AuthResponse:
 
 @router.get("/me", response_model=UserOut)
 def me(user: User = Depends(get_current_user), db: Session = Depends(get_db)) -> UserOut:
+    return user_to_out(db, user)
+
+
+@router.patch("/me/persona", response_model=UserOut)
+def update_persona(
+    body: PersonaUpdate,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> UserOut:
+    user.persona = body.persona
+    db.commit()
+    db.refresh(user)
     return user_to_out(db, user)
 
 

@@ -12,6 +12,7 @@ import { CompanyPage } from './CompanyPage.tsx'
 import { ComparePage } from './ComparePage.tsx'
 import { ForCompaniesPage } from './ForCompaniesPage.tsx'
 import { InvestorsPage } from './InvestorsPage.tsx'
+import { PersonaProvider } from './persona.tsx'
 import { PricingPage } from './PricingPage.tsx'
 import { SnowflakePathPage } from './SnowflakePathPage.tsx'
 import './index.css'
@@ -22,22 +23,24 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter basename={basename}>
       <AuthProvider>
-        <AnalyticsRouteTracker />
-        <Routes>
-          <Route path="/" element={<App />} />
-          <Route path="/agentic-path" element={<AgenticPathPage />} />
-          <Route path="/snowflake-path" element={<SnowflakePathPage />} />
-          <Route path="/pricing" element={<PricingPage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/company" element={<CompanyPage />} />
-          <Route path="/for-companies" element={<ForCompaniesPage />} />
-          <Route path="/compare" element={<ComparePage />} />
-          <Route path="/investors" element={<InvestorsPage />} />
-          <Route path="/admin" element={<AdminDashboardPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <PersonaProvider>
+          <AnalyticsRouteTracker />
+          <Routes>
+            <Route path="/" element={<App />} />
+            <Route path="/agentic-path" element={<AgenticPathPage />} />
+            <Route path="/snowflake-path" element={<SnowflakePathPage />} />
+            <Route path="/pricing" element={<PricingPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/company" element={<CompanyPage />} />
+            <Route path="/for-companies" element={<ForCompaniesPage />} />
+            <Route path="/compare" element={<ComparePage />} />
+            <Route path="/investors" element={<InvestorsPage />} />
+            <Route path="/admin" element={<AdminDashboardPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </PersonaProvider>
       </AuthProvider>
     </BrowserRouter>
   </StrictMode>,

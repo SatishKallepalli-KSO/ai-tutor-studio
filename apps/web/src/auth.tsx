@@ -9,13 +9,19 @@ import {
 } from 'react'
 import { track } from './analytics'
 import { api, setToken, getToken, type UserProfile } from './api'
+import type { Persona } from './brand'
 
 type AuthContextValue = {
   user: UserProfile | null
   loading: boolean
   refresh: () => Promise<void>
-  login: (email: string, password: string) => Promise<void>
-  register: (name: string, email: string, password: string) => Promise<void>
+  login: (email: string, password: string) => Promise<UserProfile>
+  register: (
+    name: string,
+    email: string,
+    password: string,
+    persona?: Persona,
+  ) => Promise<UserProfile>
   logout: () => void
   setUser: (user: UserProfile | null) => void
 }
@@ -52,14 +58,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(res.access_token)
     setUser(res.user)
     track('login', { path: '/login' })
+    return res.user
   }, [])
 
   const register = useCallback(
-    async (name: string, email: string, password: string) => {
-      const res = await api.register({ name, email, password })
+    async (
+      name: string,
+      email: string,
+      password: string,
+      persona: Persona = 'learner',
+    ) => {
+      const res = await api.register({ name, email, password, persona })
       setToken(res.access_token)
       setUser(res.user)
-      track('register', { path: '/register' })
+      track('register', {
+        path: '/register',
+        properties: { persona },
+      })
+      return res.user
     },
     [],
   )
