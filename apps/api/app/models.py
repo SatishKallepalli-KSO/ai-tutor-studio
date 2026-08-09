@@ -95,3 +95,31 @@ class LearnerProfile(Base):
     linkedin_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     visibility: Mapped[str] = mapped_column(String(20), default="public")  # public | private
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class Connection(Base):
+    """LinkedIn-style connection / friend request."""
+
+    __tablename__ = "connections"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    requester_id: Mapped[int] = mapped_column(Integer, index=True)
+    addressee_id: Mapped[int] = mapped_column(Integer, index=True)
+    status: Mapped[str] = mapped_column(String(20), default="pending", index=True)
+    # pending | accepted | declined | withdrawn
+    note: Mapped[str] = mapped_column(String(300), default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class ChatMessage(Base):
+    """Direct message between two connected users."""
+
+    __tablename__ = "chat_messages"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    sender_id: Mapped[int] = mapped_column(Integer, index=True)
+    recipient_id: Mapped[int] = mapped_column(Integer, index=True)
+    body: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+    read_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)

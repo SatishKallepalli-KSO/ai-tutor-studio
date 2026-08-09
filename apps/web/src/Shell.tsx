@@ -35,21 +35,23 @@ export function Shell({
             <>
               <Link to="/">Learn</Link>
               <Link to="/profile">Profile</Link>
+              <Link to="/network">Network</Link>
+              <Link to="/messages">Messaging</Link>
               <Link to="/jobs">Jobs</Link>
               <Link to="/agentic-path">Agentic AI</Link>
               <Link to="/snowflake-path">Snowflake</Link>
               <Link to="/pricing">Plans</Link>
               <Link to="/for-companies">Hire</Link>
-              <Link to="/compare">Compare</Link>
             </>
           ) : (
             <>
               <Link to="/jobs">Jobs</Link>
+              <Link to="/network">Network</Link>
+              <Link to="/messages">Messaging</Link>
               <Link to="/profile">Talent</Link>
               <Link to="/for-companies">Hiring studio</Link>
               <Link to="/compare">Compare</Link>
               <Link to="/company">Company</Link>
-              <Link to="/">Talent view</Link>
             </>
           )}
           {user?.is_admin && <Link to="/admin">Admin</Link>}
@@ -129,6 +131,8 @@ export function Shell({
         <div className="site-footer-links">
           <Link to="/">Learn</Link>
           <Link to="/profile">Profile</Link>
+          <Link to="/network">Network</Link>
+          <Link to="/messages">Messaging</Link>
           <Link to="/jobs">Jobs</Link>
           <Link to="/for-companies">Hire</Link>
           <Link to="/about">About</Link>

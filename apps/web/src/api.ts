@@ -339,6 +339,63 @@ export const api = {
     const qs = sp.toString()
     return request(qs ? `/v1/profiles/?${qs}` : '/v1/profiles/')
   },
+
+  async listConnections(params?: {
+    status?: 'pending' | 'accepted' | 'declined' | 'all'
+    direction?: 'incoming' | 'outgoing' | 'all'
+  }): Promise<ConnectionView[]> {
+    const sp = new URLSearchParams()
+    if (params?.status) sp.set('status', params.status)
+    if (params?.direction) sp.set('direction', params.direction)
+    const qs = sp.toString()
+    return request(qs ? `/v1/connections/?${qs}` : '/v1/connections/')
+  },
+
+  async connectionWith(userId: number): Promise<ConnectionView | null> {
+    return request(`/v1/connections/with/${userId}`)
+  },
+
+  async sendConnectionRequest(input: {
+    addressee_id: number
+    note?: string
+  }): Promise<ConnectionView> {
+    return request('/v1/connections/', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    })
+  },
+
+  async updateConnection(
+    id: number,
+    status: 'accepted' | 'declined' | 'withdrawn',
+  ): Promise<ConnectionView> {
+    return request(`/v1/connections/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
+    })
+  },
+
+  async deleteConnection(id: number): Promise<{ ok: boolean }> {
+    return request(`/v1/connections/${id}`, { method: 'DELETE' })
+  },
+
+  async listMessageThreads(): Promise<MessageThread[]> {
+    return request('/v1/messages/threads')
+  },
+
+  async getMessagesWith(peerUserId: number): Promise<ChatMessageView[]> {
+    return request(`/v1/messages/with/${peerUserId}`)
+  },
+
+  async sendMessage(input: {
+    recipient_id: number
+    body: string
+  }): Promise<ChatMessageView> {
+    return request('/v1/messages/', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    })
+  },
 }
 
 export type ExperienceItem = {
@@ -397,6 +454,40 @@ export type ProfileUpdateInput = {
   website_url?: string | null
   linkedin_url?: string | null
   visibility?: 'public' | 'private'
+}
+
+export type ConnectionView = {
+  id: number
+  requester_id: number
+  addressee_id: number
+  status: string
+  note: string
+  created_at: string
+  updated_at: string
+  direction: 'incoming' | 'outgoing' | string
+  other_user_id: number
+  other_name: string
+  other_headline: string
+  other_persona: string
+}
+
+export type MessageThread = {
+  peer_user_id: number
+  peer_name: string
+  peer_headline: string
+  last_message: string
+  last_at: string
+  unread_count: number
+}
+
+export type ChatMessageView = {
+  id: number
+  sender_id: number
+  recipient_id: number
+  body: string
+  created_at: string
+  read_at: string | null
+  mine: boolean
 }
 
 export type JobPost = {

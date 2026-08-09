@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import {
   ApiError,
   api,
+  type ConnectionView,
   type EducationItem,
   type ExperienceItem,
   type LearnerProfileView,
@@ -158,6 +159,8 @@ export function ProfilePage() {
   const [saving, setSaving] = useState(false)
   const [offline, setOffline] = useState(false)
   const [talent, setTalent] = useState<LearnerProfileView[]>([])
+  const [relation, setRelation] = useState<ConnectionView | null>(null)
+  const [connectBusy, setConnectBusy] = useState(false)
 
   const viewingId = userId ? Number(userId) : null
   const isMe = !viewingId || (user != null && viewingId === user.id)
@@ -208,7 +211,48 @@ export function ProfilePage() {
         setTalent([DEMO_PROFILE])
       }
     }
+
+    if (user && viewingId && viewingId !== user.id) {
+      try {
+        const rel = await api.connectionWith(viewingId)
+        setRelation(rel)
+      } catch {
+        setRelation(null)
+      }
+    } else {
+      setRelation(null)
+    }
   }, [isMe, isRecruiter, user, viewingId])
+
+  async function sendConnect() {
+    if (!profile || !user || profile.user_id === user.id) return
+    setConnectBusy(true)
+    setError('')
+    try {
+      const rel = await api.sendConnectionRequest({
+        addressee_id: profile.user_id,
+        note: '',
+      })
+      setRelation(rel)
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Could not send request')
+    } finally {
+      setConnectBusy(false)
+    }
+  }
+
+  async function acceptIncoming() {
+    if (!relation) return
+    setConnectBusy(true)
+    try {
+      const rel = await api.updateConnection(relation.id, 'accepted')
+      setRelation(rel)
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Could not accept')
+    } finally {
+      setConnectBusy(false)
+    }
+  }
 
   useEffect(() => {
     void refresh()
@@ -304,6 +348,12 @@ export function ProfilePage() {
                 Create account to sync
               </Link>
             )}
+            <Link className="btn ghost" to="/network">
+              My network
+            </Link>
+            <Link className="btn ghost" to="/messages">
+              Messaging
+            </Link>
             <Link className="btn ghost" to="/jobs">
               Jobs
             </Link>
@@ -592,6 +642,50 @@ export function ProfilePage() {
                       )}
                       {profile.email && canEdit && <span className="muted">{profile.email}</span>}
                     </div>
+                    {!isMe && user && profile.user_id > 0 && (
+                      <div className="profile-connect-actions">
+                        {relation?.status === 'accepted' ? (
+                          <Link
+                            className="btn primary sm"
+                            to={`/messages?with=${profile.user_id}`}
+                          >
+                            Message
+                          </Link>
+                        ) : relation?.status === 'pending' &&
+                          relation.direction === 'outgoing' ? (
+                          <span className="plan-badge">Pending</span>
+                        ) : relation?.status === 'pending' &&
+                          relation.direction === 'incoming' ? (
+                          <button
+                            type="button"
+                            className="btn primary sm"
+                            disabled={connectBusy}
+                            onClick={() => void acceptIncoming()}
+                          >
+                            Accept request
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            className="btn primary sm"
+                            disabled={connectBusy}
+                            onClick={() => void sendConnect()}
+                          >
+                            Connect
+                          </button>
+                        )}
+                        <Link className="btn ghost sm" to="/network">
+                          Network
+                        </Link>
+                      </div>
+                    )}
+                    {!isMe && !user && (
+                      <div className="profile-connect-actions">
+                        <Link className="btn primary sm" to="/login">
+                          Sign in to connect
+                        </Link>
+                      </div>
+                    )}
                   </div>
                 </div>
               </article>

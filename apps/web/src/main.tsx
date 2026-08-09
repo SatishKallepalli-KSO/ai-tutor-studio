@@ -13,6 +13,8 @@ import { ComparePage } from './ComparePage.tsx'
 import { ForCompaniesPage } from './ForCompaniesPage.tsx'
 import { InvestorsPage } from './InvestorsPage.tsx'
 import { JobsBoardPage } from './JobsBoardPage.tsx'
+import { MessagesPage } from './MessagesPage.tsx'
+import { NetworkPage } from './NetworkPage.tsx'
 import { PersonaProvider } from './persona.tsx'
 import { PricingPage } from './PricingPage.tsx'
 import { ProfilePage } from './ProfilePage.tsx'
@@ -38,6 +40,8 @@ createRoot(document.getElementById('root')!).render(
             <Route path="/jobs" element={<JobsBoardPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/profile/:userId" element={<ProfilePage />} />
+            <Route path="/network" element={<NetworkPage />} />
+            <Route path="/messages" element={<MessagesPage />} />
             <Route path="/compare" element={<ComparePage />} />
             <Route path="/investors" element={<InvestorsPage />} />
             <Route path="/admin" element={<AdminDashboardPage />} />
