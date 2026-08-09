@@ -3697,3 +3697,158 @@ a.ad-slot:hover {
     grid-template-columns: 1fr;
   }
 }
+
+/* —— Running testimonials + user counts —— */
+.social-proof {
+  margin: 0.75rem 0 1.5rem;
+  padding: 1rem 0 0.35rem;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  overflow: hidden;
+}
+
+.social-proof-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem 1.5rem;
+  align-items: flex-end;
+  margin-bottom: 0.95rem;
+}
+
+.social-count {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 7rem;
+}
+
+.social-count strong {
+  font-family: var(--display);
+  font-size: clamp(1.35rem, 2.5vw, 1.75rem);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.social-count span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.social-count-link {
+  margin-left: auto;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding-bottom: 0.2rem;
+}
+
+.social-count-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.testimonials-marquee {
+  overflow: hidden;
+  mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 6%,
+    #000 94%,
+    transparent
+  );
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 6%,
+    #000 94%,
+    transparent
+  );
+}
+
+.testimonials-track {
+  display: flex;
+  gap: 0.85rem;
+  width: max-content;
+  animation: testimonialScroll 55s linear infinite;
+}
+
+.testimonials-marquee:hover .testimonials-track {
+  animation-play-state: paused;
+}
+
+@keyframes testimonialScroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.testimonial-card {
+  flex: 0 0 min(320px, 78vw);
+  margin: 0;
+  padding: 0.95rem 1rem;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.025);
+  display: grid;
+  gap: 0.65rem;
+}
+
+.testimonial-card blockquote {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.testimonial-card figcaption {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.testimonial-card figcaption strong {
+  font-size: 0.86rem;
+}
+
+.testimonial-card figcaption span {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.testimonial-card figcaption em {
+  font-style: normal;
+  color: var(--accent-2);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-top: 0.2rem;
+}
+
+.social-proof-note {
+  margin: 0.75rem 0 0;
+  font-size: 0.75rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .testimonials-track {
+    animation: none;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .testimonials-marquee {
+    mask-image: none;
+    -webkit-mask-image: none;
+    overflow: auto;
+  }
+}
+
+@media (max-width: 700px) {
+  .social-count-link {
+    margin-left: 0;
+    width: 100%;
+  }
+}

@@ -15,6 +15,7 @@ import { AUDIENCES, BRAND } from './brand'
 import { getTopic, topicsForTrack, type Topic } from './curriculum'
 import { usePersona } from './persona'
 import { Shell, TRACK_GROUPS } from './Shell'
+import { SocialProof } from './SocialProof'
 import { speakText, stopSpeaking, useSpeechAnswer } from './useSpeechAnswer'
 import './App.css'
 
@@ -325,6 +326,8 @@ export default function App() {
               </div>
             </div>
           </section>
+
+          {!isRecruiter && <SocialProof />}
 
           {!isRecruiter && (
             <section className="magnet-proof reveal" aria-label="Why this works">
