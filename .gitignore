@@ -9,3 +9,6 @@ __pycache__
 .vite
 coverage
 apps/api/data/
+backups/
+*.sql
+*.sql.gz
