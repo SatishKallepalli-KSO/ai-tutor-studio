@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { AdSlot } from './AdSlot'
+import { AUDIENCES, BRAND } from './brand'
 import { Shell } from './Shell'
 import { TrustStats } from './TrustStats'
 import { PRODUCT_STATS } from './productStats'
@@ -15,12 +16,12 @@ const TECH_PARTNERS = [
 
 const OPEN_SLOTS = [
   {
-    role: 'Partner',
-    blurb: 'Distribution, hiring, or learning partners — seat open.',
+    role: 'Hiring partner',
+    blurb: 'Companies running structured interviews — early access seats.',
   },
   {
     role: 'Advisor',
-    blurb: 'Interviewing, GTM, or AI product advisors welcome.',
+    blurb: 'Talent, GTM, or AI product advisors welcome.',
   },
   {
     role: 'Design partner',
@@ -33,22 +34,18 @@ export function CompanyPage() {
     <Shell>
       <article className="company-page">
         <section className="company-hero reveal">
-          <p className="eyebrow">Kallepalli Labs</p>
+          <p className="eyebrow">{BRAND.company}</p>
           <h1>
-            AI Tutor Studio
-            <span>Win the interview loop.</span>
+            {BRAND.product}
+            <span>{BRAND.tagline}</span>
           </h1>
-          <p className="hero-lede">
-            An independent product company building voice-first interview prep
-            for Staff, EM, and stack-switch candidates. Study. Speak. Get
-            coached — with a Free path to train and Pro when the loop matters.
-          </p>
+          <p className="hero-lede">{BRAND.oneLiner}</p>
           <div className="hero-cta">
             <Link className="btn primary" to="/">
-              Try the product
+              Talent experience
             </Link>
-            <Link className="btn ghost" to="/compare">
-              Compare tools
+            <Link className="btn ghost" to="/for-companies">
+              Hiring teams
             </Link>
             <Link className="btn ghost" to="/investors">
               Partner &amp; invest
@@ -57,6 +54,25 @@ export function CompanyPage() {
         </section>
 
         <TrustStats variant="panel" className="reveal" />
+
+        <section className="dual-audience reveal">
+          <div className="dual-card">
+            <p className="eyebrow">{AUDIENCES.talent.label}</p>
+            <h3>{AUDIENCES.talent.title}</h3>
+            <p>{AUDIENCES.talent.blurb}</p>
+            <Link className="btn ghost sm" to="/">
+              Open Learn
+            </Link>
+          </div>
+          <div className="dual-card dual-card-accent">
+            <p className="eyebrow">{AUDIENCES.companies.label}</p>
+            <h3>{AUDIENCES.companies.title}</h3>
+            <p>{AUDIENCES.companies.blurb}</p>
+            <Link className="btn primary sm" to="/for-companies">
+              Explore Hire
+            </Link>
+          </div>
+        </section>
 
         <section className="company-partner-strip reveal" aria-label="Built with">
           <p className="company-tech-label">Technology stack</p>
@@ -78,54 +94,53 @@ export function CompanyPage() {
 
         <section className="company-section reveal" id="mission">
           <p className="eyebrow">Mission</p>
-          <h2>Help serious engineers sound like the role.</h2>
+          <h2>One studio from practice to hire decision.</h2>
           <p className="company-copy">
-            Interview loops reward ownership stories, tradeoff judgment, and
-            calm delivery under time. We build the practice system around that
-            — not puzzle farms, not generic chat wrappers.
+            Talent learns and practices with voice-first coaching. Companies run
+            structured interviews with a consistent bar. Same product family —
+            not two disconnected tools.
           </p>
         </section>
 
         <section className="company-section reveal" id="product">
           <p className="eyebrow">Product</p>
-          <h2>Practice the way panels hear you.</h2>
+          <h2>Learn · Practice · Hire</h2>
           <p className="company-copy">
-            {PRODUCT_STATS.tracksCount} interview &amp; language tracks, plus
-            Agentic ({PRODUCT_STATS.agenticVideosCount} videos) and Snowflake (
-            {PRODUCT_STATS.snowflakeVideosCount} videos) libraries — curriculum
-            first, mic answers second, coaching on substance and delivery.
+            {PRODUCT_STATS.tracksCount} tracks, Agentic (
+            {PRODUCT_STATS.agenticVideosCount} videos) and Snowflake (
+            {PRODUCT_STATS.snowflakeVideosCount} videos) libraries for talent —
+            plus a hiring studio for companies (structured kits, scorecards,
+            readiness signals) now opening to design partners.
           </p>
           <div className="company-snapshot">
             <div>
-              <strong>Study</strong>
-              <p>Topic docs for Staff, EM, switches, and languages.</p>
+              <strong>Learn</strong>
+              <p>Paths and docs for engineers leveling up or switching stacks.</p>
             </div>
             <div>
-              <strong>Speak</strong>
-              <p>Voice-first drills with timing pressure, not typed essays.</p>
+              <strong>Practice</strong>
+              <p>Voice drills and AI coaching on substance and delivery.</p>
             </div>
             <div>
-              <strong>Coach</strong>
-              <p>Feedback on content and delivery before the onsite.</p>
+              <strong>Hire</strong>
+              <p>Structured interviews and fairness for panels hiring them.</p>
             </div>
           </div>
         </section>
 
         <section className="company-section reveal" id="team">
           <p className="eyebrow">Team</p>
-          <h2>Built by Kallepalli Labs</h2>
+          <h2>Built by {BRAND.company}</h2>
           <p className="company-copy">
-            Founded by <strong>Satish Kallepalli</strong> — engineering manager
-            and AI architect by background. We ship practical AI products for
-            people competing in real hiring loops. Credibility means ownership,
-            shipping, and honest partner language — not invented headcount or
-            backing.
+            Founded by <strong>Satish Kallepalli</strong>. We ship practical AI
+            products for talent markets — credibility means ownership, shipping,
+            and honest partner language.
           </p>
           <div className="hero-cta" style={{ marginTop: '1rem' }}>
             <Link className="btn ghost" to="/about">
               About the lab
             </Link>
-            <a className="btn ghost" href="mailto:hello@kallepallilabs.com">
+            <a className="btn ghost" href={`mailto:${BRAND.contactEmail}`}>
               Contact
             </a>
           </div>
@@ -133,11 +148,10 @@ export function CompanyPage() {
 
         <section className="company-section reveal" id="why-now">
           <p className="eyebrow">Why now</p>
-          <h2>Interviews got harder. Prep stayed typed.</h2>
+          <h2>Learning and hiring still don’t share a system of record.</h2>
           <p className="company-copy">
-            Panels still judge spoken clarity, ownership stories, and judgment
-            under time. Candidates need curriculum, voice, and coaching in one
-            loop — built for that gap.
+            Prep tools ignore how companies interview. ATS tools ignore how
+            candidates actually practice. We connect both sides in one studio.
           </p>
         </section>
 
@@ -154,30 +168,12 @@ export function CompanyPage() {
           </ul>
         </section>
 
-        <section className="company-section reveal" id="contact">
-          <p className="eyebrow">Contact</p>
-          <h2>Talk to the team.</h2>
-          <p className="company-copy">
-            Product questions, partnerships, and investor conversations go to
-            the same inbox. Mention whether you’re a candidate, partner, or
-            investor so we can respond with the right materials.
-          </p>
-          <div className="hero-cta" style={{ marginTop: '1rem' }}>
-            <a className="btn primary" href="mailto:hello@kallepallilabs.com">
-              hello@kallepallilabs.com
-            </a>
-            <Link className="btn ghost" to="/investors">
-              Partner &amp; invest
-            </Link>
-          </div>
-        </section>
-
         <section className="company-cta-band reveal" id="partner">
           <div>
             <p className="eyebrow">Partner &amp; invest</p>
-            <h2>Help set the practice standard.</h2>
+            <h2>Help build the talent studio category.</h2>
             <p className="company-copy">
-              Advisors, distribution partners, and early investors welcome. No
+              Advisors, hiring design partners, and early investors welcome. No
               invented round announcements — just a clear conversation.
             </p>
           </div>
@@ -185,8 +181,8 @@ export function CompanyPage() {
             <Link className="btn primary" to="/investors">
               Investor relations
             </Link>
-            <Link className="btn ghost" to="/compare">
-              See how we compare
+            <Link className="btn ghost" to="/for-companies">
+              Hiring early access
             </Link>
           </div>
         </section>

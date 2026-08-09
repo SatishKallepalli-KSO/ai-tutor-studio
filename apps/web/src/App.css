@@ -588,6 +588,66 @@ a {
   }
 }
 
+/* —— Dual audience (Learn + Hire) —— */
+.dual-audience {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 0.5rem 0 1.75rem;
+}
+
+.dual-card {
+  padding: 1.35rem 1.3rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 50%),
+    linear-gradient(165deg, rgba(20, 22, 26, 0.95), rgba(10, 11, 13, 0.96));
+  box-shadow: var(--shadow);
+  display: grid;
+  gap: 0.65rem;
+  align-content: start;
+}
+
+.dual-card h3 {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 1.35rem;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.dual-card p:not(.eyebrow) {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.dual-card-accent {
+  border-color: rgba(201, 180, 152, 0.28);
+  background:
+    radial-gradient(420px 160px at 90% 0%, rgba(201, 180, 152, 0.1), transparent 65%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 45%),
+    linear-gradient(165deg, rgba(22, 24, 28, 0.96), rgba(10, 11, 13, 0.97));
+}
+
+.hire-status {
+  display: block;
+  margin-top: 0.35rem;
+  font-style: normal;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+}
+
+@media (max-width: 760px) {
+  .dual-audience {
+    grid-template-columns: 1fr;
+  }
+}
+
 .section-title {
   display: flex;
   flex-wrap: wrap;

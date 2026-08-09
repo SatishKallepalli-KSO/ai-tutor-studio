@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { AUDIENCES, BRAND } from './brand'
 import { Shell } from './Shell'
 import { TrustStats } from './TrustStats'
 import { PRODUCT_STATS } from './productStats'
@@ -11,23 +12,19 @@ export function AboutPage() {
         <section className="company-hero reveal">
           <p className="eyebrow">About</p>
           <h1>
-            Kallepalli Labs
-            <span>AI Tutor Studio</span>
+            {BRAND.company}
+            <span>{BRAND.product}</span>
           </h1>
-          <p className="hero-lede">
-            We build voice-first interview prep — study sharp topic docs, answer
-            out loud, and get coached on substance plus delivery. Not another
-            text chatbot. Not another coding puzzle farm.
-          </p>
+          <p className="hero-lede">{BRAND.oneLiner}</p>
           <div className="hero-cta">
             <Link className="btn primary" to="/">
-              Explore paths
+              Learn &amp; practice
+            </Link>
+            <Link className="btn ghost" to="/for-companies">
+              For companies
             </Link>
             <Link className="btn ghost" to="/company">
               Company
-            </Link>
-            <Link className="btn ghost" to="/compare">
-              Compare tools
             </Link>
           </div>
         </section>
@@ -36,101 +33,72 @@ export function AboutPage() {
 
         <section className="company-section reveal">
           <p className="eyebrow">Mission</p>
-          <h2>Help serious engineers sound like the role.</h2>
+          <h2>Close the gap between learning and hiring.</h2>
           <p className="company-copy">
-            Interview loops reward clear ownership stories, tradeoff judgment,
-            and calm delivery under time pressure. AI Tutor Studio is built
-            around that: curriculum first, spoken practice second, coaching that
-            critiques both what you said and how you said it.
+            Candidates need structured practice that sounds like real screens.
+            Companies need consistent interviews and clearer signals. We build
+            one studio for both — not a puzzle farm, not a generic chatbot, not
+            another ATS bolted onto email.
           </p>
+        </section>
+
+        <section className="dual-audience reveal">
+          <div className="dual-card">
+            <p className="eyebrow">{AUDIENCES.talent.label}</p>
+            <h3>{AUDIENCES.talent.title}</h3>
+            <p>{AUDIENCES.talent.blurb}</p>
+          </div>
+          <div className="dual-card dual-card-accent">
+            <p className="eyebrow">{AUDIENCES.companies.label}</p>
+            <h3>{AUDIENCES.companies.title}</h3>
+            <p>{AUDIENCES.companies.blurb}</p>
+          </div>
         </section>
 
         <section className="company-section reveal">
           <p className="eyebrow">What we build</p>
-          <h2>Surfaces that mirror the loop.</h2>
+          <h2>Learning, practice, and hiring — connected.</h2>
           <ul className="company-list">
             <li>
-              <strong>Structured study docs</strong>
+              <strong>Learning paths</strong>
               <span>
-                Topic-level curricula across {PRODUCT_STATS.tracksCount} tracks
-                for Staff, Engineering Manager, career switches, and language
-                depth drills.
+                Topic curricula across {PRODUCT_STATS.tracksCount} tracks, plus
+                Agentic ({PRODUCT_STATS.agenticVideosCount}) and Snowflake (
+                {PRODUCT_STATS.snowflakeVideosCount}) libraries.
               </span>
             </li>
             <li>
-              <strong>Voice practice</strong>
+              <strong>Spoken practice + AI coaching</strong>
               <span>
-                Mic-first answers with timing cues — closer to a panel than a
-                typed essay.
+                Mic-first answers with feedback on substance and delivery —
+                closer to a panel than a typed essay.
               </span>
             </li>
             <li>
-              <strong>Coaching feedback</strong>
+              <strong>Hiring studio</strong>
               <span>
-                Rubric-style notes on substance and delivery, with a Free path
-                to train and Pro when the loop matters.
+                Structured interview kits, scorecards, and readiness signals for
+                companies — early access via design partners.
               </span>
             </li>
             <li>
-              <strong>Career switch paths</strong>
+              <strong>Freemium + Pro</strong>
               <span>
-                Backend → Agentic AI ({PRODUCT_STATS.agenticVideosCount}{' '}
-                validated videos) and Data Engineer → Snowflake (
-                {PRODUCT_STATS.snowflakeVideosCount} videos) so switchers build
-                real stack context before they interview.
+                Talent trains free on starter paths; Pro unlocks leadership loops
+                and unlimited coaching. Companies partner directly with{' '}
+                {BRAND.company}.
               </span>
             </li>
           </ul>
         </section>
 
         <section className="company-section reveal">
-          <p className="eyebrow">Who it’s for</p>
-          <h2>Candidates who outgrew generic prep.</h2>
-          <div className="company-audience">
-            <div>
-              <strong>Staff &amp; EM candidates</strong>
-              <p>
-                Narrative depth, org impact, and systems judgment — not LeetCode
-                trivia alone.
-              </p>
-            </div>
-            <div>
-              <strong>Stack switchers</strong>
-              <p>
-                Backend → Python / AI paths plus Agentic and Snowflake curricula
-                for people rebuilding signal fast.
-              </p>
-            </div>
-            <div>
-              <strong>Engineers sharpening delivery</strong>
-              <p>
-                Language and frontend fundamentals with spoken drills before the
-                onsite.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <section className="company-section founder-block reveal">
           <p className="eyebrow">Founder</p>
           <h2>Satish Kallepalli</h2>
           <p className="company-copy">
-            Engineering manager and AI architect by background — building
-            Kallepalli Labs products that turn hard interview preparation into a
-            repeatable practice loop. AI Tutor Studio is the flagship: practical,
-            premium, and honest about what helps candidates compete.
+            Building {BRAND.product} under {BRAND.company} — focused on serious
+            engineering talent and the teams that hire them.
           </p>
-          <div className="hero-cta">
-            <Link className="btn ghost" to="/company">
-              See company overview
-            </Link>
-            <Link className="btn ghost" to="/investors">
-              Partner &amp; invest
-            </Link>
-            <a className="btn ghost" href="mailto:hello@kallepallilabs.com">
-              hello@kallepallilabs.com
-            </a>
-          </div>
         </section>
       </article>
     </Shell>

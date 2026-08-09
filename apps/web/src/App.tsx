@@ -11,6 +11,7 @@ import {
 import { AdSlot } from './AdSlot'
 import { track as trackEvent } from './analytics'
 import { useAuth } from './auth'
+import { AUDIENCES, BRAND } from './brand'
 import { getTopic, topicsForTrack, type Topic } from './curriculum'
 import { Shell, TRACK_GROUPS } from './Shell'
 import { TrustStats } from './TrustStats'
@@ -260,35 +261,31 @@ export default function App() {
       {step === 'tracks' && (
         <>
           <section className="hero reveal">
-            <p className="eyebrow">AI Tutor Studio</p>
+            <p className="eyebrow">{BRAND.product}</p>
             <h1>
-              Win the interview loop
-              <span>by practicing out loud.</span>
+              {BRAND.tagline}
+              <span>One studio for talent and hiring teams.</span>
             </h1>
-            <p className="hero-lede">
-              Study sharp topic docs, answer like you would in the room, and get
-              coaching on substance plus delivery — built for Staff, EM, and
-              stack-switch candidates who outgrow text-only prep.
-            </p>
+            <p className="hero-lede">{BRAND.oneLiner}</p>
             <div className="hero-cta">
               <a className="btn primary" href="#paths">
-                Explore paths
+                Learn &amp; practice
               </a>
-              <Link className="btn ghost" to="/agentic-path">
-                Backend → AI Engineer
+              <Link className="btn ghost" to="/for-companies">
+                Hire candidates
               </Link>
-              <Link className="btn ghost" to="/snowflake-path">
-                Data Eng → Snowflake
+              <Link className="btn ghost" to="/agentic-path">
+                Backend → AI
               </Link>
               <Link className="btn ghost" to="/compare">
-                Compare tools
+                Compare
               </Link>
             </div>
             <div className="hero-stage" aria-hidden="true">
               <div className="hero-orbit" />
               <div className="hero-panel">
                 <span className="pulse-dot" />
-                Listening · 01:42
+                Live practice · hiring-ready
                 <em>“I owned the migration end-to-end… latency dropped 40%.”</em>
               </div>
             </div>
@@ -296,31 +293,50 @@ export default function App() {
 
           <TrustStats variant="strip" className="reveal" />
 
+          <section className="dual-audience reveal" aria-label="Who it’s for">
+            <div className="dual-card">
+              <p className="eyebrow">{AUDIENCES.talent.label}</p>
+              <h3>{AUDIENCES.talent.title}</h3>
+              <p>{AUDIENCES.talent.blurb}</p>
+              <a className="btn ghost sm" href="#paths">
+                Browse paths
+              </a>
+            </div>
+            <div className="dual-card dual-card-accent">
+              <p className="eyebrow">{AUDIENCES.companies.label}</p>
+              <h3>{AUDIENCES.companies.title}</h3>
+              <p>{AUDIENCES.companies.blurb}</p>
+              <Link className="btn primary sm" to="/for-companies">
+                For companies
+              </Link>
+            </div>
+          </section>
+
           <AdSlot
             id="home-below-hero"
             variant="banner"
-            headline="Interview tools & hiring partners"
+            headline="Learning & hiring partners"
             detail="Premium partner strip — kept below the brand composition on purpose."
           />
 
           <section className="diff-row reveal">
             <div>
-              <strong>Speak, don’t type essays</strong>
-              <p>Mic answers under real timing pressure — the way panels hear you.</p>
+              <strong>Learn with structure</strong>
+              <p>Topic docs and career paths — not random chatbot prompts.</p>
             </div>
             <div>
-              <strong>Curriculum before coaching</strong>
-              <p>Topic docs first, then drills — not random chatbot prompts.</p>
+              <strong>Practice out loud</strong>
+              <p>Mic answers under timing pressure — how real screens sound.</p>
             </div>
             <div>
-              <strong>Free to train. Pro to compete.</strong>
-              <p>Starter paths free. Staff/EM + unlimited coaching on Pro.</p>
+              <strong>Hire with consistency</strong>
+              <p>Same interview bar for panels — scorecards and readiness signals.</p>
             </div>
           </section>
 
           <section className="compare reveal">
             <div className="section-title">
-              <h2>Why serious candidates switch here</h2>
+              <h2>Built bigger than interview prep alone</h2>
               <Link className="linkish" to="/compare">
                 Full comparison →
               </Link>

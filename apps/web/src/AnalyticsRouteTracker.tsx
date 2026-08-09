@@ -7,6 +7,7 @@ const PATH_EVENTS: Record<string, string> = {
   '/pricing': 'pricing_view',
   '/agentic-path': 'agentic_path_open',
   '/snowflake-path': 'snowflake_path_open',
+  '/for-companies': 'page_view',
   '/admin': 'page_view',
 }
 

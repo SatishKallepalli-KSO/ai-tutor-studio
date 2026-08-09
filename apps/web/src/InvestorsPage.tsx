@@ -13,12 +13,12 @@ export function InvestorsPage() {
           <p className="eyebrow">Kallepalli Labs</p>
           <h1>
             Partner &amp; invest
-            <span>Help candidates win the loop.</span>
+            <span>Scale Learn. Practice. Hire.</span>
           </h1>
           <p className="hero-lede">
-            Open to partners and investors who care about interview outcomes —
-            not logo-wall theater. AI Tutor Studio is a shipping, voice-first
-            practice product under Kallepalli Labs.
+            Open to partners and investors who want a two-sided talent studio —
+            candidates who practice for real screens, and companies that hire
+            with structure. Shipping under Kallepalli Labs.
           </p>
           <div className="hero-cta">
             <a className="btn primary" href="mailto:hello@kallepallilabs.com">
@@ -59,12 +59,12 @@ export function InvestorsPage() {
 
         <section className="company-section reveal">
           <p className="eyebrow">The pitch</p>
-          <h2>Practice that matches how hiring works.</h2>
+          <h2>Practice + hiring in one category.</h2>
           <p className="company-copy">
-            Most prep tools optimize for typed answers or puzzle volume. Hiring
-            panels still reward ownership stories, tradeoffs, and calm spoken
-            delivery. AI Tutor Studio targets that gap: curriculum, voice, and
-            coaching — freemium to learn, Pro when the loop matters.
+            Most tools serve only candidates or only HR. AI Tutor Studio targets
+            the full loop: curriculum and voice coaching for talent, structured
+            interviews and readiness signals for companies — freemium to learn,
+            Pro to compete, company pilots for hiring teams.
           </p>
         </section>
 

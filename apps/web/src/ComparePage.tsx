@@ -132,16 +132,20 @@ export function ComparePage() {
           <p className="eyebrow">AI Tutor Studio</p>
           <h1>
             Compare
-            <span>Honest fit, not a scoreboard.</span>
+            <span>Talent tools and hiring tools — honest fit.</span>
           </h1>
           <p className="hero-lede">
-            We win on curriculum + spoken practice + AI coaching for Staff, EM,
-            and stack-switch loops. Competitors win on coding volume or live
-            human mocks — those strengths are marked plainly below.
+            AI Tutor Studio is a one-stop talent studio: learn + practice for
+            candidates, structured interviews for companies. Competitors often
+            win on coding volume or live human mocks — those strengths are marked
+            plainly below.
           </p>
           <div className="hero-cta">
             <Link className="btn primary" to="/">
               Try paths free
+            </Link>
+            <Link className="btn ghost" to="/for-companies">
+              For companies
             </Link>
             <Link className="btn ghost" to="/pricing">
               Free vs Pro

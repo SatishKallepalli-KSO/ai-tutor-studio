@@ -110,7 +110,7 @@ export function PricingPage() {
     <Shell>
       <div className="pricing-page reveal">
         <p className="eyebrow">AI Tutor Studio · Plans</p>
-        <h1>Free to train. Pro when the loop matters.</h1>
+        <h1>Free to learn. Pro to compete. Companies partner to hire.</h1>
         <p className="muted pricing-lede">
           Competitive freemium — study every path free, then unlock Staff/EM,
           advanced switches, and unlimited voice coaching when you need the edge.
