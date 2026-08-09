@@ -1,8 +1,46 @@
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from './auth'
 import { BRAND, PERSONAS, type Persona } from './brand'
 import { usePersona } from './persona'
-import type { ReactNode } from 'react'
+
+function MoreMenu({
+  label,
+  children,
+}: {
+  label: string
+  children: ReactNode
+}) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function onDoc(e: MouseEvent) {
+      if (!ref.current?.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', onDoc)
+    return () => document.removeEventListener('mousedown', onDoc)
+  }, [])
+
+  return (
+    <div className={`nav-more${open ? ' open' : ''}`} ref={ref}>
+      <button
+        type="button"
+        className="nav-more-btn"
+        aria-expanded={open}
+        aria-haspopup="menu"
+        onClick={() => setOpen((v) => !v)}
+      >
+        {label}
+      </button>
+      {open && (
+        <div className="nav-more-panel" role="menu" onClick={() => setOpen(false)}>
+          {children}
+        </div>
+      )}
+    </div>
+  )
+}
 
 export function Shell({
   children,
@@ -34,77 +72,64 @@ export function Shell({
           {isLearner ? (
             <>
               <Link to="/">Learn</Link>
-              <Link to="/profile">Profile</Link>
-              <Link to="/network">Network</Link>
-              <Link to="/messages">Messaging</Link>
               <Link to="/jobs">Jobs</Link>
-              <Link to="/agentic-path">Agentic AI</Link>
-              <Link to="/snowflake-path">Snowflake</Link>
-              <Link to="/pricing">Plans</Link>
-              <Link to="/for-companies">Hire</Link>
+              <Link to="/network">Network</Link>
+              <Link to="/messages">Chat</Link>
+              <MoreMenu label="More">
+                <Link to="/profile">Profile</Link>
+                <Link to="/agentic-path">Agentic AI</Link>
+                <Link to="/snowflake-path">Snowflake</Link>
+                <Link to="/pricing">Plans</Link>
+                <Link to="/for-companies">For companies</Link>
+                <Link to="/compare">Compare</Link>
+                {user?.is_admin && <Link to="/admin">Admin</Link>}
+                <a href={docsHref}>Docs</a>
+              </MoreMenu>
             </>
           ) : (
             <>
               <Link to="/jobs">Jobs</Link>
               <Link to="/network">Network</Link>
-              <Link to="/messages">Messaging</Link>
+              <Link to="/messages">Chat</Link>
               <Link to="/profile">Talent</Link>
-              <Link to="/for-companies">Hiring studio</Link>
-              <Link to="/compare">Compare</Link>
-              <Link to="/company">Company</Link>
+              <MoreMenu label="More">
+                <Link to="/for-companies">Hiring studio</Link>
+                <Link to="/compare">Compare</Link>
+                <Link to="/company">Company</Link>
+                <Link to="/">Learn view</Link>
+                {user?.is_admin && <Link to="/admin">Admin</Link>}
+                <a href={docsHref}>Docs</a>
+              </MoreMenu>
             </>
           )}
-          {user?.is_admin && <Link to="/admin">Admin</Link>}
-          <a href={docsHref}>Docs</a>
         </nav>
 
         <div className="site-actions">
-          <label className="persona-switch" title="Switch role context">
+          <label className="persona-switch" title="Switch role">
             <span className="sr-only">Role</span>
             <select
               value={persona}
               onChange={(e) => void setPersona(e.target.value as Persona)}
               aria-label="View as learner or recruiter"
             >
-              <option value="learner">{PERSONAS.learner.label}</option>
-              <option value="recruiter">{PERSONAS.recruiter.label}</option>
+              <option value="learner">{PERSONAS.learner.short}</option>
+              <option value="recruiter">{PERSONAS.recruiter.short}</option>
             </select>
           </label>
           {loading ? (
             <span className="plan-badge">…</span>
           ) : user ? (
             <>
-              <span className={user.is_pro ? 'plan-badge pro' : 'plan-badge'}>
-                {user.is_pro ? 'Pro' : 'Free'}
-                {!user.is_pro && isLearner && (
-                  <span className="quota">
-                    {user.feedback_used_today}/{user.feedback_limit_today}
-                  </span>
-                )}
-              </span>
-              <Link className="btn ghost sm" to="/profile" title={user.email}>
-                {user.name?.split(' ')[0] || 'Profile'}
-              </Link>
-              {!user.is_pro && isLearner && (
-                <Link className="btn primary sm" to="/pricing">
-                  Go Pro
-                </Link>
-              )}
-              {isRecruiter && (
-                <a
-                  className="btn primary sm"
-                  href={`mailto:${BRAND.contactEmail}?subject=Hiring%20pilot`}
-                >
-                  Talk to sales
-                </a>
-              )}
-              <button
-                type="button"
-                className="btn ghost sm"
-                onClick={logout}
+              <Link
+                className="user-chip"
+                to="/profile"
                 title={user.email}
               >
-                Sign out
+                <span className={user.is_pro ? 'plan-dot pro' : 'plan-dot'} />
+                {user.name?.split(' ')[0] || 'You'}
+              </Link>
+              <button type="button" className="btn ghost sm" onClick={logout}>
+                Out
               </button>
             </>
           ) : (
@@ -113,7 +138,7 @@ export function Shell({
                 Sign in
               </Link>
               <Link className="btn primary sm" to="/register">
-                {isRecruiter ? 'Join as recruiter' : 'Start free'}
+                Join
               </Link>
             </>
           )}
@@ -125,22 +150,14 @@ export function Shell({
       <footer className="site-footer">
         <div className="site-footer-copy">
           <strong>{BRAND.product}</strong>
-          <span>{BRAND.oneLiner}</span>
           <span className="site-footer-legal">{BRAND.copyright}</span>
         </div>
         <div className="site-footer-links">
-          <Link to="/">Learn</Link>
-          <Link to="/profile">Profile</Link>
-          <Link to="/network">Network</Link>
-          <Link to="/messages">Messaging</Link>
-          <Link to="/jobs">Jobs</Link>
-          <Link to="/for-companies">Hire</Link>
           <Link to="/about">About</Link>
-          <Link to="/company">Company</Link>
-          <Link to="/compare">Compare</Link>
-          <Link to="/investors">Partner &amp; invest</Link>
           <Link to="/pricing">Plans</Link>
-          <a href={docsHref}>Product docs</a>
+          <Link to="/for-companies">Hire</Link>
+          <Link to="/company">Company</Link>
+          <a href={docsHref}>Docs</a>
         </div>
       </footer>
     </div>

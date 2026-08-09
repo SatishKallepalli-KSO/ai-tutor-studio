@@ -233,38 +233,27 @@ export function MessagesPage() {
   return (
     <Shell wide>
       <section className="messages-page">
-        <div className="profile-hero-row">
+        <div className="page-head">
           <div>
-            <p className="eyebrow">Inbox</p>
-            <h1>Messaging</h1>
-            <p className="lede">
-              Chat with your connections — recruiters and learners stay in one thread list.
-            </p>
+            <h1>Chat</h1>
+            <p className="page-sub">Message people you&apos;re connected with.</p>
           </div>
-          <div className="profile-hero-actions">
-            <Link className="btn primary" to="/network">
-              My network
-            </Link>
-          </div>
+          <Link className="btn ghost sm" to="/network">
+            Network
+          </Link>
         </div>
 
-        {offline && (
-          <p className="profile-banner muted">
-            Demo / local mode — messages stay in this browser until the API is connected.
-          </p>
-        )}
+        {offline && <p className="hint-line">Saved on this device until the API is live.</p>}
         {error && <p className="profile-banner error">{error}</p>}
 
-        <div className="messages-layout panel">
+        <div className="messages-layout">
           <aside className="messages-threads">
             <div className="messages-threads-head">
-              <strong>Chats</strong>
-              <span className="muted">{threads.length}</span>
+              <strong>Inbox</strong>
             </div>
             {threads.length === 0 && (
               <p className="muted pad">
-                No conversations yet.{' '}
-                <Link to="/network">Connect with people</Link> first.
+                No chats yet. <Link to="/network">Connect first</Link>.
               </p>
             )}
             {threads.map((t) => (
@@ -285,12 +274,11 @@ export function MessagesPage() {
                     {t.unread_count > 0 && <span className="unread-dot">{t.unread_count}</span>}
                   </strong>
                   <span>{t.last_message}</span>
-                  <em>{timeLabel(t.last_at)}</em>
                 </div>
               </button>
             ))}
             {offline && acceptedPeers.length > 0 && threads.length === 0 && (
-              <div className="pad">
+              <div className="pad stack-sm">
                 {acceptedPeers.map((c) => (
                   <button
                     key={c.id}
@@ -298,7 +286,7 @@ export function MessagesPage() {
                     className="btn ghost sm"
                     onClick={() => selectPeer(c.other_user_id)}
                   >
-                    Message {c.other_name}
+                    {c.other_name}
                   </button>
                 ))}
               </div>
@@ -308,10 +296,7 @@ export function MessagesPage() {
           <div className="messages-pane">
             {!peerId ? (
               <div className="messages-empty">
-                <p>Select a conversation or start from My network.</p>
-                <Link className="btn primary" to="/network">
-                  Find connections
-                </Link>
+                <p>Select a conversation</p>
               </div>
             ) : (
               <>
@@ -323,15 +308,10 @@ export function MessagesPage() {
                     <strong>{peerName}</strong>
                     {peerHeadline && <p className="muted">{peerHeadline}</p>}
                   </div>
-                  {peerId > 0 && (
-                    <Link className="btn ghost sm" to={`/profile/${peerId}`}>
-                      Profile
-                    </Link>
-                  )}
                 </header>
                 <div className="messages-stream">
                   {messages.length === 0 && (
-                    <p className="muted center">No messages yet — say hi.</p>
+                    <p className="muted center">Say hello to start.</p>
                   )}
                   {messages.map((m) => (
                     <div
@@ -354,7 +334,7 @@ export function MessagesPage() {
                   />
                   <button
                     type="submit"
-                    className="btn primary"
+                    className="btn primary sm"
                     disabled={sending || !body.trim()}
                   >
                     Send

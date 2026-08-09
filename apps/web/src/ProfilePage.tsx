@@ -10,7 +10,6 @@ import {
   type ProfileUpdateInput,
 } from './api'
 import { useAuth } from './auth'
-import { BRAND } from './brand'
 import { usePersona } from './persona'
 import { Shell } from './Shell'
 import './App.css'
@@ -323,48 +322,33 @@ export function ProfilePage() {
   return (
     <Shell wide>
       <section className="profile-page">
-        <div className="profile-hero-row">
+        <div className="page-head">
           <div>
-            <p className="eyebrow">{isRecruiter ? 'Talent profiles' : 'Your profile'}</p>
-            <h1>{isMe ? 'Learner profile' : profile?.name || 'Profile'}</h1>
-            <p className="lede">
-              LinkedIn-style talent card — headline, about, experience, skills, and open-to-work.
-              Recruiters browse; learners own the story.
+            <h1>{isMe ? 'Profile' : profile?.name || 'Profile'}</h1>
+            <p className="page-sub">
+              {isMe ? 'Your talent card for recruiters and peers.' : 'Talent profile'}
             </p>
           </div>
-          <div className="profile-hero-actions">
+          <div className="page-head-actions">
             {canEdit && !editing && (
-              <button type="button" className="btn primary" onClick={() => setEditing(true)}>
-                Edit profile
+              <button type="button" className="btn primary sm" onClick={() => setEditing(true)}>
+                Edit
               </button>
             )}
             {editing && (
-              <button type="button" className="btn ghost" onClick={() => setEditing(false)}>
+              <button type="button" className="btn ghost sm" onClick={() => setEditing(false)}>
                 Cancel
               </button>
             )}
             {!user && isMe && (
-              <Link className="btn ghost" to="/register">
-                Create account to sync
+              <Link className="btn ghost sm" to="/register">
+                Sync account
               </Link>
             )}
-            <Link className="btn ghost" to="/network">
-              My network
-            </Link>
-            <Link className="btn ghost" to="/messages">
-              Messaging
-            </Link>
-            <Link className="btn ghost" to="/jobs">
-              Jobs
-            </Link>
           </div>
         </div>
 
-        {offline && (
-          <p className="profile-banner muted">
-            Demo / local mode — edits save in this browser until the cloud API is connected.
-          </p>
-        )}
+        {offline && <p className="hint-line">Saved on this device until the API is live.</p>}
         {error && <p className="profile-banner error">{error}</p>}
 
         {!profile || !form ? (
@@ -759,24 +743,21 @@ export function ProfilePage() {
             </div>
 
             <aside className="profile-side">
-              <section className="panel profile-section">
-                <h3>Practice readiness</h3>
-                <p className="muted">
-                  Strengthen this profile with interview practice on {BRAND.product}.
-                </p>
+              <section className="bare-section">
+                <h3>Practice</h3>
                 <div className="profile-side-links">
-                  <Link to="/">Practice tracks</Link>
-                  <Link to="/agentic-path">Agentic AI path</Link>
-                  <Link to="/snowflake-path">Snowflake path</Link>
-                  <Link to="/jobs">Browse jobs</Link>
+                  <Link to="/">Tracks</Link>
+                  <Link to="/agentic-path">Agentic AI</Link>
+                  <Link to="/snowflake-path">Snowflake</Link>
+                  <Link to="/jobs">Jobs</Link>
                 </div>
               </section>
 
               {isRecruiter && talent.length > 0 && (
-                <section className="panel profile-section">
-                  <h3>Talent open to work</h3>
+                <section className="bare-section">
+                  <h3>Open to work</h3>
                   <ul className="talent-mini-list">
-                    {talent.map((t) => (
+                    {talent.slice(0, 6).map((t) => (
                       <li key={t.user_id}>
                         <Link to={`/profile/${t.user_id}`}>
                           <strong>{t.name}</strong>

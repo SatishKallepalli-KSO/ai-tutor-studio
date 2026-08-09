@@ -252,31 +252,17 @@ export function NetworkPage() {
   return (
     <Shell wide>
       <section className="network-page">
-        <div className="profile-hero-row">
+        <div className="page-head">
           <div>
-            <p className="eyebrow">My network</p>
-            <h1>Connections</h1>
-            <p className="lede">
-              Send connection requests, grow your network, then message people you know —
-              LinkedIn-style for talent and recruiters.
-            </p>
+            <h1>Network</h1>
+            <p className="page-sub">Connections, requests, and people to meet.</p>
           </div>
-          <div className="profile-hero-actions">
-            <Link className="btn primary" to="/messages">
-              Messaging
-            </Link>
-            <Link className="btn ghost" to="/profile">
-              Profile
-            </Link>
-          </div>
+          <Link className="btn ghost sm" to="/messages">
+            Chat
+          </Link>
         </div>
 
-        {offline && (
-          <p className="profile-banner muted">
-            Demo / local mode — requests and accepts save in this browser until the API is
-            connected.
-          </p>
-        )}
+        {offline && <p className="hint-line">Saved on this device until the API is live.</p>}
         {error && <p className="profile-banner error">{error}</p>}
 
         <div className="network-tabs" role="tablist">
@@ -285,45 +271,50 @@ export function NetworkPage() {
             className={tab === 'connections' ? 'active' : ''}
             onClick={() => setTab('connections')}
           >
-            Connections ({connections.length})
+            Connections
+            {connections.length > 0 && <em>{connections.length}</em>}
           </button>
           <button
             type="button"
             className={tab === 'requests' ? 'active' : ''}
             onClick={() => setTab('requests')}
           >
-            Requests ({pending.length})
+            Requests
+            {pending.length > 0 && <em>{pending.length}</em>}
           </button>
           <button
             type="button"
             className={tab === 'discover' ? 'active' : ''}
             onClick={() => setTab('discover')}
           >
-            People you may know
+            Discover
           </button>
         </div>
 
         {tab === 'discover' && (
-          <div className="panel network-note">
-            <label>
-              Optional note with request
-              <input
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                placeholder="Hi — saw your Agentic AI path progress…"
-                maxLength={300}
-              />
-            </label>
+          <div className="network-note bare">
+            <input
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="Optional note with your request…"
+              maxLength={300}
+              aria-label="Optional note"
+            />
           </div>
         )}
 
         {tab === 'connections' && (
           <div className="network-grid">
             {connections.length === 0 && (
-              <p className="muted">No connections yet — discover people and send a request.</p>
+              <p className="empty-state">
+                No connections yet.{' '}
+                <button type="button" className="text-link" onClick={() => setTab('discover')}>
+                  Find people
+                </button>
+              </p>
             )}
             {connections.map((c) => (
-              <article className="panel network-card" key={c.id}>
+              <article className="network-card bare" key={c.id}>
                 <div className="network-avatar" aria-hidden="true">
                   {initials(c.other_name)}
                 </div>
@@ -334,11 +325,6 @@ export function NetworkPage() {
                     <Link className="btn primary sm" to={`/messages?with=${c.other_user_id}`}>
                       Message
                     </Link>
-                    {c.other_user_id > 0 && (
-                      <Link className="btn ghost sm" to={`/profile/${c.other_user_id}`}>
-                        Profile
-                      </Link>
-                    )}
                     <button
                       type="button"
                       className="btn ghost sm"
@@ -356,9 +342,9 @@ export function NetworkPage() {
 
         {tab === 'requests' && (
           <div className="network-requests">
-            <section className="panel profile-section">
+            <section className="bare-section">
               <h3>Incoming</h3>
-              {incoming.length === 0 && <p className="muted">No pending invitations.</p>}
+              {incoming.length === 0 && <p className="muted">None</p>}
               {incoming.map((c) => (
                 <div className="request-row" key={c.id}>
                   <div className="network-avatar sm" aria-hidden="true">
@@ -390,9 +376,9 @@ export function NetworkPage() {
                 </div>
               ))}
             </section>
-            <section className="panel profile-section">
-              <h3>Outgoing</h3>
-              {outgoing.length === 0 && <p className="muted">No sent requests.</p>}
+            <section className="bare-section">
+              <h3>Sent</h3>
+              {outgoing.length === 0 && <p className="muted">None</p>}
               {outgoing.map((c) => (
                 <div className="request-row" key={c.id}>
                   <div className="network-avatar sm" aria-hidden="true">
@@ -401,7 +387,6 @@ export function NetworkPage() {
                   <div className="request-meta">
                     <strong>{c.other_name}</strong>
                     <span>{c.other_headline}</span>
-                    {c.note && <em>{c.note}</em>}
                   </div>
                   <button
                     type="button"
@@ -420,10 +405,10 @@ export function NetworkPage() {
         {tab === 'discover' && (
           <div className="network-grid">
             {discover.length === 0 && (
-              <p className="muted">You&apos;re caught up — no new suggestions right now.</p>
+              <p className="empty-state">You&apos;re all caught up.</p>
             )}
             {discover.map((p) => (
-              <article className="panel network-card" key={p.user_id}>
+              <article className="network-card bare" key={p.user_id}>
                 <div className="network-avatar" aria-hidden="true">
                   {initials(p.name)}
                 </div>
@@ -439,11 +424,6 @@ export function NetworkPage() {
                     >
                       Connect
                     </button>
-                    {p.user_id > 0 && (
-                      <Link className="btn ghost sm" to={`/profile/${p.user_id}`}>
-                        View
-                      </Link>
-                    )}
                   </div>
                 </div>
               </article>

@@ -248,39 +248,32 @@ export function JobsBoardPage() {
 
   return (
     <Shell wide>
-      <section className="jobs-hero reveal">
+      <section className="page-head reveal">
         <div>
-          <p className="eyebrow">Jobs</p>
-          <h1>Job board</h1>
-          <p className="hero-lede">
-            LinkedIn-style listings: recruiters post roles; learners browse and
-            apply. Connected to {BRAND.product} practice paths.
-          </p>
+          <h1>Jobs</h1>
+          <p className="page-sub">Browse roles or post openings.</p>
         </div>
-        <div className="hero-cta">
+        <div className="page-head-actions">
           {isRecruiter ? (
             <button
               type="button"
-              className="btn primary"
+              className="btn primary sm"
               onClick={() => setShowComposer((v) => !v)}
             >
-              {showComposer ? 'Close composer' : 'Post a job'}
+              {showComposer ? 'Cancel' : 'Post job'}
             </button>
           ) : (
             <button
               type="button"
-              className="btn primary"
+              className="btn primary sm"
               onClick={() => {
                 void setPersona('recruiter')
                 setShowComposer(true)
               }}
             >
-              Switch to recruiter &amp; post
+              Post as recruiter
             </button>
           )}
-          <Link className="btn ghost" to="/for-companies">
-            Hiring studio
-          </Link>
         </div>
       </section>
 
@@ -289,13 +282,9 @@ export function JobsBoardPage() {
       {showComposer && (
         <form className="jobs-composer panel reveal" onSubmit={onPost}>
           <h2>Post a job</h2>
-          <p className="muted">
-            {!user
-              ? 'Sign in required to publish.'
-              : useLocal || !api.apiBase
-                ? 'API offline — saving to this browser (demo mode).'
-                : 'Publishes to the live board for learners.'}
-          </p>
+          {(useLocal || !api.apiBase) && (
+            <p className="hint-line">Saves on this device until the API is live.</p>
+          )}
           <div className="jobs-form-grid">
             <label>
               Job title

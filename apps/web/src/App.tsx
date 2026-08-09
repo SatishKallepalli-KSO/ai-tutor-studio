@@ -281,31 +281,19 @@ export default function App() {
               {isRecruiter ? (
                 <>
                   <Link className="btn primary" to="/jobs">
-                    Post &amp; browse jobs
+                    Browse jobs
                   </Link>
                   <Link className="btn ghost" to="/for-companies">
                     Hiring studio
                   </Link>
-                  <a
-                    className="btn ghost"
-                    href={`mailto:${BRAND.contactEmail}?subject=Hiring%20pilot`}
-                  >
-                    Talk to sales
-                  </a>
                 </>
               ) : (
                 <>
                   <a className="btn primary" href="#paths">
-                    Learn &amp; practice
+                    Start learning
                   </a>
-                  <Link className="btn ghost" to="/for-companies">
-                    Hire candidates
-                  </Link>
-                  <Link className="btn ghost" to="/agentic-path">
-                    Backend → AI
-                  </Link>
-                  <Link className="btn ghost" to="/compare">
-                    Compare
+                  <Link className="btn ghost" to="/jobs">
+                    Jobs
                   </Link>
                 </>
               )}
