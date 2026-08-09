@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Shell } from './Shell'
+import { TrustStats } from './TrustStats'
+import { PRODUCT_STATS } from './productStats'
 import './App.css'
 
 export function AboutPage() {
@@ -22,10 +24,15 @@ export function AboutPage() {
               Explore paths
             </Link>
             <Link className="btn ghost" to="/company">
-              Company &amp; partners
+              Company
+            </Link>
+            <Link className="btn ghost" to="/compare">
+              Compare tools
             </Link>
           </div>
         </section>
+
+        <TrustStats variant="strip" className="reveal" />
 
         <section className="company-section reveal">
           <p className="eyebrow">Mission</p>
@@ -45,8 +52,9 @@ export function AboutPage() {
             <li>
               <strong>Structured study docs</strong>
               <span>
-                Topic-level curricula for Staff, Engineering Manager, career
-                switches, and language depth drills.
+                Topic-level curricula across {PRODUCT_STATS.tracksCount} tracks
+                for Staff, Engineering Manager, career switches, and language
+                depth drills.
               </span>
             </li>
             <li>
@@ -66,8 +74,10 @@ export function AboutPage() {
             <li>
               <strong>Career switch paths</strong>
               <span>
-                Backend → Agentic AI and Data Engineer → Snowflake curricula so
-                switchers build real stack context before they interview.
+                Backend → Agentic AI ({PRODUCT_STATS.agenticVideosCount}{' '}
+                validated videos) and Data Engineer → Snowflake (
+                {PRODUCT_STATS.snowflakeVideosCount} videos) so switchers build
+                real stack context before they interview.
               </span>
             </li>
           </ul>
@@ -117,6 +127,9 @@ export function AboutPage() {
             <Link className="btn ghost" to="/investors">
               Partner &amp; invest
             </Link>
+            <a className="btn ghost" href="mailto:hello@kallepallilabs.com">
+              hello@kallepallilabs.com
+            </a>
           </div>
         </section>
       </article>

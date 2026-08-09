@@ -457,6 +457,107 @@ a {
   border-bottom: 0;
 }
 
+.compare-table th[scope='row'] {
+  color: var(--ink);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.compare-table td.cmp-mid {
+  color: var(--muted);
+}
+
+.compare-table td.cmp-no {
+  color: rgba(139, 152, 166, 0.72);
+}
+
+.compare-page-table {
+  margin-top: 1.15rem;
+}
+
+.compare-page-table .compare-table {
+  min-width: 920px;
+  font-size: 0.86rem;
+}
+
+.compare-page-table .compare-table th:nth-child(2),
+.compare-page-table .compare-table td:nth-child(2).yes {
+  color: var(--accent);
+}
+
+/* —— Credibility / trust metrics —— */
+.trust-stats {
+  margin: 0.25rem 0 1.75rem;
+  padding: 1.15rem 0 1.25rem;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.trust-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.trust-stats-panel .trust-stats-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.trust-stat {
+  display: grid;
+  gap: 0.28rem;
+  min-width: 0;
+}
+
+.trust-stat strong {
+  font-family: var(--display);
+  font-size: clamp(1.45rem, 2.6vw, 1.85rem);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: var(--ink);
+}
+
+.trust-stat .trust-fallback {
+  font-size: 0.72em;
+  color: var(--accent-2);
+  letter-spacing: -0.02em;
+}
+
+.trust-stat span {
+  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.4;
+}
+
+.trust-stats-note {
+  margin: 0.85rem 0 0;
+  font-size: 0.86rem;
+  max-width: 48rem;
+}
+
+.trust-stats-note a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.trust-stats-note a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 960px) {
+  .trust-stats-grid,
+  .trust-stats-panel .trust-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .trust-stats-grid,
+  .trust-stats-panel .trust-stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .section-title {
   display: flex;
   flex-wrap: wrap;
@@ -2030,9 +2131,12 @@ a.ad-slot:hover {
 
 .company-logo-row li span {
   display: inline-flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.12rem;
   min-height: 2.4rem;
-  padding: 0.35rem 0.9rem;
+  padding: 0.45rem 0.9rem;
   border: 1px solid var(--line);
   border-radius: 12px;
   color: var(--ink);
@@ -2044,6 +2148,14 @@ a.ad-slot:hover {
     rgba(255, 255, 255, 0.04),
     rgba(255, 255, 255, 0.01)
   );
+}
+
+.company-logo-role {
+  font-style: normal;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--muted);
+  letter-spacing: 0.02em;
 }
 
 .company-tech-note {

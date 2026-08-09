@@ -83,6 +83,14 @@ export type AdminOverview = {
   }[]
 }
 
+/** Safe public aggregates — no emails, no admin flags. */
+export type PublicStats = {
+  total_users: number
+  feedback_events_last_7d: number
+  tracks_count: number
+  generated_at: string
+}
+
 export type PlanCard = {
   id: string
   name: string
@@ -251,6 +259,10 @@ export const api = {
 
   async adminOverview(days = 14): Promise<AdminOverview> {
     return request(`/v1/admin/overview?days=${days}`)
+  },
+
+  async publicStats(): Promise<PublicStats> {
+    return request('/v1/stats/public')
   },
 }
 

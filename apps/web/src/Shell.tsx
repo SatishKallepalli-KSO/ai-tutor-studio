@@ -31,6 +31,7 @@ export function Shell({
           <Link to="/agentic-path">Agentic AI</Link>
           <Link to="/snowflake-path">Snowflake</Link>
           <Link to="/pricing">Plans</Link>
+          <Link to="/compare">Compare</Link>
           <Link to="/about">About</Link>
           <Link to="/company">Company</Link>
           {user?.is_admin && <Link to="/admin">Admin</Link>}
@@ -92,6 +93,7 @@ export function Shell({
         <div className="site-footer-links">
           <Link to="/about">About</Link>
           <Link to="/company">Company</Link>
+          <Link to="/compare">Compare</Link>
           <Link to="/investors">Partner &amp; invest</Link>
           <Link to="/pricing">Plans</Link>
           <Link to="/agentic-path">Agentic AI path</Link>

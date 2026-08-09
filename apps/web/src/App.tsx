@@ -13,6 +13,7 @@ import { track as trackEvent } from './analytics'
 import { useAuth } from './auth'
 import { getTopic, topicsForTrack, type Topic } from './curriculum'
 import { Shell, TRACK_GROUPS } from './Shell'
+import { TrustStats } from './TrustStats'
 import { speakText, stopSpeaking, useSpeechAnswer } from './useSpeechAnswer'
 import './App.css'
 
@@ -279,8 +280,8 @@ export default function App() {
               <Link className="btn ghost" to="/snowflake-path">
                 Data Eng → Snowflake
               </Link>
-              <Link className="btn ghost" to="/pricing">
-                Free vs Pro
+              <Link className="btn ghost" to="/compare">
+                Compare tools
               </Link>
             </div>
             <div className="hero-stage" aria-hidden="true">
@@ -292,6 +293,8 @@ export default function App() {
               </div>
             </div>
           </section>
+
+          <TrustStats variant="strip" className="reveal" />
 
           <AdSlot
             id="home-below-hero"
@@ -316,7 +319,12 @@ export default function App() {
           </section>
 
           <section className="compare reveal">
-            <h2>Why serious candidates switch here</h2>
+            <div className="section-title">
+              <h2>Why serious candidates switch here</h2>
+              <Link className="linkish" to="/compare">
+                Full comparison →
+              </Link>
+            </div>
             <div className="compare-table-wrap">
               <table className="compare-table">
                 <thead>

@@ -1,20 +1,22 @@
 import { Link } from 'react-router-dom'
 import { AdSlot } from './AdSlot'
 import { Shell } from './Shell'
+import { TrustStats } from './TrustStats'
+import { PRODUCT_STATS } from './productStats'
 import './App.css'
 
 const TECH_PARTNERS = [
-  'OpenAI',
-  'Stripe',
-  'Snowflake',
-  'React',
-  'FastAPI',
+  { name: 'OpenAI', role: 'AI coaching models' },
+  { name: 'Stripe', role: 'Billing' },
+  { name: 'Snowflake', role: 'Career path curriculum' },
+  { name: 'React', role: 'Web product' },
+  { name: 'FastAPI', role: 'API platform' },
 ] as const
 
 const OPEN_SLOTS = [
   {
     role: 'Partner',
-    blurb: 'Distribution, hiring, or learning partners — slot open.',
+    blurb: 'Distribution, hiring, or learning partners — seat open.',
   },
   {
     role: 'Advisor',
@@ -39,11 +41,14 @@ export function CompanyPage() {
           <p className="hero-lede">
             An independent product company building voice-first interview prep
             for Staff, EM, and stack-switch candidates. Study. Speak. Get
-            coached.
+            coached — with a Free path to train and Pro when the loop matters.
           </p>
           <div className="hero-cta">
             <Link className="btn primary" to="/">
               Try the product
+            </Link>
+            <Link className="btn ghost" to="/compare">
+              Compare tools
             </Link>
             <Link className="btn ghost" to="/investors">
               Partner &amp; invest
@@ -51,18 +56,33 @@ export function CompanyPage() {
           </div>
         </section>
 
+        <TrustStats variant="panel" className="reveal" />
+
         <section className="company-partner-strip reveal" aria-label="Built with">
-          <p className="company-tech-label">Built with</p>
+          <p className="company-tech-label">Technology stack</p>
           <ul className="company-logo-row" aria-label="Technology partners">
-            {TECH_PARTNERS.map((name) => (
-              <li key={name}>
-                <span>{name}</span>
+            {TECH_PARTNERS.map((item) => (
+              <li key={item.name}>
+                <span>
+                  {item.name}
+                  <em className="company-logo-role">{item.role}</em>
+                </span>
               </li>
             ))}
           </ul>
           <p className="muted company-tech-note">
-            Stack &amp; integration partners — not investors. No fabricated VC
-            logos.
+            Integration &amp; curriculum partners — not investors. No fabricated
+            VC logos or Fortune-500 customer claims.
+          </p>
+        </section>
+
+        <section className="company-section reveal" id="mission">
+          <p className="eyebrow">Mission</p>
+          <h2>Help serious engineers sound like the role.</h2>
+          <p className="company-copy">
+            Interview loops reward ownership stories, tradeoff judgment, and
+            calm delivery under time. We build the practice system around that
+            — not puzzle farms, not generic chat wrappers.
           </p>
         </section>
 
@@ -70,9 +90,10 @@ export function CompanyPage() {
           <p className="eyebrow">Product</p>
           <h2>Practice the way panels hear you.</h2>
           <p className="company-copy">
-            Structured curricula, mic answers, and coaching on substance plus
-            delivery. Free paths to train; Pro when Staff/EM depth and unlimited
-            coaching matter.
+            {PRODUCT_STATS.tracksCount} interview &amp; language tracks, plus
+            Agentic ({PRODUCT_STATS.agenticVideosCount} videos) and Snowflake (
+            {PRODUCT_STATS.snowflakeVideosCount} videos) libraries — curriculum
+            first, mic answers second, coaching on substance and delivery.
           </p>
           <div className="company-snapshot">
             <div>
@@ -90,15 +111,24 @@ export function CompanyPage() {
           </div>
         </section>
 
-        <section className="company-section reveal" id="story">
-          <p className="eyebrow">Company story</p>
+        <section className="company-section reveal" id="team">
+          <p className="eyebrow">Team</p>
           <h2>Built by Kallepalli Labs</h2>
           <p className="company-copy">
-            Founded by <strong>Satish Kallepalli</strong>. We ship practical AI
-            products for people competing in real hiring loops — not another
-            generic chatbot wrapper. Credibility means ownership, shipping, and
-            honest partner language.
+            Founded by <strong>Satish Kallepalli</strong> — engineering manager
+            and AI architect by background. We ship practical AI products for
+            people competing in real hiring loops. Credibility means ownership,
+            shipping, and honest partner language — not invented headcount or
+            backing.
           </p>
+          <div className="hero-cta" style={{ marginTop: '1rem' }}>
+            <Link className="btn ghost" to="/about">
+              About the lab
+            </Link>
+            <a className="btn ghost" href="mailto:hello@kallepallilabs.com">
+              Contact
+            </a>
+          </div>
         </section>
 
         <section className="company-section reveal" id="why-now">
@@ -124,6 +154,24 @@ export function CompanyPage() {
           </ul>
         </section>
 
+        <section className="company-section reveal" id="contact">
+          <p className="eyebrow">Contact</p>
+          <h2>Talk to the team.</h2>
+          <p className="company-copy">
+            Product questions, partnerships, and investor conversations go to
+            the same inbox. Mention whether you’re a candidate, partner, or
+            investor so we can respond with the right materials.
+          </p>
+          <div className="hero-cta" style={{ marginTop: '1rem' }}>
+            <a className="btn primary" href="mailto:hello@kallepallilabs.com">
+              hello@kallepallilabs.com
+            </a>
+            <Link className="btn ghost" to="/investors">
+              Partner &amp; invest
+            </Link>
+          </div>
+        </section>
+
         <section className="company-cta-band reveal" id="partner">
           <div>
             <p className="eyebrow">Partner &amp; invest</p>
@@ -137,9 +185,9 @@ export function CompanyPage() {
             <Link className="btn primary" to="/investors">
               Investor relations
             </Link>
-            <a className="btn ghost" href="mailto:hello@kallepallilabs.com">
-              hello@kallepallilabs.com
-            </a>
+            <Link className="btn ghost" to="/compare">
+              See how we compare
+            </Link>
           </div>
         </section>
 

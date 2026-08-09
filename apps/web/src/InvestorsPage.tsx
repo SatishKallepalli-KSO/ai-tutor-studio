@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom'
 import { AdSlot } from './AdSlot'
 import { Shell } from './Shell'
+import { TrustStats } from './TrustStats'
+import { PRODUCT_STATS } from './productStats'
 import './App.css'
 
 export function InvestorsPage() {
@@ -25,15 +27,27 @@ export function InvestorsPage() {
             <Link className="btn ghost" to="/company">
               Company overview
             </Link>
+            <Link className="btn ghost" to="/compare">
+              Competitive fit
+            </Link>
           </div>
         </section>
 
+        <TrustStats variant="panel" className="reveal" />
+
         <section className="company-partner-strip reveal" aria-label="Built with">
-          <p className="company-tech-label">Built with</p>
+          <p className="company-tech-label">Technology stack</p>
           <ul className="company-logo-row">
-            {['OpenAI', 'Stripe', 'Snowflake'].map((name) => (
-              <li key={name}>
-                <span>{name}</span>
+            {[
+              { name: 'OpenAI', role: 'Coaching' },
+              { name: 'Stripe', role: 'Billing' },
+              { name: 'Snowflake', role: 'Curriculum' },
+            ].map((item) => (
+              <li key={item.name}>
+                <span>
+                  {item.name}
+                  <em className="company-logo-role">{item.role}</em>
+                </span>
               </li>
             ))}
           </ul>
@@ -61,8 +75,10 @@ export function InvestorsPage() {
             <li>
               <strong>Product surface</strong>
               <span>
-                Paths, study docs, voice practice, feedback, auth, and
-                Stripe-ready billing in a live app experience.
+                {PRODUCT_STATS.tracksCount} tracks, study docs, voice practice,
+                feedback, auth, Stripe-ready billing, plus Agentic (
+                {PRODUCT_STATS.agenticVideosCount}) and Snowflake (
+                {PRODUCT_STATS.snowflakeVideosCount}) video paths.
               </span>
             </li>
             <li>
@@ -75,21 +91,24 @@ export function InvestorsPage() {
             <li>
               <strong>Differentiated loop</strong>
               <span>
-                Curriculum → speak → coach, plus Agentic and Snowflake video
-                paths — closer to the interview room than generic chat.
+                Curriculum → speak → coach — closer to the interview room than
+                generic chat or coding-only drills. See the{' '}
+                <Link to="/compare">comparison page</Link> for fair tradeoffs.
               </span>
             </li>
             <li>
               <strong>Honest company story</strong>
               <span>
                 Independent Kallepalli Labs product. Partner slots labeled openly
-                until filled — no fabricated VC endorsements.
+                until filled — no fabricated VC endorsements or vanity user
+                counts.
               </span>
             </li>
           </ul>
           <p className="muted company-tech-note">
-            We don’t publish vanity metrics we can’t stand behind. Ask for
-            current usage and roadmap in conversation.
+            Learner counts shown above come from the live API when connected;
+            otherwise we show product counts we can prove from the shipped
+            curriculum.
           </p>
         </section>
 
