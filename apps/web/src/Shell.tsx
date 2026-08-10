@@ -5,6 +5,8 @@ import { useAuth } from './auth'
 import { BRAND, PERSONAS, type Persona } from './brand'
 import { ChatDock } from './ChatDock'
 import { usePersona } from './persona'
+// Hashed under /assets/ so CDN cannot reuse a poisoned /logo.png SPA HTML cache entry.
+import brandMarkUrl from './assets/pol-mark.png'
 
 function MoreMenu({
   label,
@@ -55,9 +57,6 @@ export function Shell({
   const { persona, setPersona, isLearner, isRecruiter } = usePersona()
   const docsHref = `${import.meta.env.BASE_URL}product/`
   const [logoFailed, setLogoFailed] = useState(false)
-  // Cache-busted filename: Cloudflare previously cached SPA HTML at /logo.png
-  // (and briefly at /brand-mark.png after a pre-deploy probe).
-  const brandMarkSrc = `${import.meta.env.BASE_URL}pol-mark.png?v=2`
 
   return (
     <div className={wide ? 'shell shell-wide' : 'shell'}>
@@ -75,7 +74,7 @@ export function Shell({
           ) : (
             <img
               className="brand-mark"
-              src={brandMarkSrc}
+              src={brandMarkUrl}
               width={36}
               height={36}
               alt={`${BRAND.product} logo`}
