@@ -1,17 +1,17 @@
-/** Central product positioning — AI engineer platform; speak practice is the edge. */
+/** Central product positioning — learn, practice, AI feedback. */
 
 export const BRAND = {
   product: 'Practice Out Loud',
   domain: 'practiceoutloud.com',
   company: 'Kallepalli Labs',
   /** Short nav line under the brand. */
-  tagline: 'Become an AI engineer',
-  /** Primary customer magnet — platform promise. */
-  magnet: 'One-stop platform to become an AI engineer',
+  tagline: 'Learn · Practice · AI feedback',
+  /** Primary headline under the product name. */
+  magnet: 'Learn, practice, and get AI feedback',
   magnetSub:
-    'Learn the stack, build RAG & agents, practice Staff/EM interviews out loud, then apply — study → speak → coach in one place.',
+    'One platform to become an AI engineer — study paths, practice out loud, and get coaching on content and delivery. Free to start.',
   oneLiner:
-    'Practice Out Loud is the one-stop platform to become an AI engineer: structured AI paths, spoken interview coaching, and hiring surfaces when you’re ready. Free to start, Pro for full access.',
+    'Practice Out Loud helps you learn AI engineering, practice out loud, and get AI feedback — Agentic paths, interviews, and stack depth in one place. Free to start, Pro for full access.',
   copyright: '© 2026 Practice Out Loud · Kallepalli Labs. All rights reserved.',
   contactEmail: 'hello@practiceoutloud.com',
 } as const
@@ -26,7 +26,7 @@ export const PERSONAS: Record<
     label: 'Learner',
     short: 'Learn',
     homePath: '/',
-    blurb: 'AI engineer paths first — then Staff/EM voice practice, jobs, network.',
+    blurb: 'Learn AI paths, practice out loud, get feedback — then jobs and network.',
   },
   recruiter: {
     label: 'Recruiter / hiring',
@@ -41,7 +41,7 @@ export const AUDIENCES = {
     label: 'Who it’s for',
     title: 'Engineers becoming AI engineers',
     blurb:
-      'Backend and fullstack engineers leveling into production AI — plus seniors who need Staff/EM loops practiced out loud before the panel.',
+      'Backend and fullstack engineers leveling into production AI — and anyone who wants to learn, practice out loud, and get AI coaching before the real interview.',
   },
   companies: {
     label: 'Later · B2B',
@@ -51,26 +51,26 @@ export const AUDIENCES = {
   },
 } as const
 
-/** Homepage roadmap — one-stop AI engineer journey. */
+/** Homepage roadmap — learn → practice → feedback → hire. */
 export const AI_ENGINEER_JOURNEY = [
   {
     step: '01',
-    title: 'Learn the stack',
-    blurb: 'Python, Java, TypeScript, and web fundamentals — the base every AI engineer needs.',
+    title: 'Learn',
+    blurb: 'AI engineer paths, Agentic video, languages, and stack fundamentals.',
   },
   {
     step: '02',
-    title: 'Build AI systems',
-    blurb: 'RAG, agents, evals, LLM ops, Agentic AI, and Snowflake Cortex — production paths, not toy demos.',
+    title: 'Practice',
+    blurb: 'Speak answers out loud on real prompts — timed drills, not silent reading.',
   },
   {
     step: '03',
-    title: 'Practice out loud',
-    blurb: 'Staff & EM interview loops with AI coaching on content and delivery — the skill coding sites skip.',
+    title: 'Get AI feedback',
+    blurb: 'Coaching on content and delivery so you know what to fix before the next try.',
   },
   {
     step: '04',
     title: 'Get hired',
-    blurb: 'Browse roles and show practice-ready profiles when you’re ready to apply.',
+    blurb: 'Browse roles when you’re ready — practice-ready profiles, not cold apply.',
   },
 ] as const

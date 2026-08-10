@@ -181,8 +181,8 @@ export const TRACK_GROUPS: {
   },
   {
     id: 'interview',
-    title: 'Interview out loud',
-    blurb: 'Staff & EM narratives for hiring panels — speak them until they land.',
+    title: 'Interview practice',
+    blurb: 'Staff & EM loops when you need the panel — speak them until they land.',
     trackIds: ['staff-interview', 'em-interview'],
   },
   {

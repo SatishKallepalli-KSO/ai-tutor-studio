@@ -503,11 +503,11 @@ export default function App() {
                 <span className="pulse-dot" />
                 {isRecruiter
                   ? 'Hiring · phase 2'
-                  : 'AI paths · spoken coaching · hire-ready'}
+                  : 'Learn · practice · AI feedback'}
                 <em>
                   {isRecruiter
                     ? '“Reach candidates who already practiced out loud.”'
-                    : '“I shipped a RAG pipeline with evals — and I can explain it in 90 seconds.”'}
+                    : '“I learned the path, practiced out loud, and the coach told me exactly what to fix.”'}
                 </em>
               </div>
             </div>
@@ -516,13 +516,13 @@ export default function App() {
           {!isRecruiter && (
             <div className="learning-trust reveal" aria-label="Product highlights">
               <span>
-                <b>Agentic AI</b> free video curriculum
+                <b>Learn</b> AI paths &amp; Agentic curriculum
               </span>
               <span>
-                <b>RAG · agents · evals</b> production paths
+                <b>Practice</b> out loud on real prompts
               </span>
               <span>
-                <b>Staff &amp; EM</b> out-loud practice
+                <b>AI feedback</b> on content &amp; delivery
               </span>
               <span>
                 <b>Free</b> to start · Pro when ready
@@ -551,11 +551,10 @@ export default function App() {
               aria-label="Featured learning paths"
             >
               <div className="section-title">
-                <h2>Agentic AI &amp; interview practice</h2>
+                <h2>Learn · practice · AI feedback</h2>
                 <p className="muted">
-                  Learn the agentic stack on free video paths, upskill into
-                  production AI, then rehearse Staff/EM out loud — same
-                  platform.
+                  Agentic AI, production AI upskilling, and interview loops —
+                  same study → speak → coach loop.
                 </p>
               </div>
               <div className="featured-grid">
@@ -661,7 +660,7 @@ export default function App() {
             id="home-below-hero"
             variant="banner"
             headline="Interview prep partners"
-            detail="Partner strip under the Staff/EM magnet — not in the hero."
+            detail="Partner strip under the learn/practice magnet — not in the hero."
           />
 
           {isRecruiter ? (
@@ -755,7 +754,7 @@ export default function App() {
               <p className="muted">
                 {isRecruiter
                   ? `${tracks.length} paths learners use before they apply`
-                  : 'Become an AI engineer · practice Staff/EM out loud · sharpen the stack'}
+                  : 'Learn · practice · AI feedback · become an AI engineer'}
               </p>
             </div>
 
