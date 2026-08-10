@@ -856,14 +856,40 @@ export function allPathVideos(): PathVideo[] {
   return AGENTIC_PATH.flatMap((p) => p.videos)
 }
 
-export function embedUrl(video: PathVideo): string {
-  if (video.playlistId) {
-    return `https://www.youtube.com/embed/videoseries?list=${video.playlistId}`
+/** Auto-mark complete when watch ratio reaches this threshold. */
+export const AUTO_COMPLETE_THRESHOLD = 0.9
+
+/** Don't resume for tiny watches; restart if already near the end. */
+const RESUME_MIN_SECONDS = 5
+const RESUME_RESTART_RATIO = 0.95
+
+export function embedUrl(video: PathVideo, startSeconds = 0): string {
+  const params = new URLSearchParams({
+    enablejsapi: '1',
+    rel: '0',
+  })
+  if (typeof window !== 'undefined' && window.location?.origin) {
+    params.set('origin', window.location.origin)
   }
-  return `https://www.youtube.com/embed/${video.youtubeId}`
+  const start = Math.max(0, Math.floor(startSeconds))
+  if (start > 0) params.set('start', String(start))
+
+  if (video.playlistId) {
+    return `https://www.youtube.com/embed/videoseries?list=${video.playlistId}&${params}`
+  }
+  return `https://www.youtube.com/embed/${video.youtubeId}?${params}`
 }
 
 const PROGRESS_KEY = 'ats_agentic_video_done'
+const WATCH_KEY = 'ats_agentic_video_watch'
+
+export type VideoWatchProgress = {
+  seconds: number
+  duration?: number
+  updatedAt: number
+}
+
+export type WatchProgressMap = Record<string, VideoWatchProgress>
 
 export function loadVideoProgress(): Set<string> {
   try {
@@ -877,4 +903,90 @@ export function loadVideoProgress(): Set<string> {
 
 export function saveVideoProgress(done: Set<string>) {
   localStorage.setItem(PROGRESS_KEY, JSON.stringify([...done]))
+}
+
+export function loadWatchProgress(): WatchProgressMap {
+  try {
+    const raw = localStorage.getItem(WATCH_KEY)
+    if (!raw) return {}
+    const parsed = JSON.parse(raw) as WatchProgressMap
+    if (!parsed || typeof parsed !== 'object') return {}
+    return parsed
+  } catch {
+    return {}
+  }
+}
+
+export function saveWatchProgress(map: WatchProgressMap) {
+  localStorage.setItem(WATCH_KEY, JSON.stringify(map))
+}
+
+export function upsertWatchProgress(
+  map: WatchProgressMap,
+  videoId: string,
+  seconds: number,
+  duration?: number,
+): WatchProgressMap {
+  const prev = map[videoId]
+  const nextSeconds = Math.max(prev?.seconds ?? 0, Math.max(0, seconds))
+  const nextDuration =
+    duration && duration > 0
+      ? Math.max(prev?.duration ?? 0, duration)
+      : prev?.duration
+  return {
+    ...map,
+    [videoId]: {
+      seconds: nextSeconds,
+      ...(nextDuration ? { duration: nextDuration } : {}),
+      updatedAt: Date.now(),
+    },
+  }
+}
+
+/** Seconds to resume from when opening a lesson. */
+export function resumeSeconds(progress?: VideoWatchProgress): number {
+  if (!progress?.seconds) return 0
+  const s = Math.floor(progress.seconds)
+  if (s < RESUME_MIN_SECONDS) return 0
+  if (progress.duration && progress.duration > 0) {
+    if (s / progress.duration >= RESUME_RESTART_RATIO) return 0
+  }
+  return Math.max(0, s - 2)
+}
+
+export function watchPercent(progress?: VideoWatchProgress): number {
+  if (!progress) return 0
+  if (progress.duration && progress.duration > 0) {
+    return Math.min(
+      100,
+      Math.round((progress.seconds / progress.duration) * 100),
+    )
+  }
+  // No duration yet — show a modest in-progress signal once watching started.
+  if (progress.seconds > 0) return Math.min(15, Math.round(progress.seconds / 10))
+  return 0
+}
+
+/** Per-lesson bar: done = 100%, else watch %. */
+export function lessonProgressPercent(
+  videoId: string,
+  done: Set<string>,
+  watch: WatchProgressMap,
+): number {
+  if (done.has(videoId)) return 100
+  return watchPercent(watch[videoId])
+}
+
+/** Average of lesson progress across a phase (or whole path). */
+export function aggregateProgressPercent(
+  videos: PathVideo[],
+  done: Set<string>,
+  watch: WatchProgressMap,
+): number {
+  if (!videos.length) return 0
+  const sum = videos.reduce(
+    (acc, v) => acc + lessonProgressPercent(v.id, done, watch),
+    0,
+  )
+  return Math.round(sum / videos.length)
 }

@@ -4,26 +4,35 @@ import {
   AGENTIC_PATH,
   AGENTIC_PRACTICE_TRACK,
   agenticPracticeHref,
+  aggregateProgressPercent,
   allPathVideos,
-  embedUrl,
+  lessonProgressPercent,
   loadVideoProgress,
+  loadWatchProgress,
+  resumeSeconds,
   saveVideoProgress,
+  saveWatchProgress,
+  upsertWatchProgress,
   type PathVideo,
+  type WatchProgressMap,
 } from './agenticPath'
 import { AdSlot } from './AdSlot'
 import { track } from './analytics'
 import { Shell } from './Shell'
+import { YouTubePlayer } from './YouTubePlayer'
 import './App.css'
 
 export function AgenticPathPage() {
   const videos = useMemo(() => allPathVideos(), [])
   const [activeId, setActiveId] = useState(videos[0]?.id ?? '')
   const [done, setDone] = useState<Set<string>>(() => new Set())
+  const [watch, setWatch] = useState<WatchProgressMap>({})
   const [query, setQuery] = useState('')
   const [phaseFilter, setPhaseFilter] = useState<string>('all')
 
   useEffect(() => {
     setDone(loadVideoProgress())
+    setWatch(loadWatchProgress())
   }, [])
 
   const filteredPhases = useMemo(() => {
@@ -67,14 +76,30 @@ export function AgenticPathPage() {
   )
   const doneCount = [...done].filter((id) => videos.some((v) => v.id === id))
     .length
-  const pct = videos.length
-    ? Math.round((doneCount / videos.length) * 100)
-    : 0
+  const pathPct = aggregateProgressPercent(videos, done, watch)
   const pathComplete = videos.length > 0 && doneCount === videos.length
   const phaseComplete = !!activePhase?.videos.every((v) => done.has(v.id))
   const practiceHref = agenticPracticeHref(
     activePhase?.practiceTopicId ?? 'ai-agents',
   )
+  const activeLessonPct = active
+    ? lessonProgressPercent(active.id, done, watch)
+    : 0
+  const activeResume = active ? resumeSeconds(watch[active.id]) : 0
+
+  function markDone(id: string, source: 'manual' | 'auto' = 'manual') {
+    setDone((prev) => {
+      if (prev.has(id)) return prev
+      const next = new Set(prev)
+      next.add(id)
+      track('agentic_video_complete', {
+        path: '/agentic-path',
+        properties: { video_id: id, source },
+      })
+      saveVideoProgress(next)
+      return next
+    })
+  }
 
   function toggleDone(id: string) {
     setDone((prev) => {
@@ -84,12 +109,21 @@ export function AgenticPathPage() {
         next.add(id)
         track('agentic_video_complete', {
           path: '/agentic-path',
-          properties: { video_id: id },
+          properties: { video_id: id, source: 'manual' },
         })
       } else {
         next.delete(id)
       }
       saveVideoProgress(next)
+      return next
+    })
+  }
+
+  function handleWatchProgress(seconds: number, duration: number) {
+    if (!active) return
+    setWatch((prev) => {
+      const next = upsertWatchProgress(prev, active.id, seconds, duration)
+      saveWatchProgress(next)
       return next
     })
   }
@@ -110,18 +144,25 @@ export function AgenticPathPage() {
           {videos.length} validated free YouTube courses &amp; playlists for
           backend engineers: Python for AI → LLMs → APIs &amp; vectors →
           tools/agents → RAG → LangGraph → prompting, evals &amp; production.
-          Watch in the player, mark complete, then practice out loud with AI
-          feedback on the matching Studio topics.
+          Watch in the player (progress resumes), mark complete, then practice
+          out loud with AI feedback on the matching Studio topics.
         </p>
         <div className="path-progress-head">
           <div>
             <strong>
               {doneCount}/{videos.length} marked done
             </strong>
-            <span className="muted"> · {pct}% of library</span>
+            <span className="muted"> · {pathPct}% path progress</span>
           </div>
-          <div className="progress-bar path-bar" aria-hidden="true">
-            <span style={{ width: `${pct}%` }} />
+          <div
+            className="progress-bar path-bar"
+            role="progressbar"
+            aria-valuenow={pathPct}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label="Path progress"
+          >
+            <span style={{ width: `${pathPct}%` }} />
           </div>
         </div>
         <div className="path-filters">
@@ -233,6 +274,11 @@ export function AgenticPathPage() {
             ).length
             const phaseDone =
               phase.videos.length > 0 && phaseDoneCount === phase.videos.length
+            const phasePct = aggregateProgressPercent(
+              phase.videos,
+              done,
+              watch,
+            )
             return (
               <div key={phase.id} className="path-phase">
                 <div className="path-phase-head">
@@ -244,6 +290,19 @@ export function AgenticPathPage() {
                     {phaseDoneCount > 0
                       ? ` · ${phaseDoneCount}/${phase.videos.length} watched`
                       : ''}
+                  </p>
+                  <div
+                    className="progress-bar path-lesson-bar"
+                    role="progressbar"
+                    aria-valuenow={phasePct}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-label={`Phase ${phase.step} progress`}
+                  >
+                    <span style={{ width: `${phasePct}%` }} />
+                  </div>
+                  <p className="path-lesson-pct muted">
+                    {phasePct}% complete
                   </p>
                   {phaseDone ? (
                     <Link
@@ -264,28 +323,45 @@ export function AgenticPathPage() {
                     </Link>
                   ) : null}
                 </div>
-                {phase.videos.map((video, i) => (
-                  <button
-                    key={video.id}
-                    type="button"
-                    className={
-                      video.id === active?.id
-                        ? 'path-video-item active'
-                        : 'path-video-item'
-                    }
-                    onClick={() => setActiveId(video.id)}
-                  >
-                    <span className="path-video-idx">
-                      {done.has(video.id) ? '✓' : `${phase.step}.${i + 1}`}
-                    </span>
-                    <span className="path-video-meta">
-                      <strong>{video.title}</strong>
-                      <em>
-                        {video.channel} · {video.duration}
-                      </em>
-                    </span>
-                  </button>
-                ))}
+                {phase.videos.map((video, i) => {
+                  const lessonPct = lessonProgressPercent(
+                    video.id,
+                    done,
+                    watch,
+                  )
+                  return (
+                    <button
+                      key={video.id}
+                      type="button"
+                      className={
+                        video.id === active?.id
+                          ? 'path-video-item active'
+                          : 'path-video-item'
+                      }
+                      onClick={() => setActiveId(video.id)}
+                    >
+                      <span className="path-video-idx">
+                        {done.has(video.id) ? '✓' : `${phase.step}.${i + 1}`}
+                      </span>
+                      <span className="path-video-meta">
+                        <strong>{video.title}</strong>
+                        <em>
+                          {video.channel} · {video.duration}
+                          {lessonPct > 0 && !done.has(video.id)
+                            ? ` · ${lessonPct}%`
+                            : ''}
+                          {done.has(video.id) ? ' · Complete' : ''}
+                        </em>
+                        <span
+                          className="progress-bar path-video-bar"
+                          aria-hidden="true"
+                        >
+                          <span style={{ width: `${lessonPct}%` }} />
+                        </span>
+                      </span>
+                    </button>
+                  )
+                })}
               </div>
             )
           })}
@@ -295,15 +371,14 @@ export function AgenticPathPage() {
           {active && (
             <>
               <div className="path-player panel">
-                <div className="video-frame">
-                  <iframe
-                    key={active.id}
-                    title={active.title}
-                    src={embedUrl(active)}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    allowFullScreen
-                  />
-                </div>
+                <YouTubePlayer
+                  key={active.id}
+                  video={active}
+                  title={active.title}
+                  startSeconds={activeResume}
+                  onProgress={handleWatchProgress}
+                  onNearComplete={() => markDone(active.id, 'auto')}
+                />
                 <div className="path-player-body">
                   <p className="pill">
                     Phase {activePhase?.step}: {activePhase?.title}
@@ -311,6 +386,25 @@ export function AgenticPathPage() {
                   <h2>{active.title}</h2>
                   <p className="muted">
                     {active.channel} · {active.duration}
+                  </p>
+                  <div
+                    className="progress-bar path-active-bar"
+                    role="progressbar"
+                    aria-valuenow={activeLessonPct}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-label="Lesson watch progress"
+                  >
+                    <span style={{ width: `${activeLessonPct}%` }} />
+                  </div>
+                  <p className="path-lesson-pct muted">
+                    {done.has(active.id)
+                      ? 'Lesson complete'
+                      : activeResume > 0
+                        ? `Resumes at ${formatTimestamp(activeResume)} · ${activeLessonPct}% watched`
+                        : activeLessonPct > 0
+                          ? `${activeLessonPct}% watched`
+                          : 'Not started — progress saves as you watch'}
                   </p>
                   <p className="lede">{active.why}</p>
                   {activePhase && (
@@ -397,6 +491,11 @@ export function AgenticPathPage() {
                     const phaseDone =
                       phase.videos.length > 0 &&
                       phase.videos.every((v) => done.has(v.id))
+                    const phasePct = aggregateProgressPercent(
+                      phase.videos,
+                      done,
+                      watch,
+                    )
                     return (
                       <li key={phase.id}>
                         <span>
@@ -407,6 +506,12 @@ export function AgenticPathPage() {
                             <span className="pill done">Ready</span>
                           ) : null}
                           <em className="muted"> — {phase.practiceLabel}</em>
+                          <span
+                            className="progress-bar path-map-bar"
+                            aria-hidden="true"
+                          >
+                            <span style={{ width: `${phasePct}%` }} />
+                          </span>
                         </span>
                         <Link
                           className={
@@ -472,4 +577,15 @@ export function AgenticPathPage() {
       </section>
     </Shell>
   )
+}
+
+function formatTimestamp(totalSeconds: number): string {
+  const s = Math.max(0, Math.floor(totalSeconds))
+  const h = Math.floor(s / 3600)
+  const m = Math.floor((s % 3600) / 60)
+  const sec = s % 60
+  if (h > 0) {
+    return `${h}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`
+  }
+  return `${m}:${String(sec).padStart(2, '0')}`
 }

@@ -2506,6 +2506,40 @@ a.ad-slot:hover {
   font-size: 0.75rem;
 }
 
+.path-lesson-bar,
+.path-video-bar,
+.path-active-bar,
+.path-map-bar {
+  margin-top: 0.4rem;
+}
+
+.path-lesson-bar {
+  height: 5px;
+  max-width: 220px;
+}
+
+.path-video-bar {
+  height: 3px;
+  margin-top: 0.35rem;
+}
+
+.path-active-bar {
+  height: 6px;
+  max-width: 360px;
+  margin-top: 0.65rem;
+}
+
+.path-map-bar {
+  height: 4px;
+  max-width: 240px;
+  margin-top: 0.35rem;
+}
+
+.path-lesson-pct {
+  margin: 0.3rem 0 0;
+  font-size: 0.78rem;
+}
+
 .video-frame {
   position: relative;
   width: 100%;
@@ -2515,12 +2549,20 @@ a.ad-slot:hover {
   overflow: hidden;
 }
 
-.video-frame iframe {
+.video-frame iframe,
+.video-frame .yt-player-shell,
+.video-frame .yt-player-host,
+.video-frame .yt-player-host iframe {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   border: 0;
+}
+
+.yt-player-shell,
+.yt-player-host {
+  display: block;
 }
 
 .path-player {
