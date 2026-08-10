@@ -1307,6 +1307,1346 @@
         "openapi",
         "dependency"
       ]
+    },
+    {
+      "id": "staff-cross-team",
+      "track_id": "staff-interview",
+      "topic_id": "staff-influence",
+      "category": "Behavioral",
+      "prompt": "Describe a time you aligned two teams with conflicting priorities. How did you get to a decision without formal authority?",
+      "hints": [
+        "Name the conflict in one sentence",
+        "Explain how you framed shared outcomes",
+        "End with what changed in behavior or delivery"
+      ],
+      "strong_answer_signals": [
+        "align",
+        "stakeholders",
+        "tradeoff",
+        "shared goal",
+        "influence",
+        "decision"
+      ]
+    },
+    {
+      "id": "staff-tech-debt",
+      "track_id": "staff-interview",
+      "topic_id": "staff-strategy",
+      "category": "Technical strategy",
+      "prompt": "How do you decide when to pay down tech debt versus ship features? Give a concrete example.",
+      "hints": [
+        "State the business risk of the debt",
+        "Compare cost of delay vs rewrite",
+        "Share the sequencing you chose"
+      ],
+      "strong_answer_signals": [
+        "tech debt",
+        "risk",
+        "sequencing",
+        "ROI",
+        "migration",
+        "reliability"
+      ]
+    },
+    {
+      "id": "staff-design-review",
+      "track_id": "staff-interview",
+      "topic_id": "staff-design",
+      "category": "System design",
+      "prompt": "Walk me through a design review you ran. What did you push back on, and what did you accept?",
+      "hints": [
+        "Clarify requirements and constraints",
+        "Call out the risky assumption",
+        "Say what you deferred and why"
+      ],
+      "strong_answer_signals": [
+        "design review",
+        "constraint",
+        "assumption",
+        "tradeoff",
+        "scalability",
+        "API"
+      ]
+    },
+    {
+      "id": "staff-oncall-story",
+      "track_id": "staff-interview",
+      "topic_id": "staff-incidents",
+      "category": "Incidents",
+      "prompt": "Tell me about an on-call incident where you improved the system afterward, not just restored service.",
+      "hints": [
+        "Timeline: detect → mitigate → recover",
+        "Root cause without blame",
+        "Permanent fix + prevention"
+      ],
+      "strong_answer_signals": [
+        "incident",
+        "mitigate",
+        "root cause",
+        "runbook",
+        "monitoring",
+        "postmortem"
+      ]
+    },
+    {
+      "id": "staff-ai-prod",
+      "track_id": "staff-interview",
+      "topic_id": "staff-ai-safe",
+      "category": "AI safety",
+      "prompt": "How would you put guardrails around an LLM feature in a production product used by customers?",
+      "hints": [
+        "Threat model: leakage, hallucinations, abuse",
+        "Evaluation and human review gates",
+        "Rollback and cost controls"
+      ],
+      "strong_answer_signals": [
+        "guardrail",
+        "eval",
+        "hallucination",
+        "PII",
+        "rate limit",
+        "rollback"
+      ]
+    },
+    {
+      "id": "staff-ambiguous-scope",
+      "track_id": "staff-interview",
+      "topic_id": "staff-ambiguity",
+      "category": "Ambiguity",
+      "prompt": "A PM asks for “AI search” with no requirements. How do you create a Staff-level plan in the first week?",
+      "hints": [
+        "Clarify users and success metrics",
+        "Spike options with costs",
+        "Propose a thin vertical slice"
+      ],
+      "strong_answer_signals": [
+        "clarify",
+        "metric",
+        "spike",
+        "MVP",
+        "users",
+        "scope"
+      ]
+    },
+    {
+      "id": "staff-mentorship-impact",
+      "track_id": "staff-interview",
+      "topic_id": "staff-stories",
+      "category": "Behavioral",
+      "prompt": "Tell me about mentoring someone who leveled up because of your coaching. What did you do differently?",
+      "hints": [
+        "Start with their goal",
+        "Your concrete coaching loop",
+        "Evidence they grew"
+      ],
+      "strong_answer_signals": [
+        "mentor",
+        "feedback",
+        "growth",
+        "ownership",
+        "coach",
+        "outcome"
+      ]
+    },
+    {
+      "id": "em-1on1-hard",
+      "track_id": "em-interview",
+      "topic_id": "em-people",
+      "category": "People",
+      "prompt": "How do you run a 1:1 when someone is underperforming but still valuable? Walk through a real example.",
+      "hints": [
+        "Separate behavior from identity",
+        "Clear expectations and timeline",
+        "Support plan + checkpoint"
+      ],
+      "strong_answer_signals": [
+        "1:1",
+        "expectations",
+        "feedback",
+        "PIP",
+        "support",
+        "timeline"
+      ]
+    },
+    {
+      "id": "em-hiring-signal",
+      "track_id": "em-interview",
+      "topic_id": "em-hiring",
+      "category": "Hiring",
+      "prompt": "What signals tell you a Staff candidate is ready versus still senior IC? How do you probe in an interview?",
+      "hints": [
+        "Influence without authority",
+        "Ambiguity handling",
+        "System ownership stories"
+      ],
+      "strong_answer_signals": [
+        "signal",
+        "Staff",
+        "influence",
+        "ambiguity",
+        "ownership",
+        "bar"
+      ]
+    },
+    {
+      "id": "em-exec-update",
+      "track_id": "em-interview",
+      "topic_id": "em-exec",
+      "category": "Exec communication",
+      "prompt": "Your roadmap slipped two weeks. How do you update an exec in 90 seconds?",
+      "hints": [
+        "Status in one line",
+        "Cause without excuses",
+        "Decision you need"
+      ],
+      "strong_answer_signals": [
+        "exec",
+        "status",
+        "risk",
+        "decision",
+        "timeline",
+        "impact"
+      ]
+    },
+    {
+      "id": "em-reorg",
+      "track_id": "em-interview",
+      "topic_id": "em-org",
+      "category": "Org design",
+      "prompt": "When would you reorganize a team, and how do you minimize delivery risk during the change?",
+      "hints": [
+        "Problem the org is solving",
+        "Transition plan",
+        "Communication cadence"
+      ],
+      "strong_answer_signals": [
+        "reorg",
+        "ownership",
+        "transition",
+        "communication",
+        "capacity",
+        "risk"
+      ]
+    },
+    {
+      "id": "em-conflict-skip",
+      "track_id": "em-interview",
+      "topic_id": "em-people",
+      "category": "Conflict",
+      "prompt": "Two senior engineers escalate past each other to you. How do you resolve it without becoming the bottleneck?",
+      "hints": [
+        "Reset shared goals",
+        "Facilitate a decision framework",
+        "Document owners"
+      ],
+      "strong_answer_signals": [
+        "conflict",
+        "facilitate",
+        "decision",
+        "owner",
+        "escalate",
+        "align"
+      ]
+    },
+    {
+      "id": "em-delivery-risk",
+      "track_id": "em-interview",
+      "topic_id": "em-delivery",
+      "category": "Delivery",
+      "prompt": "A critical launch is at risk. How do you triage scope, people, and communication in the next 48 hours?",
+      "hints": [
+        "Cut to must-have outcomes",
+        "Staffing and unblocking",
+        "External comms plan"
+      ],
+      "strong_answer_signals": [
+        "triage",
+        "scope",
+        "unblock",
+        "comms",
+        "risk",
+        "launch"
+      ]
+    },
+    {
+      "id": "em-transform-ai",
+      "track_id": "em-interview",
+      "topic_id": "em-transform",
+      "category": "Transformation",
+      "prompt": "Leadership wants “every team using AI.” How do you turn that slogan into a durable engineering change?",
+      "hints": [
+        "Pilot with clear ROI",
+        "Platform + enablement",
+        "Guardrails and metrics"
+      ],
+      "strong_answer_signals": [
+        "AI",
+        "pilot",
+        "enablement",
+        "platform",
+        "metric",
+        "adoption"
+      ]
+    },
+    {
+      "id": "java-ai-choose-model",
+      "track_id": "java-to-ai",
+      "topic_id": "ai-path",
+      "category": "Architecture",
+      "prompt": "When do you choose a hosted LLM API versus self-hosting an open model for a Java backend product?",
+      "hints": [
+        "Latency, cost, compliance",
+        "Ops burden",
+        "Product iteration speed"
+      ],
+      "strong_answer_signals": [
+        "API",
+        "self-host",
+        "cost",
+        "compliance",
+        "latency",
+        "ops"
+      ]
+    },
+    {
+      "id": "java-rag-chunk",
+      "track_id": "java-to-ai",
+      "topic_id": "ai-rag",
+      "category": "RAG",
+      "prompt": "Explain how you would chunk and embed a large internal wiki for RAG. What breaks if chunking is wrong?",
+      "hints": [
+        "Chunk size vs overlap",
+        "Metadata filters",
+        "Failure modes: missed context / noise"
+      ],
+      "strong_answer_signals": [
+        "chunk",
+        "embed",
+        "vector",
+        "metadata",
+        "retrieval",
+        "context"
+      ]
+    },
+    {
+      "id": "java-agent-tools",
+      "track_id": "java-to-ai",
+      "topic_id": "ai-agents",
+      "category": "Agents",
+      "prompt": "Design a tool-calling agent that can query tickets and create a summary. How do you prevent unsafe actions?",
+      "hints": [
+        "Allowlisted tools",
+        "Human approval for writes",
+        "Observation/logging"
+      ],
+      "strong_answer_signals": [
+        "tool",
+        "allowlist",
+        "approval",
+        "agent",
+        "audit",
+        "schema"
+      ]
+    },
+    {
+      "id": "java-eval-gate",
+      "track_id": "java-to-ai",
+      "topic_id": "ai-evals",
+      "category": "Evals",
+      "prompt": "What offline and online evals would you require before shipping an LLM feature to 10% of users?",
+      "hints": [
+        "Golden set quality",
+        "Online metrics: thumbs, escalation",
+        "Kill switch"
+      ],
+      "strong_answer_signals": [
+        "eval",
+        "golden",
+        "online",
+        "regression",
+        "gate",
+        "metric"
+      ]
+    },
+    {
+      "id": "java-cost-control",
+      "track_id": "java-to-ai",
+      "topic_id": "ai-ops",
+      "category": "LLM Ops",
+      "prompt": "Your LLM bill spiked 3x overnight. How do you diagnose and stop the bleed without killing the feature?",
+      "hints": [
+        "Token attribution by route",
+        "Caching / cheaper model",
+        "Rate limits"
+      ],
+      "strong_answer_signals": [
+        "cost",
+        "tokens",
+        "cache",
+        "rate limit",
+        "trace",
+        "budget"
+      ]
+    },
+    {
+      "id": "java-rag-vs-fine",
+      "track_id": "java-to-ai",
+      "topic_id": "ai-rag",
+      "category": "RAG",
+      "prompt": "A stakeholder asks to fine-tune instead of RAG. How do you decide?",
+      "hints": [
+        "Freshness of knowledge",
+        "Behavioral style vs facts",
+        "Cost and iteration speed"
+      ],
+      "strong_answer_signals": [
+        "fine-tune",
+        "RAG",
+        "freshness",
+        "facts",
+        "cost",
+        "decide"
+      ]
+    },
+    {
+      "id": "j2p-collections",
+      "track_id": "java-to-python",
+      "topic_id": "j2p-syntax",
+      "category": "Syntax",
+      "prompt": "Compare Java List/Map idioms to Python list/dict comprehensions. When is each clearer?",
+      "hints": [
+        "Show a small transform example",
+        "Mention readability vs performance",
+        "Call out mutation pitfalls"
+      ],
+      "strong_answer_signals": [
+        "list",
+        "dict",
+        "comprehension",
+        "idiom",
+        "readable",
+        "mutable"
+      ]
+    },
+    {
+      "id": "j2p-typing-strict",
+      "track_id": "java-to-python",
+      "topic_id": "j2p-typing",
+      "category": "Typing",
+      "prompt": "How would you introduce mypy or pyright into a Java-style team coming to Python?",
+      "hints": [
+        "Start on public APIs",
+        "CI gate gradually",
+        "Show a typed FastAPI example"
+      ],
+      "strong_answer_signals": [
+        "mypy",
+        "type hint",
+        "CI",
+        "FastAPI",
+        "gradual",
+        "interface"
+      ]
+    },
+    {
+      "id": "j2p-async-vs-threads",
+      "track_id": "java-to-python",
+      "topic_id": "j2p-async",
+      "category": "Async",
+      "prompt": "When do you use asyncio versus threads/processes in Python after years of Java concurrency?",
+      "hints": [
+        "I/O bound vs CPU bound",
+        "Event loop mental model",
+        "Common deadlock mistakes"
+      ],
+      "strong_answer_signals": [
+        "asyncio",
+        "thread",
+        "process",
+        "I/O",
+        "CPU",
+        "event loop"
+      ]
+    },
+    {
+      "id": "j2p-fastapi-auth",
+      "track_id": "java-to-python",
+      "topic_id": "j2p-fastapi",
+      "category": "APIs",
+      "prompt": "Design JWT auth for a FastAPI service the way you would in Spring Security — what is similar and different?",
+      "hints": [
+        "Dependency injection for auth",
+        "Middleware vs Depends",
+        "Error model"
+      ],
+      "strong_answer_signals": [
+        "JWT",
+        "Depends",
+        "middleware",
+        "auth",
+        "401",
+        "FastAPI"
+      ]
+    },
+    {
+      "id": "j2p-oop-vs-funcs",
+      "track_id": "java-to-python",
+      "topic_id": "j2p-oop",
+      "category": "OOP",
+      "prompt": "When should a Java engineer prefer plain functions and modules over classes in Python?",
+      "hints": [
+        "Statefulness test",
+        "Protocol/duck typing",
+        "Keep classes for real entities"
+      ],
+      "strong_answer_signals": [
+        "function",
+        "module",
+        "class",
+        "protocol",
+        "state",
+        "simple"
+      ]
+    },
+    {
+      "id": "j2p-mindset-tests",
+      "track_id": "java-to-python",
+      "topic_id": "j2p-mindset",
+      "category": "Mindset",
+      "prompt": "How does your testing strategy change moving from JUnit to pytest?",
+      "hints": [
+        "Fixtures vs @Before",
+        "Parametrize",
+        "Fast feedback loops"
+      ],
+      "strong_answer_signals": [
+        "pytest",
+        "fixture",
+        "parametrize",
+        "assert",
+        "unit",
+        "integration"
+      ]
+    },
+    {
+      "id": "java-equals-hash",
+      "track_id": "java",
+      "topic_id": "java-oop",
+      "category": "OOP",
+      "prompt": "Explain equals/hashCode contracts and a production bug you have seen when they break.",
+      "hints": [
+        "Symmetry/transitivity",
+        "HashMap implications",
+        "Defensive pattern"
+      ],
+      "strong_answer_signals": [
+        "equals",
+        "hashCode",
+        "HashMap",
+        "contract",
+        "bug",
+        "immutable"
+      ]
+    },
+    {
+      "id": "java-streams",
+      "track_id": "java",
+      "topic_id": "java-oop",
+      "category": "Language",
+      "prompt": "When do you prefer Streams over classic loops in Java, and when do you avoid them?",
+      "hints": [
+        "Readability",
+        "Performance pitfalls",
+        "Checked exceptions"
+      ],
+      "strong_answer_signals": [
+        "stream",
+        "loop",
+        "lazy",
+        "collect",
+        "readable",
+        "perf"
+      ]
+    },
+    {
+      "id": "java-virtual-threads",
+      "track_id": "java",
+      "topic_id": "java-concurrency",
+      "category": "Concurrency",
+      "prompt": "How would you use virtual threads (Project Loom) for a high-concurrency IO service?",
+      "hints": [
+        "Blocking IO friendliness",
+        "Pinning pitfalls",
+        "Migration from thread pools"
+      ],
+      "strong_answer_signals": [
+        "virtual thread",
+        "Loom",
+        "blocking",
+        "pool",
+        "scalability",
+        "IO"
+      ]
+    },
+    {
+      "id": "java-spring-tx",
+      "track_id": "java",
+      "topic_id": "java-spring",
+      "category": "Spring",
+      "prompt": "Explain @Transactional boundaries and a failure mode with self-invocation or lazy loading.",
+      "hints": [
+        "Proxy behavior",
+        "Propagation",
+        "LazyInitializationException"
+      ],
+      "strong_answer_signals": [
+        "transactional",
+        "proxy",
+        "lazy",
+        "propagation",
+        "session",
+        "Spring"
+      ]
+    },
+    {
+      "id": "java-spring-rest",
+      "track_id": "java",
+      "topic_id": "java-spring",
+      "category": "APIs",
+      "prompt": "Design a versioned REST API in Spring Boot with validation and consistent error responses.",
+      "hints": [
+        "DTO validation",
+        "Problem Details / error shape",
+        "Versioning strategy"
+      ],
+      "strong_answer_signals": [
+        "REST",
+        "validation",
+        "DTO",
+        "version",
+        "error",
+        "Spring Boot"
+      ]
+    },
+    {
+      "id": "py-gil",
+      "track_id": "python",
+      "topic_id": "python-basics",
+      "category": "Language",
+      "prompt": "Explain the GIL in practical terms for a web service. When does it matter?",
+      "hints": [
+        "CPU vs IO",
+        "multiprocessing",
+        "native extensions"
+      ],
+      "strong_answer_signals": [
+        "GIL",
+        "CPU",
+        "IO",
+        "multiprocess",
+        "thread",
+        "CPython"
+      ]
+    },
+    {
+      "id": "py-decorators",
+      "track_id": "python",
+      "topic_id": "python-basics",
+      "category": "Language",
+      "prompt": "Explain decorators with a real FastAPI or logging example.",
+      "hints": [
+        "Functions as values",
+        "wraps",
+        "Common pitfalls"
+      ],
+      "strong_answer_signals": [
+        "decorator",
+        "wraps",
+        "closure",
+        "fastapi",
+        "logging",
+        "reuse"
+      ]
+    },
+    {
+      "id": "py-async-cancel",
+      "track_id": "python",
+      "topic_id": "python-async",
+      "category": "Async",
+      "prompt": "How do you handle cancellation and timeouts safely in asyncio?",
+      "hints": [
+        "wait_for",
+        "task groups",
+        "Cleanup in finally"
+      ],
+      "strong_answer_signals": [
+        "timeout",
+        "cancel",
+        "asyncio",
+        "finally",
+        "task",
+        "shield"
+      ]
+    },
+    {
+      "id": "py-fastapi-deps",
+      "track_id": "python",
+      "topic_id": "python-fastapi",
+      "category": "APIs",
+      "prompt": "How do FastAPI dependencies help structure auth, DB sessions, and testing?",
+      "hints": [
+        "Depends graph",
+        "Override in tests",
+        "Lifecycle"
+      ],
+      "strong_answer_signals": [
+        "Depends",
+        "session",
+        "auth",
+        "override",
+        "test",
+        "lifecycle"
+      ]
+    },
+    {
+      "id": "py-pydantic",
+      "track_id": "python",
+      "topic_id": "python-fastapi",
+      "category": "Validation",
+      "prompt": "When do you use Pydantic models versus plain dicts in an API?",
+      "hints": [
+        "Validation at boundary",
+        "Serialization",
+        "Performance notes"
+      ],
+      "strong_answer_signals": [
+        "Pydantic",
+        "validation",
+        "schema",
+        "serialize",
+        "boundary",
+        "typed"
+      ]
+    },
+    {
+      "id": "js-promises",
+      "track_id": "javascript",
+      "topic_id": "js-async",
+      "category": "Async",
+      "prompt": "Compare callbacks, promises, and async/await. When does Promise.allSettled matter?",
+      "hints": [
+        "Error propagation",
+        "Parallelism",
+        "Partial failure"
+      ],
+      "strong_answer_signals": [
+        "promise",
+        "async",
+        "await",
+        "allSettled",
+        "error",
+        "parallel"
+      ]
+    },
+    {
+      "id": "js-event-loop",
+      "track_id": "javascript",
+      "topic_id": "js-async",
+      "category": "Runtime",
+      "prompt": "Explain the browser/Node event loop with microtasks vs macrotasks.",
+      "hints": [
+        "Call stack",
+        "queue types",
+        "Why UI jank happens"
+      ],
+      "strong_answer_signals": [
+        "event loop",
+        "microtask",
+        "macrotask",
+        "queue",
+        "jank",
+        "tick"
+      ]
+    },
+    {
+      "id": "js-dom-perf",
+      "track_id": "javascript",
+      "topic_id": "js-dom",
+      "category": "DOM",
+      "prompt": "How do you batch DOM updates and avoid layout thrashing?",
+      "hints": [
+        "Read/write separation",
+        "DocumentFragment",
+        "Virtualize long lists"
+      ],
+      "strong_answer_signals": [
+        "reflow",
+        "batch",
+        "fragment",
+        "layout",
+        "virtualize",
+        "DOM"
+      ]
+    },
+    {
+      "id": "js-modules",
+      "track_id": "javascript",
+      "topic_id": "js-language",
+      "category": "Modules",
+      "prompt": "ESM vs CommonJS: what breaks in the browser and in Node tooling?",
+      "hints": [
+        "Static vs dynamic import",
+        "Default export pitfalls",
+        "Bundlers"
+      ],
+      "strong_answer_signals": [
+        "ESM",
+        "CommonJS",
+        "import",
+        "export",
+        "bundle",
+        "module"
+      ]
+    },
+    {
+      "id": "ts-unknown",
+      "track_id": "typescript",
+      "topic_id": "ts-basics",
+      "category": "Types",
+      "prompt": "When do you use unknown versus any, and how do you narrow safely?",
+      "hints": [
+        "Force narrowing",
+        "Avoid any escape hatches",
+        "Example with JSON parse"
+      ],
+      "strong_answer_signals": [
+        "unknown",
+        "any",
+        "narrow",
+        "typeof",
+        "guard",
+        "safe"
+      ]
+    },
+    {
+      "id": "ts-utility",
+      "track_id": "typescript",
+      "topic_id": "ts-basics",
+      "category": "Types",
+      "prompt": "Explain Pick, Omit, Partial, and Required with an API DTO example.",
+      "hints": [
+        "Derive types from a source of truth",
+        "Avoid duplication",
+        "Readonly where useful"
+      ],
+      "strong_answer_signals": [
+        "Pick",
+        "Omit",
+        "Partial",
+        "Required",
+        "DTO",
+        "derive"
+      ]
+    },
+    {
+      "id": "ts-generics-api",
+      "track_id": "typescript",
+      "topic_id": "ts-generics",
+      "category": "Generics",
+      "prompt": "Design a typed fetch helper with generics for response data and error shapes.",
+      "hints": [
+        "Generic parameters",
+        "Constraints",
+        "Inference"
+      ],
+      "strong_answer_signals": [
+        "generic",
+        "fetch",
+        "infer",
+        "constraint",
+        "Response",
+        "typed"
+      ]
+    },
+    {
+      "id": "ts-discriminated",
+      "track_id": "typescript",
+      "topic_id": "ts-generics",
+      "category": "Advanced",
+      "prompt": "Show a discriminated union for UI state: loading | error | success.",
+      "hints": [
+        "tag field",
+        "exhaustive switch",
+        "Narrowing benefits"
+      ],
+      "strong_answer_signals": [
+        "discriminated",
+        "union",
+        "exhaustive",
+        "narrow",
+        "state",
+        "tag"
+      ]
+    },
+    {
+      "id": "react-state-lift",
+      "track_id": "react",
+      "topic_id": "react-components",
+      "category": "State",
+      "prompt": "When do you lift state up versus use context or a store?",
+      "hints": [
+        "Who needs the data",
+        "Prop drilling pain",
+        "Render cost"
+      ],
+      "strong_answer_signals": [
+        "lift state",
+        "context",
+        "store",
+        "props",
+        "render",
+        "owner"
+      ]
+    },
+    {
+      "id": "react-effect-deps",
+      "track_id": "react",
+      "topic_id": "react-effects",
+      "category": "Effects",
+      "prompt": "Explain a stale closure bug in useEffect and how you fix it.",
+      "hints": [
+        "Dependency array",
+        "Functional updates",
+        "Cleanup"
+      ],
+      "strong_answer_signals": [
+        "useEffect",
+        "deps",
+        "stale",
+        "cleanup",
+        "functional update",
+        "bug"
+      ]
+    },
+    {
+      "id": "react-memo",
+      "track_id": "react",
+      "topic_id": "react-components",
+      "category": "Performance",
+      "prompt": "When does React.memo / useMemo help, and when is it wasted work?",
+      "hints": [
+        "Pure children",
+        "Unstable props",
+        "Measure first"
+      ],
+      "strong_answer_signals": [
+        "memo",
+        "useMemo",
+        "render",
+        "props",
+        "perf",
+        "profile"
+      ]
+    },
+    {
+      "id": "react-forms",
+      "track_id": "react",
+      "topic_id": "react-components",
+      "category": "Forms",
+      "prompt": "Controlled vs uncontrolled inputs — how do you choose for a complex form?",
+      "hints": [
+        "Validation needs",
+        "Performance",
+        "Libraries"
+      ],
+      "strong_answer_signals": [
+        "controlled",
+        "uncontrolled",
+        "form",
+        "validation",
+        "state",
+        "input"
+      ]
+    },
+    {
+      "id": "node-event-loop",
+      "track_id": "nodejs",
+      "topic_id": "node-runtime",
+      "category": "Runtime",
+      "prompt": "Explain Node’s event loop phases and a bug caused by blocking the loop.",
+      "hints": [
+        "Phases overview",
+        "CPU-heavy sync work",
+        "Offload strategies"
+      ],
+      "strong_answer_signals": [
+        "event loop",
+        "blocking",
+        "phase",
+        "worker",
+        "CPU",
+        "async"
+      ]
+    },
+    {
+      "id": "node-streams",
+      "track_id": "nodejs",
+      "topic_id": "node-runtime",
+      "category": "Streams",
+      "prompt": "When do you use streams for file/HTTP processing instead of buffering?",
+      "hints": [
+        "Memory bounds",
+        "Backpressure",
+        "Error propagation"
+      ],
+      "strong_answer_signals": [
+        "stream",
+        "backpressure",
+        "buffer",
+        "pipe",
+        "memory",
+        "HTTP"
+      ]
+    },
+    {
+      "id": "node-express-errors",
+      "track_id": "nodejs",
+      "topic_id": "node-apis",
+      "category": "APIs",
+      "prompt": "Design centralized error handling for an Express API.",
+      "hints": [
+        "Async errors",
+        "Status mapping",
+        "Logging without leaking internals"
+      ],
+      "strong_answer_signals": [
+        "error middleware",
+        "async",
+        "status",
+        "logging",
+        "Express",
+        "handler"
+      ]
+    },
+    {
+      "id": "node-auth-jwt",
+      "track_id": "nodejs",
+      "topic_id": "node-apis",
+      "category": "Auth",
+      "prompt": "Implement JWT auth in Node: access vs refresh tokens and revocation basics.",
+      "hints": [
+        "Short-lived access",
+        "Refresh storage",
+        "Logout/revoke"
+      ],
+      "strong_answer_signals": [
+        "JWT",
+        "refresh",
+        "revoke",
+        "auth",
+        "cookie",
+        "expire"
+      ]
+    },
+    {
+      "id": "node-prod-obs",
+      "track_id": "nodejs",
+      "topic_id": "node-prod",
+      "category": "Production",
+      "prompt": "What observability do you require before calling a Node service production-ready?",
+      "hints": [
+        "Structured logs",
+        "Metrics/traces",
+        "Health checks"
+      ],
+      "strong_answer_signals": [
+        "observability",
+        "metrics",
+        "trace",
+        "health",
+        "logs",
+        "SLO"
+      ]
+    },
+    {
+      "id": "html-landmarks",
+      "track_id": "html",
+      "topic_id": "html-semantic",
+      "category": "Semantic",
+      "prompt": "How do landmark elements (header/nav/main/aside/footer) help accessibility and SEO?",
+      "hints": [
+        "Screen reader navigation",
+        "One main",
+        "Avoid div soup"
+      ],
+      "strong_answer_signals": [
+        "landmark",
+        "semantic",
+        "a11y",
+        "main",
+        "nav",
+        "SEO"
+      ]
+    },
+    {
+      "id": "html-forms-a11y",
+      "track_id": "html",
+      "topic_id": "html-forms",
+      "category": "Forms",
+      "prompt": "Build an accessible form: labels, errors, and required fields.",
+      "hints": [
+        "label for/id",
+        "aria-describedby",
+        "Error announcement"
+      ],
+      "strong_answer_signals": [
+        "label",
+        "aria",
+        "required",
+        "error",
+        "form",
+        "accessible"
+      ]
+    },
+    {
+      "id": "html-img-alt",
+      "track_id": "html",
+      "topic_id": "html-a11y",
+      "category": "A11y",
+      "prompt": "When should alt text be empty, and how do you describe complex images?",
+      "hints": [
+        "Decorative vs informative",
+        "Long descriptions",
+        "Charts"
+      ],
+      "strong_answer_signals": [
+        "alt",
+        "decorative",
+        "informative",
+        "aria",
+        "image",
+        "a11y"
+      ]
+    },
+    {
+      "id": "html-tables",
+      "track_id": "html",
+      "topic_id": "html-semantic",
+      "category": "Tables",
+      "prompt": "How do you mark up a data table accessibly with headers and captions?",
+      "hints": [
+        "th scope",
+        "caption",
+        "Avoid layout tables"
+      ],
+      "strong_answer_signals": [
+        "table",
+        "th",
+        "scope",
+        "caption",
+        "accessible",
+        "data"
+      ]
+    },
+    {
+      "id": "html-dialog",
+      "track_id": "html",
+      "topic_id": "html-a11y",
+      "category": "A11y",
+      "prompt": "How should a modal dialog behave for keyboard and screen reader users?",
+      "hints": [
+        "Focus trap",
+        "Escape to close",
+        "aria-modal"
+      ],
+      "strong_answer_signals": [
+        "dialog",
+        "focus",
+        "escape",
+        "aria-modal",
+        "keyboard",
+        "modal"
+      ]
+    },
+    {
+      "id": "css-specificity",
+      "track_id": "css",
+      "topic_id": "css-box",
+      "category": "Cascade",
+      "prompt": "Explain specificity and a maintainable strategy to avoid !important wars.",
+      "hints": [
+        "Inline vs classes vs IDs",
+        "Layering / BEM",
+        "When !important is ok"
+      ],
+      "strong_answer_signals": [
+        "specificity",
+        "cascade",
+        "important",
+        "BEM",
+        "layer",
+        "selector"
+      ]
+    },
+    {
+      "id": "css-flex-wrap",
+      "track_id": "css",
+      "topic_id": "css-layout",
+      "category": "Flexbox",
+      "prompt": "How do you build a responsive card row with flexbox that wraps cleanly?",
+      "hints": [
+        "flex-basis",
+        "gap",
+        "min-width pitfalls"
+      ],
+      "strong_answer_signals": [
+        "flex",
+        "wrap",
+        "gap",
+        "basis",
+        "responsive",
+        "card"
+      ]
+    },
+    {
+      "id": "css-grid-areas",
+      "track_id": "css",
+      "topic_id": "css-layout",
+      "category": "Grid",
+      "prompt": "When do you choose CSS Grid over Flexbox for a page layout?",
+      "hints": [
+        "Two-dimensional layout",
+        "Template areas",
+        "Alignment"
+      ],
+      "strong_answer_signals": [
+        "grid",
+        "flex",
+        "template",
+        "area",
+        "2D",
+        "layout"
+      ]
+    },
+    {
+      "id": "css-clamp",
+      "track_id": "css",
+      "topic_id": "css-responsive",
+      "category": "Responsive",
+      "prompt": "Explain fluid type/spacing with clamp() and when media queries are still needed.",
+      "hints": [
+        "min preferred max",
+        "Container queries",
+        "Breakpoints for layout swaps"
+      ],
+      "strong_answer_signals": [
+        "clamp",
+        "fluid",
+        "media query",
+        "container",
+        "responsive",
+        "type"
+      ]
+    },
+    {
+      "id": "css-stacking",
+      "track_id": "css",
+      "topic_id": "css-box",
+      "category": "Positioning",
+      "prompt": "Explain stacking contexts and a bug where z-index “doesn’t work.”",
+      "hints": [
+        "New stacking context triggers",
+        "Isolation",
+        "Practical fix"
+      ],
+      "strong_answer_signals": [
+        "z-index",
+        "stacking",
+        "context",
+        "position",
+        "isolation",
+        "overlay"
+      ]
+    },
+    {
+      "id": "js-this-bind",
+      "track_id": "javascript",
+      "topic_id": "js-language",
+      "category": "Language",
+      "prompt": "Explain how `this` works in regular functions vs arrow functions, and when you reach for `.bind` or a class field.",
+      "hints": [
+        "Call-site rules for function this",
+        "Arrow functions close over lexical this",
+        "Event handlers and extracting methods"
+      ],
+      "strong_answer_signals": [
+        "this",
+        "arrow",
+        "bind",
+        "lexical",
+        "call site",
+        "method"
+      ]
+    },
+    {
+      "id": "ts-react-events",
+      "track_id": "typescript",
+      "topic_id": "ts-react",
+      "category": "React + TS",
+      "prompt": "How do you type React event handlers and form change events without resorting to `any`?",
+      "hints": [
+        "React.ChangeEvent / FormEvent",
+        "Generic HTML element types",
+        "Infer from onChange props when possible"
+      ],
+      "strong_answer_signals": [
+        "ChangeEvent",
+        "FormEvent",
+        "HTMLInputElement",
+        "handler",
+        "generic",
+        "props"
+      ]
+    },
+    {
+      "id": "react-list-stable-ids",
+      "track_id": "react",
+      "topic_id": "react-lists",
+      "category": "Lists",
+      "prompt": "You reordered a list and inputs kept the wrong values. What went wrong with keys, and how do you pick stable identities?",
+      "hints": [
+        "Index keys vs business ids",
+        "Reconciliation remount vs reuse",
+        "When index keys are acceptable"
+      ],
+      "strong_answer_signals": [
+        "key",
+        "identity",
+        "reconcile",
+        "index",
+        "stable",
+        "remount"
+      ]
+    },
+    {
+      "id": "java-ai-grounding",
+      "track_id": "java-to-ai",
+      "topic_id": "ai-agents",
+      "category": "Safety",
+      "prompt": "How do you keep an LLM agent from inventing answers when tools or retrieval return nothing useful?",
+      "hints": [
+        "Abstain / clarify when evidence is weak",
+        "Cite retrieved chunks or tool results",
+        "Separate retrieval failure from model failure"
+      ],
+      "strong_answer_signals": [
+        "grounding",
+        "abstain",
+        "citation",
+        "tool",
+        "retrieval",
+        "hallucination"
+      ]
     }
   ]
 }

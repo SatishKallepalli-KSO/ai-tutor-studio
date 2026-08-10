@@ -720,22 +720,15 @@ a {
 .brand-mark {
   width: 36px;
   height: 36px;
+  flex-shrink: 0;
   border-radius: 10px;
-  background: var(--cover-1);
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  background: #0b6bcb;
   box-shadow:
     0 0 0 1px rgba(11, 107, 203, 0.18),
     0 8px 20px rgba(11, 107, 203, 0.22);
-  position: relative;
-}
-
-.brand-mark::after {
-  content: '';
-  position: absolute;
-  inset: 10px;
-  border-radius: 3px;
-  border: 2px solid rgba(255, 255, 255, 0.9);
-  border-right-color: transparent;
-  transform: rotate(45deg);
 }
 
 .brand-text {

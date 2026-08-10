@@ -64,7 +64,14 @@ export function Shell({
 
       <header className="site-nav">
         <Link to={isRecruiter ? '/jobs' : '/'} className="brand">
-          <span className="brand-mark" aria-hidden="true" />
+          <img
+            className="brand-mark"
+            src={`${import.meta.env.BASE_URL}logo.png`}
+            width={36}
+            height={36}
+            alt=""
+            decoding="async"
+          />
           <span className="brand-text">
             <strong>{BRAND.product}</strong>
             <em>{BRAND.tagline}</em>
