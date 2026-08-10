@@ -1,8 +1,8 @@
 {
-  "name": "ai-tutor-studio",
+  "name": "practice-out-loud",
   "private": true,
   "version": "0.1.0",
-  "description": "AI-assisted tutoring and upskilling product (Staff/EM interview prep + Java→AI)",
+  "description": "Practice Out Loud — learn, practice out loud, and get AI feedback (by Kallepalli Labs)",
   "workspaces": [
     "apps/web"
   ],

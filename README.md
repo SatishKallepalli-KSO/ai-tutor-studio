@@ -1,17 +1,21 @@
-# AI Tutor Studio
+# Practice Out Loud
+
+**Learn → Practice → Get AI feedback → Get hired**
 
 Built by **Kallepalli Labs** (Satish Kallepalli).
 
-## Live production
-
-**https://ai-tutor-studio.onrender.com**
+Multi-track oral practice with curriculum (Learn mode), AI coaching, and a jobs board. Staff and EM interview tracks are paths in the catalog — not the whole product.
 
 | | |
 |--|--|
-| Stack | Render Free (Docker) · **Neon Free Postgres** · **OpenAI** `gpt-4o-mini` |
-| Status | Auth, Staff/EM practice, AI coaching (`provider: openai`), admin `/admin` |
-| Payments | Demo Pro upgrade on (Stripe not live yet) |
-| Ops docs | [PRODUCTION.md](docs/product/PRODUCTION.md) · [DATABASE.md](docs/product/DATABASE.md) · [DEPLOY-FREE.md](docs/product/DEPLOY-FREE.md) · [GO-LIVE.md](docs/product/GO-LIVE.md) |
+| **Live** | https://practiceoutloud.com (`www` → apex) |
+| **Fallback** | https://ai-tutor-studio.onrender.com (prefer the brand domain) |
+| **Privacy** | https://practiceoutloud.com/privacy |
+| **GitHub** | https://github.com/SatishKallepalli-KSO/practice-out-loud |
+| **Stack** | `apps/web` (Vite/React) · `apps/api` (FastAPI) · Neon Postgres · OpenAI · Render · Cloudflare DNS |
+| **Catalog** | ~120 practice questions across 12 tracks |
+
+Ops docs: [PRODUCTION.md](docs/product/PRODUCTION.md) · [DATABASE.md](docs/product/DATABASE.md) · [DEPLOY-FREE.md](docs/product/DEPLOY-FREE.md) · [GO-LIVE.md](docs/product/GO-LIVE.md)
 
 ```bash
 ./scripts/backup-db.sh --neon   # dump Neon
@@ -19,29 +23,23 @@ Built by **Kallepalli Labs** (Satish Kallepalli).
 ./scripts/publish-pages.sh      # GitHub Pages docs mirror
 ```
 
-## Customer magnet (what we sell)
-
-**Practice Staff & EM interviews out loud.**  
-Free to start — study the path, speak answers, get AI coaching on content and delivery.
-
-Hire / jobs / network exist as **phase 2** (don’t lead with them).
+> Local clone folders may still be named `ai-tutor-studio`. Product and repo names are **Practice Out Loud** / `practice-out-loud`.
 
 ## Product
 
 | Plan | What you get |
 |------|----------------|
-| **Free** | Learn docs · starter practice · 5 feedbacks/day |
-| **Pro ($19/mo or $149/yr)** | Staff, EM, advanced tracks · unlimited coaching · Stripe (demo upgrade until Stripe is wired) |
+| **Free** | Learn docs · starter practice tracks · 5 AI feedbacks/day · jobs board |
+| **Pro ($19/mo or $149/yr)** | All 12 tracks (incl. Staff/EM & advanced) · unlimited coaching · Stripe (demo upgrade until Stripe is wired) |
 
-Also: Agentic AI & Snowflake video paths · jobs board · profiles · messaging (secondary).
+Also: Agentic AI & Snowflake video paths · profiles · messaging (secondary).
 
-## Docs & sales
+## Docs & links
 
-- Production app: https://ai-tutor-studio.onrender.com
-- Pages / sales docs: https://satishkallepalli-kso.github.io/ai-tutor-studio/
-- Sales playbook: https://satishkallepalli-kso.github.io/ai-tutor-studio/product/sales-playbook.html
-- Production status: [docs/product/PRODUCTION.md](docs/product/PRODUCTION.md)
-- Go-live: [docs/product/GO-LIVE.md](docs/product/GO-LIVE.md)
+- App: https://practiceoutloud.com
+- Product docs index: [docs/product/README.md](docs/product/README.md)
+- GitHub Pages (static / sales docs): https://satishkallepalli-kso.github.io/practice-out-loud/
+- Sales playbook: https://satishkallepalli-kso.github.io/practice-out-loud/product/sales-playbook.html
 
 ## Quick start (local)
 
@@ -59,5 +57,14 @@ uvicorn app.main:app --reload --port 8000
 ```bash
 cd apps/web && npm install && npm run dev
 ```
+
+Optional: `VITE_API_BASE=https://practiceoutloud.com` to hit production API from local UI.
+
+## Deploy notes
+
+- Production is a single Docker image (`Dockerfile`): Vite build → FastAPI serves `/static` + `/v1`.
+- Blueprint: [`render.yaml`](render.yaml) (Render service may still be named `ai-tutor-studio`).
+- Set `APP_URL=https://practiceoutloud.com`, Neon pooled `DATABASE_URL`, `OPENAI_API_KEY`, and `ADMIN_EMAILS` in the Render dashboard.
+- Domain: Cloudflare DNS for `practiceoutloud.com` / `www` → Render.
 
 © 2026 Kallepalli Labs. All rights reserved.

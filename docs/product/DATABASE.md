@@ -1,6 +1,6 @@
 # Database — Neon Free (active)
 
-Live app **https://ai-tutor-studio.onrender.com** uses **Neon Free Postgres**.
+Live app **https://practiceoutloud.com** (fallback https://ai-tutor-studio.onrender.com) uses **Neon Free Postgres**.
 
 | | |
 |--|--|

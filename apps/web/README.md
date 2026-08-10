@@ -1,6 +1,6 @@
-# AI Tutor Studio — Web
+# Practice Out Loud — Web
 
-React + TypeScript + Vite client for **https://ai-tutor-studio.onrender.com**.
+React + TypeScript + Vite client for **https://practiceoutloud.com**.
 
 ## Local
 
@@ -9,7 +9,7 @@ npm install
 npm run dev
 ```
 
-Optional: `VITE_API_BASE=https://ai-tutor-studio.onrender.com` to hit production API from local UI.
+Optional: `VITE_API_BASE=https://practiceoutloud.com` to hit production API from local UI (fallback: `https://ai-tutor-studio.onrender.com`).
 
 ## Production
 

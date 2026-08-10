@@ -1,13 +1,15 @@
-# Free live deploy — AI Tutor Studio
+# Free live deploy — Practice Out Loud
 
-**Production today:** https://ai-tutor-studio.onrender.com  
+**Production today:** https://practiceoutloud.com  
+**Render fallback:** https://ai-tutor-studio.onrender.com  
 Full status: [PRODUCTION.md](./PRODUCTION.md) · Database: [DATABASE.md](./DATABASE.md)
 
 Current free stack:
 
-- **Compute:** Render Free Docker web
+- **Compute:** Render Free Docker web (service name may still be `ai-tutor-studio`)
 - **Database:** Neon Free Postgres (not Render Postgres — that expires in 30 days)
 - **AI:** OpenAI `gpt-4o-mini` (prepaid credits)
+- **Domain:** Cloudflare → `practiceoutloud.com` / `www`
 - **Pay:** Demo Pro upgrade (`ALLOW_DEMO_UPGRADE=true`) until Stripe
 
 ---
@@ -17,14 +19,14 @@ Current free stack:
 1. Render account (card on file may be required even for free web).
 2. Open:
 
-   **https://render.com/deploy?repo=https://github.com/SatishKallepalli-KSO/ai-tutor-studio**
+   **https://render.com/deploy?repo=https://github.com/SatishKallepalli-KSO/practice-out-loud**
 
 3. After the web service is up, create a **Neon Free** project and set `DATABASE_URL` to the **pooled** connection string (see [DATABASE.md](./DATABASE.md)).
 4. Set env on the web service:
 
    | Key | Value |
    |-----|--------|
-   | `APP_URL` | `https://ai-tutor-studio.onrender.com` |
+   | `APP_URL` | `https://practiceoutloud.com` |
    | `JWT_SECRET` | long random |
    | `DATABASE_URL` | Neon pooled URL |
    | `OPENAI_API_KEY` | from platform.openai.com (add ~$5 credits) |
@@ -35,8 +37,10 @@ Current free stack:
 5. Deploy / restart. Smoke:
 
 ```bash
+curl -s https://practiceoutloud.com/healthz
+curl -s https://practiceoutloud.com/v1/stats/public
+# fallback if domain is down:
 curl -s https://ai-tutor-studio.onrender.com/healthz
-curl -s https://ai-tutor-studio.onrender.com/v1/stats/public
 ```
 
 Practice → coaching should store `provider: "openai"` in `feature_events` (not `local-rubric`).
@@ -45,15 +49,15 @@ Practice → coaching should store `provider: "openai"` in `feature_events` (not
 
 ---
 
-## Free domain options
+## Domain options
 
 | Option | Example | Cost |
 |--------|---------|------|
-| Render subdomain | `ai-tutor-studio.onrender.com` | Free (live now) |
-| NxtDev / vexr / is-a.dev | `aitutor.nxtdev.xyz` | Free CNAME |
-| Brand domain | `aitutor.studio` | ~$10–15/yr |
+| Brand domain (live) | `practiceoutloud.com` | Cloudflare DNS → Render |
+| Render subdomain | `ai-tutor-studio.onrender.com` | Free fallback |
+| Free CNAME | e.g. `*.nxtdev.xyz` | Optional alternate |
 
-Point CNAME → `ai-tutor-studio.onrender.com`, add custom domain in Render, update `APP_URL`.
+Point DNS → `ai-tutor-studio.onrender.com`, add custom domain in Render, keep `APP_URL=https://practiceoutloud.com`.
 
 ---
 
@@ -63,7 +67,7 @@ Point CNAME → `ai-tutor-studio.onrender.com`, add custom domain in Render, upd
 Browser
    │
    ▼
-https://ai-tutor-studio.onrender.com   ← free TLS (Render)
+https://practiceoutloud.com   ← Cloudflare → Render TLS
    │
    ▼
 Docker (Dockerfile)
@@ -80,7 +84,7 @@ Docker (Dockerfile)
 | DB | **[Neon](https://neon.tech) Free** (recommended) |
 | AI | OpenAI prepaid (`gpt-4o-mini`) |
 | Pay | Demo upgrade now; Stripe when ready |
-| Domain | `*.onrender.com` then free CNAME |
+| Domain | `practiceoutloud.com` (+ `*.onrender.com` fallback) |
 
 Local laptop only: omit `DATABASE_URL` → SQLite under `apps/api/data/`.
 
@@ -102,9 +106,10 @@ render login
 - [x] Neon `DATABASE_URL` (Render free Postgres deleted)
 - [x] OpenAI key + credits → `provider: openai`
 - [x] `ADMIN_EMAILS` + `/admin`
-- [x] Demo Pro upgrade for Staff/EM testing
+- [x] Demo Pro upgrade for full-track testing
+- [x] Brand domain `practiceoutloud.com` (Cloudflare)
+- [x] Privacy policy `/privacy`
 - [ ] Stripe live + `ALLOW_DEMO_UPGRADE=false`
-- [ ] Optional vanity domain CNAME
 
 ---
 
@@ -116,4 +121,4 @@ render login
 | Render Free Postgres alone | Expires in 30 days — **avoid for production** |
 | GitHub Pages | Docs/static only — no durable auth |
 
-**Recommendation:** keep Render web + Neon Free; buy a brand domain when revenue starts.
+**Recommendation:** keep Render web + Neon Free; brand domain is already live.

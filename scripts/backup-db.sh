@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Backup AI Tutor Studio Postgres.
+# Backup Practice Out Loud Postgres (Neon / Render / explicit URL).
 # Default: Neon Free project. Also supports Render or an explicit URL.
 #
 #   ./scripts/backup-db.sh              # Neon (default)
@@ -93,7 +93,7 @@ if [[ "$URL" == postgres://* ]]; then
 fi
 
 STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
-OUT="${OUT_DIR}/ai-tutor-studio-${STAMP}.sql.gz"
+OUT="${OUT_DIR}/practice-out-loud-${STAMP}.sql.gz"
 
 pg_dump --no-owner --no-acl --clean --if-exists "$URL" | gzip -c >"$OUT"
 cp "$OUT" "${OUT_DIR}/latest.sql.gz"

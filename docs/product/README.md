@@ -1,10 +1,14 @@
-# AI Tutor Studio — Product documentation
+# Practice Out Loud — Product documentation
 
-**Magnet:** Practice Staff & EM interviews out loud (Free → Pro).  
-**Phase 2:** Hire / jobs / network (don’t lead sales with these).
+**Positioning:** Learn, practice, and get AI feedback — then get hired.  
+Staff / EM are catalog tracks, not the whole pitch. Journey: **Learn → Practice → Get AI feedback → Get hired**.
 
-**Live production:** https://ai-tutor-studio.onrender.com  
-(Render Free · Neon Free Postgres · OpenAI `gpt-4o-mini`) — see [PRODUCTION.md](./PRODUCTION.md)
+**Live:** https://practiceoutloud.com  
+**Fallback:** https://ai-tutor-studio.onrender.com  
+**Privacy:** https://practiceoutloud.com/privacy  
+**GitHub:** https://github.com/SatishKallepalli-KSO/practice-out-loud  
+
+Stack: Render Free · Neon Free Postgres · OpenAI `gpt-4o-mini` · Cloudflare DNS — see [PRODUCTION.md](./PRODUCTION.md)
 
 | Page | Purpose |
 |------|---------|
@@ -12,10 +16,10 @@
 | [Deploy free](./DEPLOY-FREE.md) | Render + Neon free path |
 | [Database](./DATABASE.md) | Neon IDs, backup / restore |
 | [Go-live](./GO-LIVE.md) | Full cloud + Stripe checklist |
-| [Overview](https://satishkallepalli-kso.github.io/ai-tutor-studio/product/) | Magnet + plan matrix |
-| [Sales playbook](https://satishkallepalli-kso.github.io/ai-tutor-studio/product/sales-playbook.html) | ICP, 5-min demo, objections |
-| [Monetization](https://satishkallepalli-kso.github.io/ai-tutor-studio/product/monetization.html) | Free / Pro |
-| [Architecture](https://satishkallepalli-kso.github.io/ai-tutor-studio/product/architecture.html) | System design |
+| [Overview](https://satishkallepalli-kso.github.io/practice-out-loud/product/) | Product + plan matrix |
+| [Sales playbook](https://satishkallepalli-kso.github.io/practice-out-loud/product/sales-playbook.html) | ICP, 5-min demo, objections |
+| [Monetization](https://satishkallepalli-kso.github.io/practice-out-loud/product/monetization.html) | Free / Pro |
+| [Architecture](https://satishkallepalli-kso.github.io/practice-out-loud/product/architecture.html) | System design |
 
 ```bash
 ./scripts/publish-pages.sh   # preserves docs/product/

@@ -1,10 +1,10 @@
-# AI Tutor Studio — Go-live runbook
+# Practice Out Loud — Go-live runbook
 
 **Audience:** you (founder / operator) launching the product on any cloud with live AI coaching and Stripe payments.
 
 **Outcome:** a public URL where users can register, practice, get AI feedback, upgrade to Pro, and where you can open `/admin` for product metrics.
 
-> **Already live:** https://ai-tutor-studio.onrender.com — Render Free + Neon Free + OpenAI.  
+> **Already live:** https://practiceoutloud.com (fallback https://ai-tutor-studio.onrender.com) — Render Free + Neon Free + OpenAI + Cloudflare.  
 > See **[PRODUCTION.md](PRODUCTION.md)** for current status. Use this runbook for Stripe / domains / rebuilding elsewhere.
 
 ---
@@ -20,7 +20,7 @@
 | **Stripe** | Real subscriptions | **Yes for monetization** |
 | **GitHub Pages** | Optional static marketing/UI mirror | Optional |
 
-**Product positioning:** Learn. Practice. Hire. — learners study/practice; recruiters post jobs and network with talent.
+**Product positioning:** Learn → Practice → Get AI feedback → Get hired. Multi-track oral practice (~120 questions / 12 tracks); Staff/EM are catalog paths, not the whole pitch. Jobs board + privacy at `/privacy`.
 
 **Recommended production shape:** one Docker web service (API serves built UI from `/static`) + managed Postgres + Stripe + OpenAI.
 
@@ -75,7 +75,7 @@ Set these on the **API / Docker** service:
 
 | Variable | When | Notes |
 |----------|------|-------|
-| `VITE_BASE` | Subpath host (e.g. GitHub Pages) | `/` for root domain; `/ai-tutor-studio/` for Pages |
+| `VITE_BASE` | Subpath host (e.g. GitHub Pages) | `/` for root domain; `/practice-out-loud/` for Pages |
 | `VITE_API_BASE` | UI on different origin than API | Full API origin, e.g. `https://api.yourdomain.com` |
 
 **Docker default:** `VITE_BASE=/` and UI is served by the same API host — set `VITE_API_BASE` empty / omit so browser calls same origin `/v1/...`.
@@ -122,7 +122,7 @@ Confirm `provider` in the response shows OpenAI (not only local rubric).
 
 ### 5.1 Create the product
 
-1. Stripe Dashboard → **Products** → Add product: **AI Tutor Studio Pro**.
+1. Stripe Dashboard → **Products** → Add product: **Practice Out Loud Pro**.
 2. Add two recurring prices:
    - Monthly **$19** → copy Price ID → `STRIPE_PRICE_MONTHLY`
    - Yearly **$149** → copy Price ID → `STRIPE_PRICE_YEARLY`
@@ -163,7 +163,7 @@ Set `APP_URL` to the public UI origin. The API builds:
 2. Open `/pricing` → Upgrade (should open Stripe Checkout).
 3. Pay with test card `4242 4242 4242 4242`.
 4. Confirm webhook delivered (Stripe dashboard → webhook attempts).
-5. Refresh app — user shows **Pro**; Staff/EM tracks unlock; feedback unlimited.
+5. Refresh app — user shows **Pro**; all tracks unlock (incl. Staff/EM); feedback unlimited.
 6. Open billing portal → cancel → confirm plan returns to Free after webhook.
 
 ### 5.6 Go live with Stripe
@@ -177,22 +177,22 @@ Set `APP_URL` to the public UI origin. The API builds:
 
 ## 6. Deploy on any cloud (pick one)
 
-**Free live stack (no paid domain):** see **[DEPLOY-FREE.md](DEPLOY-FREE.md)** — one-click Render Free → `https://ai-tutor-studio.onrender.com`, then optional free CNAME (`aitutor.nxtdev.xyz`).
+**Free live stack:** see **[DEPLOY-FREE.md](DEPLOY-FREE.md)** — Render Free + Neon + brand domain `https://practiceoutloud.com` (Render fallback `https://ai-tutor-studio.onrender.com`).
 
 ```bash
 ./scripts/deploy-free.sh
-# or open: https://render.com/deploy?repo=https://github.com/SatishKallepalli-KSO/ai-tutor-studio
+# or open: https://render.com/deploy?repo=https://github.com/SatishKallepalli-KSO/practice-out-loud
 ```
 
 ### Option A — Render (fastest; Blueprint included)
 
 1. Push repo to GitHub (Blueprint reads `render.yaml` from `main`).
-2. One-click: https://render.com/deploy?repo=https://github.com/SatishKallepalli-KSO/ai-tutor-studio  
+2. One-click: https://render.com/deploy?repo=https://github.com/SatishKallepalli-KSO/practice-out-loud  
    Or Render → **New** → **Blueprint** → select repo.
 3. Free launch: set **Neon** `DATABASE_URL` (prefer over Render free Postgres — 30-day expiry). Blueprint / env: `ALLOW_DEMO_UPGRADE=true`.  
    Production: Neon + OpenAI + `ADMIN_EMAILS`; Stripe when charging. Details: [DATABASE.md](DATABASE.md), [PRODUCTION.md](PRODUCTION.md).
-4. Deploy. Health check: `/healthz` → live URL `https://ai-tutor-studio.onrender.com`.
-5. Optional custom / free subdomain; update `APP_URL` + Stripe webhook URL.
+4. Deploy. Health check: `/healthz` → prefer `https://practiceoutloud.com` (fallback `https://ai-tutor-studio.onrender.com`).
+5. Point Cloudflare domain; update `APP_URL` + Stripe webhook URL.
 
 ### Option B — Railway / Fly.io / Google Cloud Run / Azure Container Apps / AWS App Runner
 
@@ -200,7 +200,7 @@ Same Docker image:
 
 ```bash
 # from repo root
-docker build -t ai-tutor-studio .
+docker build -t practice-out-loud .
 docker run --rm -p 8000:8000 \
   -e JWT_SECRET=... \
   -e APP_URL=https://YOUR_HOST \
@@ -212,7 +212,7 @@ docker run --rm -p 8000:8000 \
   -e STRIPE_WEBHOOK_SECRET=whsec_... \
   -e ALLOW_DEMO_UPGRADE=false \
   -e ADMIN_EMAILS=you@example.com \
-  ai-tutor-studio
+  practice-out-loud
 ```
 
 Cloud-specific notes:
@@ -231,7 +231,7 @@ Use when you want Pages for the shell and API elsewhere:
 
 ```bash
 cd apps/web
-VITE_BASE=/ai-tutor-studio/ \
+VITE_BASE=/practice-out-loud/ \
 VITE_API_BASE=https://YOUR-API-HOST \
 npm run build
 # then publish dist → docs/ via ./scripts/publish-pages.sh (preserve docs/product/)
@@ -239,15 +239,15 @@ npm run build
 
 Also set API CORS (already `allow_origins=["*"]`) and `APP_URL` to the Pages URL:
 
-`https://satishkallepalli-kso.github.io/ai-tutor-studio`
+`https://satishkallepalli-kso.github.io/practice-out-loud`
 
 **Prefer Option A/B for a sellable product** — same-origin cookies aren’t required (JWT in `localStorage`), but one host is simpler for Stripe redirects and ops.
 
 ### Option D — Local Docker smoke before cloud
 
 ```bash
-docker build -t ai-tutor-studio .
-docker run --rm -p 8000:8000 --env-file .env ai-tutor-studio
+docker build -t practice-out-loud .
+docker run --rm -p 8000:8000 --env-file .env practice-out-loud
 # open http://localhost:8000
 ```
 
@@ -299,10 +299,11 @@ If you don’t see Admin in the nav, sign out and back in after setting the env 
 
 1. `/healthz` → `ok`
 2. Register new user → appears in `/admin`
-3. Free practice on Python/HTML works; Staff track locked
+3. Free practice on starter tracks works; Pro-only tracks locked
 4. Submit feedback → AI response; Free quota increments
 5. Checkout test/live → webhook → Pro badge
-6. Pro unlocks Staff/EM; unlimited feedback
+6. Pro unlocks all tracks (incl. Staff/EM); unlimited feedback
+6b. `/privacy` and `/jobs` load
 7. Billing portal opens
 8. Voice practice (Chrome) → delivery tips present
 9. `/agentic-path` loads; mark complete still works
@@ -353,7 +354,7 @@ You do **not** need GitHub Pages for monetization — the Docker image already s
 
 ---
 
-*Last updated for AI Tutor Studio API v0.3 (auth, Stripe, OpenAI, admin analytics).*
+*Last updated for Practice Out Loud API v0.3 (auth, Stripe, OpenAI, admin analytics, ~120 questions / 12 tracks).*
 
 ---
 

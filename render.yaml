@@ -1,5 +1,6 @@
 # Free-tier live stack on Render (web) + Neon Free (Postgres)
-# App: https://ai-tutor-studio.onrender.com
+# App: https://practiceoutloud.com (fallback: https://ai-tutor-studio.onrender.com)
+# Repo: https://github.com/SatishKallepalli-KSO/practice-out-loud
 #
 # DATABASE_URL must be set in the Render dashboard to your Neon pooled
 # connection string (do not commit secrets). Neon project: steep-sunset-42393062

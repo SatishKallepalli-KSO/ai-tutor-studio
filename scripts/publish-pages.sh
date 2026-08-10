@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-BASE="${VITE_BASE:-/ai-tutor-studio/}"
+BASE="${VITE_BASE:-/practice-out-loud/}"
 API_BASE="${VITE_API_BASE:-}"
 
 echo "Building web (VITE_BASE=$BASE VITE_API_BASE=${API_BASE:-empty})…"

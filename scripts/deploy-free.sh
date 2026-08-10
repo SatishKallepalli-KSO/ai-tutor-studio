@@ -1,23 +1,25 @@
 #!/usr/bin/env bash
-# Open the one-click Render free deploy for AI Tutor Studio.
+# Open the one-click Render free deploy for Practice Out Loud.
 set -euo pipefail
 
-REPO_URL="https://github.com/SatishKallepalli-KSO/ai-tutor-studio"
+REPO_URL="https://github.com/SatishKallepalli-KSO/practice-out-loud"
 DEPLOY_URL="https://render.com/deploy?repo=${REPO_URL}"
-LIVE_URL="https://ai-tutor-studio.onrender.com"
+LIVE_URL="https://practiceoutloud.com"
+FALLBACK_URL="https://ai-tutor-studio.onrender.com"
 
 echo ""
-echo "AI Tutor Studio — free live deploy (Render)"
-echo "=========================================="
+echo "Practice Out Loud — free live deploy (Render)"
+echo "============================================="
 echo ""
 echo "1) One-click Blueprint (browser):"
 echo "   ${DEPLOY_URL}"
 echo ""
-echo "2) After deploy, your free app URL will be:"
+echo "2) After deploy, prefer the brand domain:"
 echo "   ${LIVE_URL}"
+echo "   Render fallback: ${FALLBACK_URL}"
 echo ""
-echo "3) Optional free vanity domain:"
-echo "   Claim aitutor.nxtdev.xyz (or similar) → CNAME to ai-tutor-studio.onrender.com"
+echo "3) Domain:"
+echo "   Cloudflare practiceoutloud.com / www → CNAME to ai-tutor-studio.onrender.com"
 echo "   Docs: docs/product/DEPLOY-FREE.md"
 echo ""
 

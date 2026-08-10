@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Go-live runbook — AI Tutor Studio</title>
+    <title>Go-live runbook — Practice Out Loud</title>
     <meta
       name="description"
-      content="Deploy AI Tutor Studio on any cloud with OpenAI coaching and Stripe payments."
+      content="Deploy Practice Out Loud (practiceoutloud.com) on any cloud with OpenAI coaching and Stripe payments."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -20,7 +20,7 @@
     <div class="wrap">
       <nav class="nav">
         <a class="nav-brand" href="./"
-          >AI Tutor Studio Docs<span>Learn · Practice · Hire</span></a
+          >Practice Out Loud Docs<span>Learn · Practice · Get hired</span></a
         >
         <div class="nav-links">
           <a href="./">Overview</a>
@@ -37,14 +37,14 @@
       <p class="eyebrow">Operations</p>
       <h1>Go-live runbook</h1>
       <p class="lede">
-        Launch the talent studio (Learn · Practice · Hire) with live AI coaching
+        Launch the talent studio (Learn · Practice · Get hired) with live AI coaching
         and Stripe. Checklist from empty hosting to first paid Pro user — plus
         persistent jobs, profiles, and chat.
       </p>
       <div class="panel">
         <p>
           <strong>Already live:</strong>
-          <a href="https://ai-tutor-studio.onrender.com">ai-tutor-studio.onrender.com</a>
+          <a href="https://practiceoutloud.com">practiceoutloud.com</a> · fallback <a href="https://ai-tutor-studio.onrender.com">ai-tutor-studio.onrender.com</a>
           — Render Free + Neon Free Postgres + OpenAI
           <code>gpt-4o-mini</code>. See
           <a href="./PRODUCTION.md">PRODUCTION.md</a>,
@@ -54,7 +54,7 @@
       </div>
 
       <div class="cta-row">
-        <a class="btn primary" href="https://ai-tutor-studio.onrender.com">Open live app</a>
+        <a class="btn primary" href="https://practiceoutloud.com">Open live app</a>
         <a class="btn" href="./GO-LIVE.md">Markdown source</a>
         <a class="btn" href="./monetization.html">Free / Pro matrix</a>
         <a class="btn" href="./architecture.html">Architecture</a>
@@ -94,7 +94,7 @@
             </tr>
             <tr>
               <td><strong>OpenAI</strong></td>
-              <td>Staff/EM coaching via <code>/v1/tutor/feedback</code></td>
+              <td>AI coaching via <code>/v1/tutor/feedback</code> (~120 Q / 12 tracks)</td>
               <td>Live (<code>gpt-4o-mini</code>); rubric fallback</td>
             </tr>
             <tr>
@@ -105,7 +105,7 @@
           </tbody>
         </table>
         <p class="muted" style="margin-top: 0.85rem">
-          Product: <strong>Learn. Practice. Hire.</strong> Live shape: Render Free
+          Product: <strong>Learn → Practice → AI feedback → Get hired.</strong> Live shape: Render Free
           Docker + <strong>Neon Free</strong> + OpenAI. Stripe when charging.
           See <a href="./PRODUCTION.md">PRODUCTION.md</a>. Repo includes
           <code>Dockerfile</code>, <code>render.yaml</code>, and
@@ -239,7 +239,7 @@
       <h2>5. Integrate payments (Stripe)</h2>
       <ol>
         <li>
-          Products → add <strong>AI Tutor Studio Pro</strong> with monthly
+          Products → add <strong>Practice Out Loud Pro</strong> with monthly
           ($19) and yearly ($149) prices. Copy Price IDs into env.
         </li>
         <li>
@@ -269,7 +269,7 @@
           <li>Register → <code>/pricing</code> → Upgrade → Checkout</li>
           <li>Card <code>4242 4242 4242 4242</code></li>
           <li>Confirm webhook delivered in Stripe</li>
-          <li>App shows Pro; Staff/EM unlock; unlimited feedback</li>
+          <li>App shows Pro; all tracks unlock; unlimited feedback</li>
           <li>Portal cancel → Free after webhook</li>
         </ol>
         <p class="muted">
@@ -295,7 +295,7 @@
       <h3>Option B — Railway / Fly / Cloud Run / Azure / AWS</h3>
       <div class="panel">
         <p class="muted">Same Docker image everywhere:</p>
-        <pre>docker build -t ai-tutor-studio .
+        <pre>docker build -t practice-out-loud .
 docker run --rm -p 8000:8000 \
   -e JWT_SECRET=... \
   -e APP_URL=https://YOUR_HOST \
@@ -307,7 +307,7 @@ docker run --rm -p 8000:8000 \
   -e STRIPE_WEBHOOK_SECRET=whsec_... \
   -e ALLOW_DEMO_UPGRADE=false \
   -e ADMIN_EMAILS=you@example.com \
-  ai-tutor-studio</pre>
+  practice-out-loud</pre>
         <ul>
           <li><strong>Cloud Run / App Runner:</strong> port 8000; attach managed Postgres</li>
           <li><strong>Fly.io:</strong> Dockerfile + <code>fly secrets set</code> + Fly Postgres</li>
@@ -319,7 +319,7 @@ docker run --rm -p 8000:8000 \
       <h3>Option C — GitHub Pages UI + cloud API</h3>
       <div class="panel">
         <pre>cd apps/web
-VITE_BASE=/ai-tutor-studio/ \
+VITE_BASE=/practice-out-loud/ \
 VITE_API_BASE=https://YOUR-API-HOST \
 npm run build
 # publish via ./scripts/publish-pages.sh (keeps docs/product/)</pre>
@@ -359,7 +359,7 @@ npm run build
         <ol>
           <li><code>/healthz</code> → ok</li>
           <li>Register → user appears in <code>/admin</code></li>
-          <li>Free practice works; Staff locked</li>
+          <li>Free practice works; Pro-only tracks locked</li>
           <li>Feedback returns AI; Free quota increments</li>
           <li>Checkout → webhook → Pro badge</li>
           <li>Pro unlocks advanced tracks; unlimited feedback</li>
@@ -396,8 +396,8 @@ npm run build
       </div>
 
       <footer class="footer">
-        AI Tutor Studio · Go-live for cloud + AI + payments ·
-        <a href="https://github.com/SatishKallepalli-KSO/ai-tutor-studio">GitHub</a>
+        Practice Out Loud · Go-live for cloud + AI + payments ·
+        <a href="https://github.com/SatishKallepalli-KSO/practice-out-loud">GitHub</a>
         <br />© 2026 Kallepalli Labs. All rights reserved.
       </footer>
     </div>

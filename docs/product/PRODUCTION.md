@@ -1,6 +1,6 @@
 # Production status (live)
 
-**Last updated:** 2026-08-09
+**Last updated:** 2026-08-10
 
 ## Live URLs
 
@@ -8,11 +8,14 @@
 |---------|-----|
 | **Production app** | https://practiceoutloud.com |
 | Render fallback | https://ai-tutor-studio.onrender.com |
+| Privacy | https://practiceoutloud.com/privacy |
 | Login | https://practiceoutloud.com/login |
 | Admin dashboard | https://practiceoutloud.com/admin |
+| Jobs board | https://practiceoutloud.com/jobs |
 | API docs | https://practiceoutloud.com/docs |
 | Health | https://practiceoutloud.com/healthz |
-| GitHub Pages (static / docs mirror) | https://satishkallepalli-kso.github.io/ai-tutor-studio/ |
+| GitHub | https://github.com/SatishKallepalli-KSO/practice-out-loud |
+| GitHub Pages (static / docs mirror) | https://satishkallepalli-kso.github.io/practice-out-loud/ |
 
 ## Stack in production
 
@@ -29,11 +32,12 @@ Browser
 
 | Layer | Choice | Notes |
 |-------|--------|--------|
-| Domain | **practiceoutloud.com** (Cloudflare) | CNAME `@` + `www` → `ai-tutor-studio.onrender.com` (DNS only until verified) |
-| Compute | Render Free web (`ai-tutor-studio`) | Cold start after ~15 min idle |
+| Domain | **practiceoutloud.com** (Cloudflare) | `www` → apex; CNAME → `ai-tutor-studio.onrender.com` |
+| Compute | Render Free web (`ai-tutor-studio` service name) | Cold start after ~15 min idle |
 | Database | **Neon Free** project `ai-tutor-studio` | Durable; Render free Postgres **deleted** |
 | AI coaching | **OpenAI** `gpt-4o-mini` | Falls back to `local-rubric` if key/credits missing |
 | Payments | Demo upgrade on | Wire Stripe before charging real money |
+| Catalog | ~120 questions · 12 tracks | Staff/EM are tracks in the catalog |
 | UI motion | Ambient voice/signal field | CSS; respects `prefers-reduced-motion` |
 
 ## Verified working
@@ -41,11 +45,13 @@ Browser
 - [x] Register / login / JWT
 - [x] Neon persistence (users, profiles, events)
 - [x] `POST /v1/tutor/feedback` with `provider: "openai"`
-- [x] Staff / EM Pro tracks via demo upgrade
+- [x] Multi-track oral practice + Pro unlock (incl. Staff / EM) via demo upgrade
+- [x] Learn mode / curriculum paths + local path progress
+- [x] Jobs board
+- [x] Privacy policy at `/privacy`
 - [x] Admin overview (`ADMIN_EMAILS` + `is_admin`)
 - [x] Neon backups: `./scripts/backup-db.sh --neon`
-- [x] Learn loop: deeper Staff/EM topics · local path progress · retry/next after coaching
-- [x] Expanded paths: Staff 7 topics/9 drills · EM 6 topics/9 drills · Java→AI 5 topics/5 drills
+- [x] Expanded practice catalog (~120 questions across 12 tracks)
 
 ## Operator docs
 
