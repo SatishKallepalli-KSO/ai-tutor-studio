@@ -173,26 +173,26 @@ export const TRACK_GROUPS: {
   trackIds: string[]
 }[] = [
   {
+    id: 'ai-engineer',
+    title: 'Become an AI engineer',
+    blurb:
+      'Production AI upskilling — RAG, agents, evals, LLM ops — plus Agentic and Snowflake video paths.',
+    trackIds: ['java-to-ai', 'java-to-python'],
+  },
+  {
     id: 'interview',
-    title: 'Leadership & loop readiness',
-    blurb: 'Staff & EM narratives built for hiring panels — not textbook answers.',
+    title: 'Interview out loud',
+    blurb: 'Staff & EM narratives for hiring panels — speak them until they land.',
     trackIds: ['staff-interview', 'em-interview'],
   },
   {
-    id: 'career',
-    title: 'Career switches',
-    blurb:
-      'Java → Python, Java → AI, Agentic video curriculum, plus Data Engineer → Snowflake.',
-    trackIds: ['java-to-python', 'java-to-ai'],
-  },
-  {
     id: 'languages',
-    title: 'Language & stack depth',
+    title: 'Foundations & stack depth',
     blurb:
-      'Sharp fundamentals for day-to-day engineering interviews and on-the-job growth.',
+      'Language fundamentals that every AI engineer leans on day to day.',
     trackIds: [
-      'java',
       'python',
+      'java',
       'javascript',
       'typescript',
       'react',

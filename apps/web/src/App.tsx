@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState, type CSSProperties } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import {
   ApiError,
   api,
@@ -11,7 +11,7 @@ import {
 import { AdSlot } from './AdSlot'
 import { track as trackEvent } from './analytics'
 import { useAuth } from './auth'
-import { AUDIENCES, BRAND } from './brand'
+import { AUDIENCES, AI_ENGINEER_JOURNEY, BRAND } from './brand'
 import { getTopic, topicsForTrack, type Topic } from './curriculum'
 import {
   getTrackProgress,
@@ -38,6 +38,7 @@ function speakSeconds(words: number) {
 export default function App() {
   const { user, refresh } = useAuth()
   const { isRecruiter } = usePersona()
+  const navigate = useNavigate()
   const [params] = useSearchParams()
   const [tracks, setTracks] = useState<Track[]>([])
   const [trackId, setTrackId] = useState<string | null>(null)
@@ -53,6 +54,38 @@ export default function App() {
   const [error, setError] = useState<string | null>(null)
   const [paywall, setPaywall] = useState<string | null>(null)
   const [progressTick, setProgressTick] = useState(0)
+  const loadingTrackRef = useRef<string | null>(null)
+
+  /** Keep learn/practice in the URL so browser Back works. */
+  function writeLearnUrl(next: {
+    path: string | null
+    mode?: 'learn' | 'practice'
+    topic?: string | null
+    q?: string | null
+    replace?: boolean
+  }) {
+    const sp = new URLSearchParams()
+    const billing = params.get('billing')
+    if (billing) sp.set('billing', billing)
+    if (next.path) {
+      sp.set('path', next.path)
+      sp.set('mode', next.mode ?? 'learn')
+      if (next.topic) sp.set('topic', next.topic)
+      if (next.q) sp.set('q', next.q)
+    }
+    const search = sp.toString()
+    navigate({ pathname: '/', search: search ? `?${search}` : '' }, {
+      replace: next.replace,
+    })
+  }
+
+  function clearLearnUrl() {
+    const sp = new URLSearchParams()
+    const billing = params.get('billing')
+    if (billing) sp.set('billing', billing)
+    const search = sp.toString()
+    navigate({ pathname: '/', search: search ? `?${search}` : '' })
+  }
 
   const speech = useSpeechAnswer({
     onTranscript: (finalChunk, liveInterim) => {
@@ -131,45 +164,112 @@ export default function App() {
     if (params.get('billing') === 'success') void refresh()
   }, [params, refresh])
 
-  async function selectTrack(id: string) {
+  // Browser Back/Forward + deep links: URL is the source of truth for workspace.
+  useEffect(() => {
+    const urlPath = params.get('path')
+    const urlMode = params.get('mode') === 'practice' ? 'practice' : 'learn'
+    const urlTopic = params.get('topic')
+    const urlQ = params.get('q')
+
+    if (!urlPath) {
+      if (step !== 'tracks' || trackId) {
+        setStep('tracks')
+        setTrackId(null)
+        setTopicId(null)
+        setQuestionId(null)
+        setQuestions([])
+        setFeedback(null)
+        setPaywall(null)
+        speech.stop()
+        stopSpeaking()
+      }
+      return
+    }
+
+    setStep(urlMode)
+    if (urlTopic) setTopicId(urlTopic)
+    if (urlQ) setQuestionId(urlQ)
+
+    if (trackId === urlPath && questions.length > 0) {
+      if (urlTopic && urlTopic !== topicId) {
+        const qs = questions.filter((q) => q.topic_id === urlTopic)
+        if (!urlQ) setQuestionId(qs[0]?.id ?? null)
+      }
+      return
+    }
+
+    if (loadingTrackRef.current === urlPath) return
+    loadingTrackRef.current = urlPath
     setError(null)
     setPaywall(null)
-    setTrackId(id)
+    setTrackId(urlPath)
     setFeedback(null)
     setAnswer('')
     setLoading(true)
-    try {
-      const qs = await api.questions(id)
-      setQuestions(qs)
-      const firstTopic = topicsForTrack(id)[0]
-      setTopicId(firstTopic?.id ?? qs[0]?.topic_id ?? null)
-      setQuestionId(qs[0]?.id ?? null)
-      setStep('learn')
-      trackEvent('track_open', {
-        path: '/',
-        properties: { track_id: id },
+    void api
+      .questions(urlPath)
+      .then((qs) => {
+        setQuestions(qs)
+        const topics = topicsForTrack(urlPath)
+        const topic =
+          (urlTopic && topics.some((t) => t.id === urlTopic) && urlTopic) ||
+          topics[0]?.id ||
+          qs[0]?.topic_id ||
+          null
+        setTopicId(topic)
+        const topicQs = topic ? qs.filter((q) => q.topic_id === topic) : qs
+        const qid =
+          (urlQ && qs.some((q) => q.id === urlQ) && urlQ) ||
+          topicQs[0]?.id ||
+          qs[0]?.id ||
+          null
+        setQuestionId(qid)
+        setStep(urlMode)
       })
-      trackEvent('learn_open', {
-        path: '/',
-        properties: { track_id: id },
+      .catch((err: Error) => {
+        setError(err.message)
+        clearLearnUrl()
       })
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load questions')
-    } finally {
-      setLoading(false)
-    }
+      .finally(() => {
+        setLoading(false)
+        loadingTrackRef.current = null
+      })
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- sync from URL params only
+  }, [params])
+
+  async function selectTrack(id: string) {
+    setError(null)
+    setPaywall(null)
+    setFeedback(null)
+    setAnswer('')
+    const firstTopic = topicsForTrack(id)[0]
+    writeLearnUrl({
+      path: id,
+      mode: 'learn',
+      topic: firstTopic?.id ?? null,
+    })
+    trackEvent('track_open', {
+      path: '/',
+      properties: { track_id: id },
+    })
+    trackEvent('learn_open', {
+      path: '/',
+      properties: { track_id: id },
+    })
   }
 
   function selectTopic(next: Topic) {
-    setTopicId(next.id)
     setFeedback(null)
     setAnswer('')
-    const qs = questions.filter((q) => q.topic_id === next.id)
-    setQuestionId(qs[0]?.id ?? null)
     if (trackId) {
       markTopicStudied(trackId, next.id)
       setProgressTick((n) => n + 1)
     }
+    writeLearnUrl({
+      path: trackId ?? params.get('path'),
+      mode: step === 'practice' ? 'practice' : 'learn',
+      topic: next.id,
+    })
     trackEvent('topic_open', {
       path: '/',
       properties: { track_id: trackId, topic_id: next.id },
@@ -193,12 +293,30 @@ export default function App() {
       const tIdx = topics.findIndex((t) => t.id === topicId)
       const nextTopic = topics[tIdx + 1]
       if (nextTopic) {
-        selectTopic(nextTopic)
-        setStep('practice')
+        if (trackId) {
+          markTopicStudied(trackId, nextTopic.id)
+          setProgressTick((n) => n + 1)
+        }
+        writeLearnUrl({
+          path: trackId,
+          mode: 'practice',
+          topic: nextTopic.id,
+        })
+        setFeedback(null)
+        setAnswer('')
+        setInterim('')
+        setInputMode('text')
+        speech.stop()
+        stopSpeaking()
         return
       }
     }
-    setQuestionId(next.id)
+    writeLearnUrl({
+      path: trackId,
+      mode: 'practice',
+      topic: topicId,
+      q: next.id,
+    })
     setFeedback(null)
     setAnswer('')
     setInterim('')
@@ -228,19 +346,20 @@ export default function App() {
       return
     }
     const id = forTopicId ?? topicId
-    if (id) {
-      setTopicId(id)
-      const qs = questions.filter((q) => q.topic_id === id)
-      setQuestionId(qs[0]?.id ?? questions[0]?.id ?? null)
-      if (trackId) {
-        markTopicStudied(trackId, id)
-        setProgressTick((n) => n + 1)
-      }
+    if (id && trackId) {
+      markTopicStudied(trackId, id)
+      setProgressTick((n) => n + 1)
     }
     setFeedback(null)
     setAnswer('')
     setPaywall(null)
-    setStep('practice')
+    const qs = id ? questions.filter((q) => q.topic_id === id) : questions
+    writeLearnUrl({
+      path: trackId,
+      mode: 'practice',
+      topic: id,
+      q: qs[0]?.id ?? questionId,
+    })
     trackEvent('practice_start', {
       path: '/',
       properties: { track_id: trackId, topic_id: id ?? topicId },
@@ -361,21 +480,16 @@ export default function App() {
                 </>
               ) : (
                 <>
-                  <button
-                    type="button"
-                    className="btn primary"
-                    disabled={loading}
-                    onClick={() => void selectTrack('staff-interview')}
-                  >
-                    Start Staff practice
-                  </button>
+                  <Link className="btn primary" to="/agentic-path">
+                    Explore Agentic AI
+                  </Link>
                   <button
                     type="button"
                     className="btn ghost"
                     disabled={loading}
-                    onClick={() => void selectTrack('em-interview')}
+                    onClick={() => void selectTrack('staff-interview')}
                   >
-                    Start EM practice
+                    Practice Staff loop
                   </button>
                   <a className="btn ghost" href="#paths">
                     Browse all paths
@@ -389,11 +503,11 @@ export default function App() {
                 <span className="pulse-dot" />
                 {isRecruiter
                   ? 'Hiring · phase 2'
-                  : 'Live coaching · Staff & EM loops'}
+                  : 'AI paths · spoken coaching · hire-ready'}
                 <em>
                   {isRecruiter
                     ? '“Reach candidates who already practiced out loud.”'
-                    : '“I owned the migration end-to-end… latency dropped 40%.”'}
+                    : '“I shipped a RAG pipeline with evals — and I can explain it in 90 seconds.”'}
                 </em>
               </div>
             </div>
@@ -402,13 +516,13 @@ export default function App() {
           {!isRecruiter && (
             <div className="learning-trust reveal" aria-label="Product highlights">
               <span>
-                <b>Study → Speak → Coach</b> learning loop
+                <b>Agentic AI</b> free video curriculum
               </span>
               <span>
-                <b>Staff &amp; EM</b> interview paths
+                <b>RAG · agents · evals</b> production paths
               </span>
               <span>
-                <b>AI feedback</b> on content &amp; delivery
+                <b>Staff &amp; EM</b> out-loud practice
               </span>
               <span>
                 <b>Free</b> to start · Pro when ready
@@ -419,25 +533,15 @@ export default function App() {
           {!isRecruiter && <SocialProof />}
 
           {!isRecruiter && (
-            <section className="magnet-proof reveal" aria-label="Why this works">
-              <div>
-                <strong>1. Study the topic</strong>
-                <p>
-                  End-to-end Staff &amp; EM docs — ownership, design, incidents,
-                  hiring.
-                </p>
-              </div>
-              <div>
-                <strong>2. Speak the answer</strong>
-                <p>90–120s out loud. Retry until you hit ≥4/5.</p>
-              </div>
-              <div>
-                <strong>3. Advance the path</strong>
-                <p>
-                  Coach names the gap — next question, next topic, real panel
-                  ready.
-                </p>
-              </div>
+            <section className="magnet-proof reveal" aria-label="AI engineer journey">
+              {AI_ENGINEER_JOURNEY.map((item) => (
+                <div key={item.step}>
+                  <strong>
+                    {item.step}. {item.title}
+                  </strong>
+                  <p>{item.blurb}</p>
+                </div>
+              ))}
             </section>
           )}
 
@@ -447,49 +551,65 @@ export default function App() {
               aria-label="Featured learning paths"
             >
               <div className="section-title">
-                <h2>Featured learning paths</h2>
+                <h2>Agentic AI &amp; interview practice</h2>
                 <p className="muted">
-                  Start where hiring panels actually listen — spoken narrative,
-                  not puzzle grind.
+                  Learn the agentic stack on free video paths, upskill into
+                  production AI, then rehearse Staff/EM out loud — same
+                  platform.
                 </p>
               </div>
               <div className="featured-grid">
+                <Link to="/agentic-path" className="featured-course agentic">
+                  <span className="cover" aria-hidden="true" />
+                  <span className="body">
+                    <span className="pill-row">
+                      <span className="pill">Headline path</span>
+                      <span className="pill">Free videos</span>
+                    </span>
+                    <strong>Agentic AI curriculum</strong>
+                    <p>
+                      Backend → Python for AI → LLMs → tools/agents → RAG →
+                      LangGraph → production. Watch, mark done, then drill.
+                    </p>
+                    <span className="meta">Open Agentic path →</span>
+                  </span>
+                </Link>
                 <button
                   type="button"
-                  className="featured-course"
+                  className="featured-course em"
                   disabled={loading}
                   onClick={() => void selectTrack('staff-interview')}
                 >
                   <span className="cover" aria-hidden="true" />
                   <span className="body">
                     <span className="pill-row">
-                      <span className="pill">Staff Engineer</span>
+                      <span className="pill">Interview</span>
                       <span className="pill lock">Pro practice</span>
                     </span>
                     <strong>Staff Engineer interview loop</strong>
                     <p>
-                      Ownership, design tradeoffs, incidents, and influence —
-                      rehearsed out loud.
+                      Ownership, design, AI safety, and influence — practiced
+                      out loud until the panel is easy.
                     </p>
                     <span className="meta">Open path →</span>
                   </span>
                 </button>
                 <button
                   type="button"
-                  className="featured-course em"
+                  className="featured-course ai"
                   disabled={loading}
-                  onClick={() => void selectTrack('em-interview')}
+                  onClick={() => void selectTrack('java-to-ai')}
                 >
                   <span className="cover" aria-hidden="true" />
                   <span className="body">
                     <span className="pill-row">
-                      <span className="pill">Engineering Manager</span>
+                      <span className="pill">AI Engineer</span>
                       <span className="pill lock">Pro practice</span>
                     </span>
-                    <strong>Engineering Manager interview loop</strong>
+                    <strong>Java → Production AI</strong>
                     <p>
-                      People, conflict, exec communication, and org design —
-                      spoken under pressure.
+                      Map your backend skills to RAG, agents, evals, and LLM
+                      ops — then speak the story.
                     </p>
                     <span className="meta">Open path →</span>
                   </span>
@@ -499,14 +619,19 @@ export default function App() {
           )}
 
           {!isRecruiter && (
-            <section className="learner-path-highlights reveal" aria-label="More paths">
-              <Link to="/agentic-path" className="path-banner muted-path">
-                <strong>Also: Agentic AI path</strong>
-                <span>Career switch curriculum (secondary)</span>
-              </Link>
-              <Link to="/snowflake-path" className="path-banner muted-path">
-                <strong>Also: Snowflake path</strong>
-                <span>Data Engineer → Cortex (secondary)</span>
+            <section className="learner-path-highlights reveal" aria-label="More AI paths">
+              <button
+                type="button"
+                className="path-banner path-banner-btn"
+                disabled={loading}
+                onClick={() => void selectTrack('em-interview')}
+              >
+                <strong>Engineering Manager interview loop</strong>
+                <span>People · conflict · org design — speak them →</span>
+              </button>
+              <Link to="/snowflake-path" className="path-banner">
+                <strong>Data Engineer → Snowflake + Cortex</strong>
+                <span>Core → Cortex → agents → interview prep →</span>
               </Link>
             </section>
           )}
@@ -558,15 +683,15 @@ export default function App() {
             <section className="diff-row reveal">
               <div>
                 <strong>Not another LeetCode</strong>
-                <p>Oral Staff/EM narrative — not puzzle grinding.</p>
+                <p>AI systems + spoken narrative — not puzzle grinding alone.</p>
               </div>
               <div>
                 <strong>Not raw ChatGPT</strong>
-                <p>Curriculum + quotas + coaching product, not a blank prompt.</p>
+                <p>Curriculum, paths, and coaching product — not a blank prompt.</p>
               </div>
               <div>
-                <strong>Free → Pro</strong>
-                <p>Starter practice free; Staff/EM depth on Pro.</p>
+                <strong>One stop → AI engineer</strong>
+                <p>Learn, build, practice out loud, then apply from one platform.</p>
               </div>
             </section>
           )}
@@ -625,12 +750,12 @@ export default function App() {
               <h2>
                 {isRecruiter
                   ? 'Paths talent trains on'
-                  : 'Browse the catalog'}
+                  : 'Full catalog — AI engineer to interview'}
               </h2>
               <p className="muted">
                 {isRecruiter
                   ? `${tracks.length} paths learners use before they apply`
-                  : 'Staff & EM first — then career switches and language depth'}
+                  : 'Become an AI engineer · practice Staff/EM out loud · sharpen the stack'}
               </p>
             </div>
 
@@ -647,7 +772,7 @@ export default function App() {
                         <h3>{group.title}</h3>
                         <p>{group.blurb}</p>
                       </div>
-                      {group.id === 'career' && (
+                      {group.id === 'ai-engineer' && (
                         <>
                           <Link to="/agentic-path" className="path-banner">
                             <strong>Full Agentic AI video curriculum</strong>
@@ -737,9 +862,7 @@ export default function App() {
             <button
               className="linkish"
               onClick={() => {
-                setStep('tracks')
-                setTrackId(null)
-                setPaywall(null)
+                clearLearnUrl()
               }}
             >
               ← All paths
@@ -777,7 +900,13 @@ export default function App() {
               role="tab"
               aria-selected={step === 'learn'}
               className={step === 'learn' ? 'mode active' : 'mode'}
-              onClick={() => setStep('learn')}
+              onClick={() =>
+                writeLearnUrl({
+                  path: trackId,
+                  mode: 'learn',
+                  topic: topicId,
+                })
+              }
             >
               <span>01</span> Study
             </button>
@@ -971,13 +1100,18 @@ export default function App() {
                     key={q.id}
                     className={q.id === questionId ? 'q-item active' : 'q-item'}
                     onClick={() => {
-                      setQuestionId(q.id)
                       setFeedback(null)
                       setAnswer('')
                       setInterim('')
                       setInputMode('text')
                       speech.stop()
                       stopSpeaking()
+                      writeLearnUrl({
+                        path: trackId,
+                        mode: 'practice',
+                        topic: topicId,
+                        q: q.id,
+                      })
                     }}
                   >
                     <span>
@@ -992,7 +1126,13 @@ export default function App() {
                 {topic && (
                   <button
                     className="linkish doc-link"
-                    onClick={() => setStep('learn')}
+                    onClick={() =>
+                      writeLearnUrl({
+                        path: trackId,
+                        mode: 'learn',
+                        topic: topicId,
+                      })
+                    }
                   >
                     ← Review docs: {topic.title}
                   </button>
@@ -1193,7 +1333,13 @@ export default function App() {
                       <button
                         type="button"
                         className="btn ghost"
-                        onClick={() => setStep('learn')}
+                        onClick={() =>
+                          writeLearnUrl({
+                            path: trackId,
+                            mode: 'learn',
+                            topic: topicId,
+                          })
+                        }
                       >
                         Review docs for gaps
                       </button>
