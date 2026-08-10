@@ -5,14 +5,23 @@ export type YtPlayer = {
   getCurrentTime: () => number
   getDuration: () => number
   seekTo: (seconds: number, allowSeekAhead: boolean) => void
-  getPlayerState: () => number
+}
+
+export type YtPlayerVars = {
+  enablejsapi?: number
+  rel?: number
+  playsinline?: number
+  origin?: string
+  start?: number
+  listType?: string
+  list?: string
 }
 
 export type YtPlayerOptions = {
   videoId?: string
   width?: string | number
   height?: string | number
-  playerVars?: Record<string, string | number | undefined>
+  playerVars?: YtPlayerVars
   events?: {
     onReady?: (event: { target: YtPlayer }) => void
     onStateChange?: (event: { data: number; target: YtPlayer }) => void
@@ -21,7 +30,10 @@ export type YtPlayerOptions = {
 }
 
 export type YtNamespace = {
-  Player: new (elementId: string | HTMLElement, options: YtPlayerOptions) => YtPlayer
+  Player: new (
+    elementId: string | HTMLElement,
+    options: YtPlayerOptions,
+  ) => YtPlayer
   PlayerState: {
     UNSTARTED: number
     ENDED: number

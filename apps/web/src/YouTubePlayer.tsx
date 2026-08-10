@@ -1,20 +1,15 @@
 import { useEffect, useId, useRef } from 'react'
-import { AUTO_COMPLETE_THRESHOLD } from './agenticPath'
+import { AUTO_COMPLETE_THRESHOLD } from './agenticProgress'
+import type { PathVideo } from './agenticPath'
 import {
   loadYouTubeApi,
   type YtNamespace,
   type YtPlayer,
+  type YtPlayerVars,
 } from './youtubeApi'
 
-/** Minimal video fields the IFrame player needs (Agentic PathVideo-compatible). */
-type PlayerVideo = {
-  id: string
-  youtubeId?: string
-  playlistId?: string
-}
-
 type Props = {
-  video: PlayerVideo
+  video: PathVideo
   /** Resume position in seconds (from localStorage). */
   startSeconds?: number
   title: string
@@ -119,13 +114,13 @@ export function YouTubePlayer({
         yt = api
 
         const start = Math.max(0, Math.floor(startRef.current))
-        const playerVars: Record<string, string | number | undefined> = {
+        const playerVars: YtPlayerVars = {
           enablejsapi: 1,
           rel: 0,
           playsinline: 1,
           origin: window.location.origin,
-          start: start > 0 ? start : undefined,
         }
+        if (start > 0) playerVars.start = start
 
         if (video.playlistId) {
           playerVars.listType = 'playlist'
@@ -139,12 +134,15 @@ export function YouTubePlayer({
           playerVars,
           events: {
             onReady: (event) => {
-              if (cancelled) return
-              playerRef.current = event.target
-              const iframe = mount.querySelector('iframe')
-              if (iframe && !iframe.getAttribute('title')) {
-                iframe.setAttribute('title', title)
+              if (cancelled) {
+                try {
+                  event.target.destroy()
+                } catch {
+                  /* ignore */
+                }
+                return
               }
+              playerRef.current = event.target
               if (start > 0) {
                 try {
                   event.target.seekTo(start, true)
@@ -191,7 +189,7 @@ export function YouTubePlayer({
       destroyPlayer()
       shell.replaceChildren()
     }
-  }, [video.id, video.youtubeId, video.playlistId, reactId, title])
+  }, [video.id, video.youtubeId, video.playlistId, reactId])
 
   return (
     <div className="video-frame" aria-label={title}>

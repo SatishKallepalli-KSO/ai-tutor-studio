@@ -4,36 +4,29 @@ import {
   AGENTIC_PATH,
   AGENTIC_PRACTICE_TRACK,
   agenticPracticeHref,
-  aggregateProgressPercent,
   allPathVideos,
-  lessonProgressPercent,
-  loadVideoProgress,
-  loadWatchProgress,
-  resumeSeconds,
-  saveVideoProgress,
-  saveWatchProgress,
-  upsertWatchProgress,
   type PathVideo,
-  type WatchProgressMap,
 } from './agenticPath'
+import {
+  aggregateProgressPercent,
+  formatWatchTimestamp,
+  lessonProgressPercent,
+  resumeSeconds,
+} from './agenticProgress'
 import { AdSlot } from './AdSlot'
 import { track } from './analytics'
 import { Shell } from './Shell'
+import { useAgenticVideoProgress } from './useAgenticVideoProgress'
 import { YouTubePlayer } from './YouTubePlayer'
 import './App.css'
 
 export function AgenticPathPage() {
   const videos = useMemo(() => allPathVideos(), [])
   const [activeId, setActiveId] = useState(videos[0]?.id ?? '')
-  const [done, setDone] = useState<Set<string>>(() => new Set())
-  const [watch, setWatch] = useState<WatchProgressMap>({})
   const [query, setQuery] = useState('')
   const [phaseFilter, setPhaseFilter] = useState<string>('all')
-
-  useEffect(() => {
-    setDone(loadVideoProgress())
-    setWatch(loadWatchProgress())
-  }, [])
+  const { done, watch, markDone, toggleDone, recordProgress } =
+    useAgenticVideoProgress()
 
   const filteredPhases = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -86,48 +79,6 @@ export function AgenticPathPage() {
     ? lessonProgressPercent(active.id, done, watch)
     : 0
   const activeResume = active ? resumeSeconds(watch[active.id]) : 0
-
-  function markDone(id: string, source: 'manual' | 'auto' = 'manual') {
-    setDone((prev) => {
-      if (prev.has(id)) return prev
-      const next = new Set(prev)
-      next.add(id)
-      track('agentic_video_complete', {
-        path: '/agentic-path',
-        properties: { video_id: id, source },
-      })
-      saveVideoProgress(next)
-      return next
-    })
-  }
-
-  function toggleDone(id: string) {
-    setDone((prev) => {
-      const next = new Set(prev)
-      const markingDone = !next.has(id)
-      if (markingDone) {
-        next.add(id)
-        track('agentic_video_complete', {
-          path: '/agentic-path',
-          properties: { video_id: id, source: 'manual' },
-        })
-      } else {
-        next.delete(id)
-      }
-      saveVideoProgress(next)
-      return next
-    })
-  }
-
-  function handleWatchProgress(seconds: number, duration: number) {
-    if (!active) return
-    setWatch((prev) => {
-      const next = upsertWatchProgress(prev, active.id, seconds, duration)
-      if (next === prev) return prev
-      saveWatchProgress(next)
-      return next
-    })
-  }
 
   function goNext() {
     const list = filteredVideos.length ? filteredVideos : videos
@@ -377,7 +328,9 @@ export function AgenticPathPage() {
                   video={active}
                   title={active.title}
                   startSeconds={activeResume}
-                  onProgress={handleWatchProgress}
+                  onProgress={(seconds, duration) =>
+                    recordProgress(active.id, seconds, duration)
+                  }
                   onNearComplete={() => markDone(active.id, 'auto')}
                 />
                 <div className="path-player-body">
@@ -402,7 +355,7 @@ export function AgenticPathPage() {
                     {done.has(active.id)
                       ? 'Lesson complete'
                       : activeResume > 0
-                        ? `Resumes at ${formatTimestamp(activeResume)} · ${activeLessonPct}% watched`
+                        ? `Resumes at ${formatWatchTimestamp(activeResume)} · ${activeLessonPct}% watched`
                         : activeLessonPct > 0
                           ? `${activeLessonPct}% watched`
                           : 'Not started — progress saves as you watch'}
@@ -578,15 +531,4 @@ export function AgenticPathPage() {
       </section>
     </Shell>
   )
-}
-
-function formatTimestamp(totalSeconds: number): string {
-  const s = Math.max(0, Math.floor(totalSeconds))
-  const h = Math.floor(s / 3600)
-  const m = Math.floor((s % 3600) / 60)
-  const sec = s % 60
-  if (h > 0) {
-    return `${h}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`
-  }
-  return `${m}:${String(sec).padStart(2, '0')}`
 }
