@@ -489,10 +489,10 @@ export function JobsBoardPage() {
                     {active.poster_name ? ` · Posted by ${active.poster_name}` : ''}
                   </p>
                 </div>
-                <div className="actions">
+                <div className="jobs-detail-actions">
                   {active.apply_url ? (
                     <a
-                      className="btn primary"
+                      className="btn primary jobs-apply-btn"
                       href={active.apply_url}
                       target="_blank"
                       rel="noreferrer"
@@ -501,7 +501,7 @@ export function JobsBoardPage() {
                     </a>
                   ) : (
                     <a
-                      className="btn primary"
+                      className="btn primary jobs-apply-btn"
                       href={`mailto:${BRAND.contactEmail}?subject=${encodeURIComponent(`Application: ${active.title}`)}`}
                     >
                       Express interest
