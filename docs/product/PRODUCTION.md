@@ -6,18 +6,19 @@
 
 | Surface | URL |
 |---------|-----|
-| **Production app** | https://ai-tutor-studio.onrender.com |
-| Login | https://ai-tutor-studio.onrender.com/login |
-| Admin dashboard | https://ai-tutor-studio.onrender.com/admin |
-| API docs | https://ai-tutor-studio.onrender.com/docs |
-| Health | https://ai-tutor-studio.onrender.com/healthz |
+| **Production app** | https://practiceoutloud.com |
+| Render fallback | https://ai-tutor-studio.onrender.com |
+| Login | https://practiceoutloud.com/login |
+| Admin dashboard | https://practiceoutloud.com/admin |
+| API docs | https://practiceoutloud.com/docs |
+| Health | https://practiceoutloud.com/healthz |
 | GitHub Pages (static / docs mirror) | https://satishkallepalli-kso.github.io/ai-tutor-studio/ |
 
 ## Stack in production
 
 ```
 Browser
-  → https://ai-tutor-studio.onrender.com  (Render Free Docker web)
+  → https://practiceoutloud.com  (Cloudflare DNS → Render Free Docker web)
       ├── React SPA (/static)
       └── FastAPI (/v1, /healthz)
             ├── Neon Free Postgres (DATABASE_URL, pooled)
@@ -28,6 +29,7 @@ Browser
 
 | Layer | Choice | Notes |
 |-------|--------|--------|
+| Domain | **practiceoutloud.com** (Cloudflare) | CNAME `@` + `www` → `ai-tutor-studio.onrender.com` (DNS only until verified) |
 | Compute | Render Free web (`ai-tutor-studio`) | Cold start after ~15 min idle |
 | Database | **Neon Free** project `ai-tutor-studio` | Durable; Render free Postgres **deleted** |
 | AI coaching | **OpenAI** `gpt-4o-mini` | Falls back to `local-rubric` if key/credits missing |
@@ -59,7 +61,7 @@ Browser
 Required / set in production today:
 
 - `JWT_SECRET`
-- `APP_URL=https://ai-tutor-studio.onrender.com`
+- `APP_URL=https://practiceoutloud.com`
 - `DATABASE_URL` → Neon pooled URL
 - `OPENAI_API_KEY` + `OPENAI_TUTOR_MODEL=gpt-4o-mini`
 - `ALLOW_DEMO_UPGRADE=true`

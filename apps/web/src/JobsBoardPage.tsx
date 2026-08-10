@@ -23,7 +23,7 @@ const DEMO_JOBS: JobPost[] = [
     employment_type: 'full-time',
     workplace: 'remote',
     description:
-      'Build the learning + hiring studio: FastAPI services, practice feedback pipelines, and recruiter job workflows. You will own APIs that power Learn. Practice. Hire.',
+      'Build Practice Out Loud: FastAPI services, practice feedback pipelines, and recruiter job workflows. You will own APIs that power Staff/EM spoken interview practice.',
     requirements:
       '5+ years backend · Python or Java · comfort with LLMs/APIs · strong written + spoken communication.',
     salary_range: '$160k–$210k',
@@ -43,7 +43,7 @@ const DEMO_JOBS: JobPost[] = [
     employment_type: 'full-time',
     workplace: 'hybrid',
     description:
-      'Lead cross-team platform work. Interview loop includes system design and ownership narrative — candidates who practice on AI Tutor Studio are encouraged to apply.',
+      'Lead cross-team platform work. Interview loop includes system design and ownership narrative — candidates who practice on Practice Out Loud are encouraged to apply.',
     requirements:
       'Staff-level impact · distributed systems · mentoring · clear panel communication.',
     salary_range: null,

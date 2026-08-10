@@ -101,7 +101,7 @@ export function AdminDashboardPage() {
     <Shell wide>
       <section className="admin-hero reveal">
         <div>
-          <p className="eyebrow">AI Tutor Studio · Admin</p>
+          <p className="eyebrow">Practice Out Loud · Admin</p>
           <h1>Usage dashboard</h1>
           <p className="hero-lede">
             Registrations, Free vs Pro mix, and which surfaces users hit most —

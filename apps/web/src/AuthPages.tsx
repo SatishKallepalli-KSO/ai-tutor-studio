@@ -4,6 +4,7 @@ import { useAuth } from './auth'
 import { BRAND, PERSONAS, type Persona } from './brand'
 import { usePersona } from './persona'
 import { Shell } from './Shell'
+import './App.css'
 
 export function LoginPage() {
   const { login } = useAuth()

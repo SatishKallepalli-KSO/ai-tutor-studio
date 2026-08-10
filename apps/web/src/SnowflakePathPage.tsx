@@ -97,7 +97,7 @@ export function SnowflakePathPage() {
   return (
     <Shell wide>
       <section className="path-hero reveal">
-        <p className="eyebrow">AI Tutor Studio · Career switch</p>
+        <p className="eyebrow">Practice Out Loud · Career switch</p>
         <h1>Data Engineer → Snowflake + Agentic AI</h1>
         <p className="hero-lede">
           {videos.length} validated free YouTube courses &amp; playlists: DE

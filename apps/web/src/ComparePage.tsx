@@ -116,7 +116,7 @@ const DIMENSIONS: {
 ]
 
 const COLUMNS = [
-  'AI Tutor Studio',
+  'Practice Out Loud',
   'HackerRank / LeetCode',
   'Interviewing.io / Pramp',
   'ChatGPT alone',
@@ -129,15 +129,15 @@ export function ComparePage() {
     <Shell wide>
       <article className="company-page compare-page">
         <section className="company-hero reveal">
-          <p className="eyebrow">AI Tutor Studio</p>
+          <p className="eyebrow">Practice Out Loud</p>
           <h1>
             Compare
             <span>Talent tools and hiring tools — honest fit.</span>
           </h1>
           <p className="hero-lede">
-            AI Tutor Studio is a one-stop talent studio: learn + practice for
-            candidates, structured interviews for companies. Competitors often
-            win on coding volume or live human mocks — those strengths are marked
+            Practice Out Loud is built for spoken Staff/EM interview loops:
+            study a path, speak answers, get AI coaching. Competitors often win
+            on coding volume or live human mocks — those strengths are marked
             plainly below.
           </p>
           <div className="hero-cta">
@@ -205,7 +205,7 @@ export function ComparePage() {
           <h2>Pick the tool that matches the loop.</h2>
           <ul className="company-list">
             <li>
-              <strong>Choose AI Tutor Studio</strong>
+              <strong>Choose Practice Out Loud</strong>
               <span>
                 When you need topic docs, voice answers, delivery coaching, and
                 career paths (Backend→AI, Snowflake) in one freemium product.

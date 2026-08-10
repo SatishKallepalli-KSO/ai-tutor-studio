@@ -46,7 +46,7 @@ function initials(name: string): string {
 
 const LEARNER_TEMPLATES = [
   'Thanks for connecting — happy to share my practice readiness.',
-  'I applied to your role and practiced the loop on AI Tutor Studio.',
+  'I applied to your role and practiced the loop on Practice Out Loud.',
 ]
 
 const RECRUITER_TEMPLATES = [

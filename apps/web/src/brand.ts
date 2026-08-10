@@ -1,18 +1,19 @@
 /** Central product positioning — magnet first, Hire secondary. */
 
 export const BRAND = {
-  product: 'AI Tutor Studio',
+  product: 'Practice Out Loud',
+  domain: 'practiceoutloud.com',
   company: 'Kallepalli Labs',
-  /** Long-term platform story (secondary on homepage). */
-  tagline: 'Learn. Practice. Hire.',
+  /** Short nav line under the brand. */
+  tagline: 'Staff & EM interview practice',
   /** Primary customer magnet — what we sell today. */
   magnet: 'Practice Staff & EM interviews out loud',
   magnetSub:
-    'Free to start. Study the path, speak your answers, get AI coaching on content and delivery — the part coding platforms never train.',
+    'Study the path, speak your answers, get AI coaching on content and delivery — the skill coding platforms never train.',
   oneLiner:
-    'AI Tutor Studio helps senior engineers practice Staff and EM interview loops out loud — with structured paths and coaching — Free to start, Pro for full access.',
-  copyright: '© 2026 Kallepalli Labs. All rights reserved.',
-  contactEmail: 'hello@kallepallilabs.com',
+    'Practice Out Loud helps senior engineers rehearse Staff and EM interview loops out loud — with structured paths and AI coaching. Free to start, Pro for full access.',
+  copyright: '© 2026 Practice Out Loud · Kallepalli Labs. All rights reserved.',
+  contactEmail: 'hello@practiceoutloud.com',
 } as const
 
 export type Persona = 'learner' | 'recruiter'

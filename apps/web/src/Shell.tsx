@@ -138,7 +138,7 @@ export function Shell({
                 Sign in
               </Link>
               <Link className="btn primary sm" to="/register">
-                Join
+                Get started
               </Link>
             </>
           )}

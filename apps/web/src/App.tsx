@@ -337,19 +337,17 @@ export default function App() {
       {step === 'tracks' && (
         <>
           <section className="hero reveal">
-            <p className="eyebrow">{BRAND.product}</p>
-            <h1>
-              {isRecruiter ? 'Hire practice-ready talent' : BRAND.magnet}
+            <p className="eyebrow">practiceoutloud.com</p>
+            <h1 className="brand-hero">
+              {isRecruiter ? 'Hire practice-ready talent' : BRAND.product}
               <span>
                 {isRecruiter
                   ? 'Secondary surface — post jobs after candidates train here.'
-                  : 'Speak answers. Get coached. Walk into the loop ready.'}
+                  : BRAND.magnet}
               </span>
             </h1>
             <p className="hero-lede">
-              {isRecruiter
-                ? AUDIENCES.companies.blurb
-                : BRAND.magnetSub}
+              {isRecruiter ? AUDIENCES.companies.blurb : BRAND.magnetSub}
             </p>
             <div className="hero-cta">
               {isRecruiter ? (
@@ -380,7 +378,7 @@ export default function App() {
                     Start EM practice
                   </button>
                   <a className="btn ghost" href="#paths">
-                    All paths
+                    Browse all paths
                   </a>
                 </>
               )}
@@ -391,7 +389,7 @@ export default function App() {
                 <span className="pulse-dot" />
                 {isRecruiter
                   ? 'Hiring · phase 2'
-                  : 'Voice practice · Staff / EM'}
+                  : 'Live coaching · Staff & EM loops'}
                 <em>
                   {isRecruiter
                     ? '“Reach candidates who already practiced out loud.”'
@@ -401,13 +399,33 @@ export default function App() {
             </div>
           </section>
 
+          {!isRecruiter && (
+            <div className="learning-trust reveal" aria-label="Product highlights">
+              <span>
+                <b>Study → Speak → Coach</b> learning loop
+              </span>
+              <span>
+                <b>Staff &amp; EM</b> interview paths
+              </span>
+              <span>
+                <b>AI feedback</b> on content &amp; delivery
+              </span>
+              <span>
+                <b>Free</b> to start · Pro when ready
+              </span>
+            </div>
+          )}
+
           {!isRecruiter && <SocialProof />}
 
           {!isRecruiter && (
             <section className="magnet-proof reveal" aria-label="Why this works">
               <div>
                 <strong>1. Study the topic</strong>
-                <p>End-to-end Staff &amp; EM docs — ownership, design, incidents, hiring.</p>
+                <p>
+                  End-to-end Staff &amp; EM docs — ownership, design, incidents,
+                  hiring.
+                </p>
               </div>
               <div>
                 <strong>2. Speak the answer</strong>
@@ -415,31 +433,73 @@ export default function App() {
               </div>
               <div>
                 <strong>3. Advance the path</strong>
-                <p>Coach names the gap — next question, next topic, real panel ready.</p>
+                <p>
+                  Coach names the gap — next question, next topic, real panel
+                  ready.
+                </p>
               </div>
             </section>
           )}
 
           {!isRecruiter && (
-            <section className="learner-path-highlights reveal" aria-label="Featured paths">
-              <button
-                type="button"
-                className="path-banner path-banner-btn"
-                disabled={loading}
-                onClick={() => void selectTrack('staff-interview')}
-              >
-                <strong>Staff Engineer loop</strong>
-                <span>Ownership · design · AI safety — practice out loud →</span>
-              </button>
-              <button
-                type="button"
-                className="path-banner path-banner-btn"
-                disabled={loading}
-                onClick={() => void selectTrack('em-interview')}
-              >
-                <strong>Engineering Manager loop</strong>
-                <span>People · conflict · org narratives — speak them →</span>
-              </button>
+            <section
+              className="featured-learning reveal"
+              aria-label="Featured learning paths"
+            >
+              <div className="section-title">
+                <h2>Featured learning paths</h2>
+                <p className="muted">
+                  Start where hiring panels actually listen — spoken narrative,
+                  not puzzle grind.
+                </p>
+              </div>
+              <div className="featured-grid">
+                <button
+                  type="button"
+                  className="featured-course"
+                  disabled={loading}
+                  onClick={() => void selectTrack('staff-interview')}
+                >
+                  <span className="cover" aria-hidden="true" />
+                  <span className="body">
+                    <span className="pill-row">
+                      <span className="pill">Staff Engineer</span>
+                      <span className="pill lock">Pro practice</span>
+                    </span>
+                    <strong>Staff Engineer interview loop</strong>
+                    <p>
+                      Ownership, design tradeoffs, incidents, and influence —
+                      rehearsed out loud.
+                    </p>
+                    <span className="meta">Open path →</span>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  className="featured-course em"
+                  disabled={loading}
+                  onClick={() => void selectTrack('em-interview')}
+                >
+                  <span className="cover" aria-hidden="true" />
+                  <span className="body">
+                    <span className="pill-row">
+                      <span className="pill">Engineering Manager</span>
+                      <span className="pill lock">Pro practice</span>
+                    </span>
+                    <strong>Engineering Manager interview loop</strong>
+                    <p>
+                      People, conflict, exec communication, and org design —
+                      spoken under pressure.
+                    </p>
+                    <span className="meta">Open path →</span>
+                  </span>
+                </button>
+              </div>
+            </section>
+          )}
+
+          {!isRecruiter && (
+            <section className="learner-path-highlights reveal" aria-label="More paths">
               <Link to="/agentic-path" className="path-banner muted-path">
                 <strong>Also: Agentic AI path</strong>
                 <span>Career switch curriculum (secondary)</span>
@@ -524,7 +584,7 @@ export default function App() {
                 <thead>
                   <tr>
                     <th></th>
-                    <th>AI Tutor Studio</th>
+                    <th>Practice Out Loud</th>
                     <th>Coding platforms</th>
                     <th>Generic ChatGPT</th>
                   </tr>
@@ -565,12 +625,12 @@ export default function App() {
               <h2>
                 {isRecruiter
                   ? 'Paths talent trains on'
-                  : 'Start with Staff or EM — then explore'}
+                  : 'Browse the catalog'}
               </h2>
               <p className="muted">
                 {isRecruiter
                   ? `${tracks.length} paths learners use before they apply`
-                  : 'Primary: Staff & EM voice loops · Also: languages, career switches, video paths'}
+                  : 'Staff & EM first — then career switches and language depth'}
               </p>
             </div>
 
@@ -619,21 +679,24 @@ export default function App() {
                               onClick={() => selectTrack(item.id)}
                               disabled={loading}
                             >
-                              <span className="pill-row">
-                                <span className="pill">{item.audience}</span>
-                                {locked ? (
-                                  <span className="pill lock">Pro</span>
-                                ) : (
-                                  <span className="pill free">Free practice</span>
-                                )}
+                              <span className="course-cover" aria-hidden="true" />
+                              <span className="course-body">
+                                <span className="pill-row">
+                                  <span className="pill">{item.audience}</span>
+                                  {locked ? (
+                                    <span className="pill lock">Pro</span>
+                                  ) : (
+                                    <span className="pill free">Free practice</span>
+                                  )}
+                                </span>
+                                <strong>{item.title}</strong>
+                                <p>{item.summary}</p>
+                                <span className="meta">
+                                  {count} topics · Study free · Practice{' '}
+                                  {locked ? 'Pro' : 'included'}
+                                </span>
+                                <span className="track-go">Open path →</span>
                               </span>
-                              <strong>{item.title}</strong>
-                              <p>{item.summary}</p>
-                              <span className="meta">
-                                {count} topics · Study free · Practice{' '}
-                                {locked ? 'Pro' : 'included'}
-                              </span>
-                              <span className="track-go">Open path →</span>
                             </button>
                           )
                         })}

@@ -5,6 +5,7 @@ import { api, type BillingPlans } from './api'
 import { track } from './analytics'
 import { useAuth } from './auth'
 import { Shell } from './Shell'
+import './App.css'
 
 export function PricingPage() {
   const { user, refresh, setUser } = useAuth()
@@ -109,11 +110,12 @@ export function PricingPage() {
   return (
     <Shell>
       <div className="pricing-page reveal">
-        <p className="eyebrow">AI Tutor Studio · Plans</p>
-        <h1>Free to learn. Pro to compete. Companies partner to hire.</h1>
+        <p className="eyebrow">Practice Out Loud · Plans</p>
+        <h1>Free to learn. Pro when the panel is real.</h1>
         <p className="muted pricing-lede">
-          Competitive freemium — study every path free, then unlock Staff/EM,
-          advanced switches, and unlimited voice coaching when you need the edge.
+          Study every path free. Unlock Staff/EM voice coaching and unlimited
+          feedback when you need the edge — priced like a serious learning
+          platform, not a toy chatbot.
         </p>
 
         {params.get('billing') === 'success' && (

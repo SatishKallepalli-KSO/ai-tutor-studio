@@ -15,7 +15,7 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: APP_URL
-        value: https://ai-tutor-studio.onrender.com
+        value: https://practiceoutloud.com
       - key: ALLOW_DEMO_UPGRADE
         value: "true"
       - key: OPENAI_TUTOR_MODEL

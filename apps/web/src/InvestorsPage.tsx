@@ -13,7 +13,7 @@ export function InvestorsPage() {
           <p className="eyebrow">Kallepalli Labs</p>
           <h1>
             Partner &amp; invest
-            <span>Scale Learn. Practice. Hire.</span>
+            <span>Scale spoken Staff &amp; EM practice.</span>
           </h1>
           <p className="hero-lede">
             Open to partners and investors who want a two-sided talent studio —
@@ -61,7 +61,7 @@ export function InvestorsPage() {
           <p className="eyebrow">The pitch</p>
           <h2>Practice + hiring in one category.</h2>
           <p className="company-copy">
-            Most tools serve only candidates or only HR. AI Tutor Studio targets
+            Most tools serve only candidates or only HR. Practice Out Loud targets
             the full loop: curriculum and voice coaching for talent, structured
             interviews and readiness signals for companies — freemium to learn,
             Pro to compete, company pilots for hiring teams.
@@ -154,7 +154,7 @@ export function InvestorsPage() {
               hello@kallepallilabs.com
             </a>
             <Link className="btn ghost" to="/">
-              Try AI Tutor Studio
+              Try Practice Out Loud
             </Link>
           </div>
         </section>
