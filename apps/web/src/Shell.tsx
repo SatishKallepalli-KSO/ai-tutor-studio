@@ -56,7 +56,8 @@ export function Shell({
   const docsHref = `${import.meta.env.BASE_URL}product/`
   const [logoFailed, setLogoFailed] = useState(false)
   // Cache-busted filename: Cloudflare previously cached SPA HTML at /logo.png
-  const brandMarkSrc = `${import.meta.env.BASE_URL}brand-mark.png`
+  // (and briefly at /brand-mark.png after a pre-deploy probe).
+  const brandMarkSrc = `${import.meta.env.BASE_URL}pol-mark.png`
 
   return (
     <div className={wide ? 'shell shell-wide' : 'shell'}>
