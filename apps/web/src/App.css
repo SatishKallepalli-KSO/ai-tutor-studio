@@ -731,6 +731,19 @@ a {
     0 8px 20px rgba(11, 107, 203, 0.22);
 }
 
+.brand-mark-fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-family: var(--display);
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  user-select: none;
+}
+
 .brand-text {
   display: grid;
   line-height: 1.15;

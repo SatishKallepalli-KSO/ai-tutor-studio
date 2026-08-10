@@ -185,6 +185,39 @@ def tutor_feedback(
     return result
 
 
+# Asset-like extensions must never fall through to SPA HTML — CDNs cache by URL
+# extension (e.g. Cloudflare treated /logo.png HTML as a cacheable PNG).
+_STATIC_ASSET_SUFFIXES = (
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".gif",
+    ".webp",
+    ".svg",
+    ".ico",
+    ".css",
+    ".js",
+    ".mjs",
+    ".map",
+    ".woff",
+    ".woff2",
+    ".ttf",
+    ".txt",
+    ".xml",
+    ".json",
+    ".webmanifest",
+)
+
+
+def _static_file_response(path: Path, *, cache: bool) -> FileResponse:
+    headers = (
+        {"Cache-Control": "public, max-age=86400"}
+        if cache
+        else {"Cache-Control": "no-cache"}
+    )
+    return FileResponse(path, headers=headers)
+
+
 if STATIC_DIR.exists():
     assets = STATIC_DIR / "assets"
     if assets.exists():
@@ -192,14 +225,22 @@ if STATIC_DIR.exists():
 
     @app.get("/")
     def spa_index() -> FileResponse:
-        return FileResponse(STATIC_DIR / "index.html")
+        return _static_file_response(STATIC_DIR / "index.html", cache=False)
 
     @app.get("/{full_path:path}")
     def spa_fallback(full_path: str) -> FileResponse:
         # Don't swallow API routes (mounted above); only unmatched paths hit here
         if full_path.startswith("v1/") or full_path == "healthz":
             raise HTTPException(status_code=404, detail="Not found")
-        candidate = STATIC_DIR / full_path
+        candidate = (STATIC_DIR / full_path).resolve()
+        try:
+            candidate.relative_to(STATIC_DIR.resolve())
+        except ValueError as exc:
+            raise HTTPException(status_code=404, detail="Not found") from exc
         if candidate.is_file():
-            return FileResponse(candidate)
-        return FileResponse(STATIC_DIR / "index.html")
+            return _static_file_response(candidate, cache=True)
+        # Missing real files with asset extensions → 404 (never index.html)
+        lowered = full_path.lower()
+        if lowered.endswith(_STATIC_ASSET_SUFFIXES):
+            raise HTTPException(status_code=404, detail="Not found")
+        return _static_file_response(STATIC_DIR / "index.html", cache=False)

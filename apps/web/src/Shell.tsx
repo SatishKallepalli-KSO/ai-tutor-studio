@@ -54,6 +54,9 @@ export function Shell({
   const { user, loading, logout } = useAuth()
   const { persona, setPersona, isLearner, isRecruiter } = usePersona()
   const docsHref = `${import.meta.env.BASE_URL}product/`
+  const [logoFailed, setLogoFailed] = useState(false)
+  // Cache-busted filename: Cloudflare previously cached SPA HTML at /logo.png
+  const brandMarkSrc = `${import.meta.env.BASE_URL}brand-mark.png`
 
   return (
     <div className={wide ? 'shell shell-wide' : 'shell'}>
@@ -64,14 +67,21 @@ export function Shell({
 
       <header className="site-nav">
         <Link to={isRecruiter ? '/jobs' : '/'} className="brand">
-          <img
-            className="brand-mark"
-            src={`${import.meta.env.BASE_URL}logo.png`}
-            width={36}
-            height={36}
-            alt=""
-            decoding="async"
-          />
+          {logoFailed ? (
+            <span className="brand-mark brand-mark-fallback" aria-hidden="true">
+              P
+            </span>
+          ) : (
+            <img
+              className="brand-mark"
+              src={brandMarkSrc}
+              width={36}
+              height={36}
+              alt={`${BRAND.product} logo`}
+              decoding="async"
+              onError={() => setLogoFailed(true)}
+            />
+          )}
           <span className="brand-text">
             <strong>{BRAND.product}</strong>
             <em>{BRAND.tagline}</em>
