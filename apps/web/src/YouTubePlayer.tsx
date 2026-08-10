@@ -1,5 +1,4 @@
 import { useEffect, useId, useRef } from 'react'
-import type { PathVideo } from './agenticPath'
 import { AUTO_COMPLETE_THRESHOLD } from './agenticPath'
 import {
   loadYouTubeApi,
@@ -7,8 +6,15 @@ import {
   type YtPlayer,
 } from './youtubeApi'
 
+/** Minimal video fields the IFrame player needs (Agentic PathVideo-compatible). */
+type PlayerVideo = {
+  id: string
+  youtubeId?: string
+  playlistId?: string
+}
+
 type Props = {
-  video: PathVideo
+  video: PlayerVideo
   /** Resume position in seconds (from localStorage). */
   startSeconds?: number
   title: string
@@ -135,6 +141,10 @@ export function YouTubePlayer({
             onReady: (event) => {
               if (cancelled) return
               playerRef.current = event.target
+              const iframe = mount.querySelector('iframe')
+              if (iframe && !iframe.getAttribute('title')) {
+                iframe.setAttribute('title', title)
+              }
               if (start > 0) {
                 try {
                   event.target.seekTo(start, true)
@@ -181,7 +191,7 @@ export function YouTubePlayer({
       destroyPlayer()
       shell.replaceChildren()
     }
-  }, [video.id, video.youtubeId, video.playlistId, reactId])
+  }, [video.id, video.youtubeId, video.playlistId, reactId, title])
 
   return (
     <div className="video-frame" aria-label={title}>

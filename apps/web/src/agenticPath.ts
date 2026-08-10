@@ -863,23 +863,6 @@ export const AUTO_COMPLETE_THRESHOLD = 0.9
 const RESUME_MIN_SECONDS = 5
 const RESUME_RESTART_RATIO = 0.95
 
-export function embedUrl(video: PathVideo, startSeconds = 0): string {
-  const params = new URLSearchParams({
-    enablejsapi: '1',
-    rel: '0',
-  })
-  if (typeof window !== 'undefined' && window.location?.origin) {
-    params.set('origin', window.location.origin)
-  }
-  const start = Math.max(0, Math.floor(startSeconds))
-  if (start > 0) params.set('start', String(start))
-
-  if (video.playlistId) {
-    return `https://www.youtube.com/embed/videoseries?list=${video.playlistId}&${params}`
-  }
-  return `https://www.youtube.com/embed/${video.youtubeId}?${params}`
-}
-
 const PROGRESS_KEY = 'ats_agentic_video_done'
 const WATCH_KEY = 'ats_agentic_video_watch'
 
@@ -933,6 +916,14 @@ export function upsertWatchProgress(
     duration && duration > 0
       ? Math.max(prev?.duration ?? 0, duration)
       : prev?.duration
+  // Skip no-op writes so 2s polling does not thrash React state / localStorage.
+  if (
+    prev &&
+    prev.seconds === nextSeconds &&
+    (prev.duration ?? undefined) === nextDuration
+  ) {
+    return map
+  }
   return {
     ...map,
     [videoId]: {

@@ -123,6 +123,7 @@ export function AgenticPathPage() {
     if (!active) return
     setWatch((prev) => {
       const next = upsertWatchProgress(prev, active.id, seconds, duration)
+      if (next === prev) return prev
       saveWatchProgress(next)
       return next
     })
