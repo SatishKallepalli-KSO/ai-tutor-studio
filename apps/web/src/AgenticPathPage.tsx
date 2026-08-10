@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   AGENTIC_PATH,
+  AGENTIC_PRACTICE_TRACK,
+  agenticPracticeHref,
   allPathVideos,
   embedUrl,
   loadVideoProgress,
@@ -68,6 +70,11 @@ export function AgenticPathPage() {
   const pct = videos.length
     ? Math.round((doneCount / videos.length) * 100)
     : 0
+  const pathComplete = videos.length > 0 && doneCount === videos.length
+  const phaseComplete = !!activePhase?.videos.every((v) => done.has(v.id))
+  const practiceHref = agenticPracticeHref(
+    activePhase?.practiceTopicId ?? 'ai-agents',
+  )
 
   function toggleDone(id: string) {
     setDone((prev) => {
@@ -103,8 +110,8 @@ export function AgenticPathPage() {
           {videos.length} validated free YouTube courses &amp; playlists for
           backend engineers: Python for AI → LLMs → APIs &amp; vectors →
           tools/agents → RAG → LangGraph → prompting, evals &amp; production.
-          Search the library, watch in the player, mark complete, then drill
-          answers on Studio paths.
+          Watch in the player, mark complete, then practice out loud with AI
+          feedback on the matching Studio topics.
         </p>
         <div className="path-progress-head">
           <div>
@@ -147,11 +154,60 @@ export function AgenticPathPage() {
           <a className="btn primary" href="#player">
             Continue the path
           </a>
-          <Link className="btn ghost" to="/">
-            Practice on Studio paths
+          <Link
+            className="btn ghost"
+            to={agenticPracticeHref('ai-agents')}
+            onClick={() =>
+              track('agentic_practice_cta', {
+                path: '/agentic-path',
+                properties: {
+                  source: 'hero',
+                  track_id: AGENTIC_PRACTICE_TRACK,
+                  topic_id: 'ai-agents',
+                },
+              })
+            }
+          >
+            Practice with AI feedback
           </Link>
         </div>
       </section>
+
+      {pathComplete && (
+        <section className="panel path-practice-complete reveal" id="practice">
+          <p className="pill good">Path complete</p>
+          <h2>Practice with AI feedback</h2>
+          <p className="lede">
+            You’ve marked the Agentic AI library done. Next: speak answers on
+            the Production AI Studio path — same voice/text coach used
+            elsewhere — covering agents, RAG, evals, and LLM ops.
+          </p>
+          <div className="actions">
+            <Link
+              className="btn primary"
+              to={agenticPracticeHref('ai-agents')}
+              onClick={() =>
+                track('agentic_practice_cta', {
+                  path: '/agentic-path',
+                  properties: {
+                    source: 'path_complete',
+                    track_id: AGENTIC_PRACTICE_TRACK,
+                    topic_id: 'ai-agents',
+                  },
+                })
+              }
+            >
+              Practice with AI feedback
+            </Link>
+            <Link className="btn ghost" to={agenticPracticeHref('ai-rag')}>
+              Start with RAG drills
+            </Link>
+            <Link className="btn ghost" to={agenticPracticeHref('ai-evals')}>
+              Start with evals drills
+            </Link>
+          </div>
+        </section>
+      )}
 
       <AdSlot
         id="agentic-below-hero"
@@ -171,39 +227,68 @@ export function AgenticPathPage() {
           {filteredPhases.length === 0 && (
             <p className="muted">No videos match that search.</p>
           )}
-          {filteredPhases.map((phase) => (
-            <div key={phase.id} className="path-phase">
-              <div className="path-phase-head">
-                <span className="pill">Phase {phase.step}</span>
-                <strong>{phase.title}</strong>
-                <p>
-                  {phase.blurb} · {phase.videos.length} items
-                </p>
+          {filteredPhases.map((phase) => {
+            const phaseDoneCount = phase.videos.filter((v) =>
+              done.has(v.id),
+            ).length
+            const phaseDone =
+              phase.videos.length > 0 && phaseDoneCount === phase.videos.length
+            return (
+              <div key={phase.id} className="path-phase">
+                <div className="path-phase-head">
+                  <span className="pill">Phase {phase.step}</span>
+                  {phaseDone ? <span className="pill done">Done</span> : null}
+                  <strong>{phase.title}</strong>
+                  <p>
+                    {phase.blurb} · {phase.videos.length} items
+                    {phaseDoneCount > 0
+                      ? ` · ${phaseDoneCount}/${phase.videos.length} watched`
+                      : ''}
+                  </p>
+                  {phaseDone ? (
+                    <Link
+                      className="path-phase-practice"
+                      to={agenticPracticeHref(phase.practiceTopicId)}
+                      onClick={() =>
+                        track('agentic_practice_cta', {
+                          path: '/agentic-path',
+                          properties: {
+                            source: 'phase_sidebar',
+                            phase_id: phase.id,
+                            topic_id: phase.practiceTopicId,
+                          },
+                        })
+                      }
+                    >
+                      Practice with AI feedback →
+                    </Link>
+                  ) : null}
+                </div>
+                {phase.videos.map((video, i) => (
+                  <button
+                    key={video.id}
+                    type="button"
+                    className={
+                      video.id === active?.id
+                        ? 'path-video-item active'
+                        : 'path-video-item'
+                    }
+                    onClick={() => setActiveId(video.id)}
+                  >
+                    <span className="path-video-idx">
+                      {done.has(video.id) ? '✓' : `${phase.step}.${i + 1}`}
+                    </span>
+                    <span className="path-video-meta">
+                      <strong>{video.title}</strong>
+                      <em>
+                        {video.channel} · {video.duration}
+                      </em>
+                    </span>
+                  </button>
+                ))}
               </div>
-              {phase.videos.map((video, i) => (
-                <button
-                  key={video.id}
-                  type="button"
-                  className={
-                    video.id === active?.id
-                      ? 'path-video-item active'
-                      : 'path-video-item'
-                  }
-                  onClick={() => setActiveId(video.id)}
-                >
-                  <span className="path-video-idx">
-                    {done.has(video.id) ? '✓' : `${phase.step}.${i + 1}`}
-                  </span>
-                  <span className="path-video-meta">
-                    <strong>{video.title}</strong>
-                    <em>
-                      {video.channel} · {video.duration}
-                    </em>
-                  </span>
-                </button>
-              ))}
-            </div>
-          ))}
+            )
+          })}
         </aside>
 
         <div className="path-main reveal">
@@ -258,26 +343,92 @@ export function AgenticPathPage() {
                       Open on YouTube
                     </a>
                   </div>
+
+                  {(done.has(active.id) || phaseComplete) && activePhase && (
+                    <div className="path-practice-step">
+                      <p className="pill">{phaseComplete ? 'Phase complete' : 'Next step'}</p>
+                      <h3>Practice with AI feedback</h3>
+                      <p className="muted">
+                        Speak {activePhase.practiceLabel.toLowerCase()} on the
+                        Studio path — voice or text, same AI coach rubric.
+                      </p>
+                      <div className="actions">
+                        <Link
+                          className="btn primary"
+                          to={practiceHref}
+                          onClick={() =>
+                            track('agentic_practice_cta', {
+                              path: '/agentic-path',
+                              properties: {
+                                source: phaseComplete
+                                  ? 'phase_complete'
+                                  : 'video_complete',
+                                phase_id: activePhase.id,
+                                topic_id: activePhase.practiceTopicId,
+                                video_id: active.id,
+                              },
+                            })
+                          }
+                        >
+                          Practice with AI feedback
+                        </Link>
+                        {!pathComplete && (
+                          <a className="btn ghost" href="#practice-map">
+                            See all phase drills
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              <div className="panel path-checklist">
-                <h3>After watching, speak it back here</h3>
-                <ul>
-                  <li>
-                    <Link to="/">Python / FastAPI drills</Link> — speak the
-                    syntax, typing, and service-design answers
-                  </li>
-                  <li>
-                    <Link to="/">Production AI path</Link> — RAG / agents
-                    interview prompts (Java-friendly bridges included)
-                  </li>
-                  <li>
-                    <a href={`${import.meta.env.BASE_URL}product/`}>
-                      Product docs
-                    </a>{' '}
-                    — architecture leave-behind for managers
-                  </li>
+              <div className="panel path-checklist" id="practice-map">
+                <h3>After watching → practice with AI feedback</h3>
+                <p className="muted path-practice-lede">
+                  Each Agentic phase maps to spoken drills on{' '}
+                  <Link to={agenticPracticeHref()}>
+                    Java → Production AI
+                  </Link>
+                  . Finish a phase (or a lesson), then open the matching topic.
+                </p>
+                <ul className="path-practice-list">
+                  {AGENTIC_PATH.map((phase) => {
+                    const phaseDone =
+                      phase.videos.length > 0 &&
+                      phase.videos.every((v) => done.has(v.id))
+                    return (
+                      <li key={phase.id}>
+                        <span>
+                          <strong>
+                            Phase {phase.step}: {phase.title}
+                          </strong>
+                          {phaseDone ? (
+                            <span className="pill done">Ready</span>
+                          ) : null}
+                          <em className="muted"> — {phase.practiceLabel}</em>
+                        </span>
+                        <Link
+                          className={
+                            phaseDone ? 'btn primary sm' : 'btn ghost sm'
+                          }
+                          to={agenticPracticeHref(phase.practiceTopicId)}
+                          onClick={() =>
+                            track('agentic_practice_cta', {
+                              path: '/agentic-path',
+                              properties: {
+                                source: 'practice_map',
+                                phase_id: phase.id,
+                                topic_id: phase.practiceTopicId,
+                              },
+                            })
+                          }
+                        >
+                          Practice with AI feedback
+                        </Link>
+                      </li>
+                    )
+                  })}
                 </ul>
               </div>
             </>

@@ -13,11 +13,11 @@
         "Frame technical strategy and ambiguous problem solving"
       ],
       "study_plan": [
-        "Day 1–2: Ownership + mentoring stories (Context → Action → Metric)",
-        "Day 3–4: System design drills (sync engine + public API platform)",
+        "Day 1\u20132: Ownership + mentoring stories (Context \u2192 Action \u2192 Metric)",
+        "Day 3\u20134: System design drills (sync engine + public API platform)",
         "Day 5: Influence + ambiguous problem framing",
         "Day 6: Incidents + safe enterprise AI narrative",
-        "Day 7–8: Full mock loop out loud — score ≥4 on every topic"
+        "Day 7\u20138: Full mock loop out loud \u2014 score \u22654 on every topic"
       ]
     },
     {
@@ -33,17 +33,17 @@
         "Communicate up to execs and design healthy org shapes"
       ],
       "study_plan": [
-        "Day 1: Memorize 30–40s EM opener",
-        "Day 2–3: Team-from-scratch + vendor-to-in-house STAR cards",
+        "Day 1: Memorize 30\u201340s EM opener",
+        "Day 2\u20133: Team-from-scratch + vendor-to-in-house STAR cards",
         "Day 4: Hiring bar + performance management scenarios",
         "Day 5: Delivery / prioritization + exec communication",
         "Day 6: Org design / span of control",
-        "Day 7–8: Mock HM screen — speak every topic until score ≥4"
+        "Day 7\u20138: Mock HM screen \u2014 speak every topic until score \u22654"
       ]
     },
     {
       "id": "java-to-ai",
-      "title": "Java → Production AI Upskilling",
+      "title": "Java \u2192 Production AI Upskilling",
       "audience": "Java/backend engineers moving into AI",
       "summary": "Practical path from Spring services to RAG, agents, and safe LLM features.",
       "outcomes": [
@@ -62,7 +62,7 @@
     },
     {
       "id": "java-to-python",
-      "title": "Java → Python Developer",
+      "title": "Java \u2192 Python Developer",
       "audience": "Java engineers switching to Python",
       "summary": "Map Java/Spring instincts to Python: syntax, typing, OOP, asyncio, and FastAPI.",
       "outcomes": [
@@ -71,11 +71,11 @@
         "Explain Spring concepts as FastAPI + Pydantic equivalents"
       ],
       "study_plan": [
-        "Day 1–2: Syntax & collections map (list/dict/set, comprehensions)",
+        "Day 1\u20132: Syntax & collections map (list/dict/set, comprehensions)",
         "Day 3: Classes, dataclasses, protocols vs Java interfaces",
         "Day 4: Typing (mypy) + packaging (venv/poetry) + pytest",
         "Day 5: asyncio vs executors; when to use each",
-        "Day 6–7: Rebuild a small Spring-style API in FastAPI and practice explaining it"
+        "Day 6\u20137: Rebuild a small Spring-style API in FastAPI and practice explaining it"
       ]
     },
     {
@@ -89,10 +89,10 @@
         "Talk JVM memory, threads, and performance tradeoffs"
       ],
       "study_plan": [
-        "Day 1–2: OOP, equals/hashCode, collections, generics",
-        "Day 3–4: Threads, executors, CompletableFuture",
+        "Day 1\u20132: OOP, equals/hashCode, collections, generics",
+        "Day 3\u20134: Threads, executors, CompletableFuture",
         "Day 5: Spring Boot REST, validation, transactions",
-        "Day 6–7: Practice debugging and production failure scenarios"
+        "Day 6\u20137: Practice debugging and production failure scenarios"
       ]
     },
     {
@@ -106,16 +106,16 @@
         "Build FastAPI-style request/response flows"
       ],
       "study_plan": [
-        "Day 1–2: Data structures, comprehensions, typing",
+        "Day 1\u20132: Data structures, comprehensions, typing",
         "Day 3: OOP, dataclasses, protocols",
-        "Day 4–5: Async IO + HTTP clients",
-        "Day 6–7: Packaging, testing, FastAPI basics"
+        "Day 4\u20135: Async IO + HTTP clients",
+        "Day 6\u20137: Packaging, testing, FastAPI basics"
       ]
     },
     {
       "id": "javascript",
       "title": "JavaScript",
-      "audience": "Web / fullstack beginners → mid",
+      "audience": "Web / fullstack beginners \u2192 mid",
       "summary": "Modern JS: language essentials, async, DOM, and browser APIs.",
       "outcomes": [
         "Master closures, prototypes, and this-binding",
@@ -123,10 +123,10 @@
         "Manipulate the DOM and handle events cleanly"
       ],
       "study_plan": [
-        "Day 1–2: Types, scope, hoisting, closures",
+        "Day 1\u20132: Types, scope, hoisting, closures",
         "Day 3: Arrays/objects + functional helpers",
-        "Day 4–5: Promises, async/await, fetch",
-        "Day 6–7: DOM events and small UI scripts"
+        "Day 4\u20135: Promises, async/await, fetch",
+        "Day 6\u20137: DOM events and small UI scripts"
       ]
     },
     {
@@ -140,10 +140,10 @@
         "Type API responses and component props safely"
       ],
       "study_plan": [
-        "Day 1–2: Primitives, unions, narrowing",
+        "Day 1\u20132: Primitives, unions, narrowing",
         "Day 3: Interfaces vs types, generics",
         "Day 4: Utility types + mapped types",
-        "Day 5–7: Type a small React + API client"
+        "Day 5\u20137: Type a small React + API client"
       ]
     },
     {
@@ -157,10 +157,10 @@
         "Explain rendering, keys, and performance basics"
       ],
       "study_plan": [
-        "Day 1–2: Components, props, state, lists/keys",
-        "Day 3–4: useEffect, data fetching, cleanup",
+        "Day 1\u20132: Components, props, state, lists/keys",
+        "Day 3\u20134: useEffect, data fetching, cleanup",
         "Day 5: Context + lifting state",
-        "Day 6–7: Forms, errors, and a mini feature"
+        "Day 6\u20137: Forms, errors, and a mini feature"
       ]
     },
     {
@@ -174,10 +174,10 @@
         "Handle errors, env config, and basic security"
       ],
       "study_plan": [
-        "Day 1–2: Modules, npm, event loop basics",
-        "Day 3–4: HTTP servers + Express routes",
+        "Day 1\u20132: Modules, npm, event loop basics",
+        "Day 3\u20134: HTTP servers + Express routes",
         "Day 5: Auth/JWT overview + validation",
-        "Day 6–7: Logging, errors, deploy checklist"
+        "Day 6\u20137: Logging, errors, deploy checklist"
       ]
     },
     {
@@ -192,9 +192,9 @@
       ],
       "study_plan": [
         "Day 1: Document structure + semantic landmarks",
-        "Day 2–3: Forms, inputs, validation attributes",
+        "Day 2\u20133: Forms, inputs, validation attributes",
         "Day 4: Media, tables, metadata",
-        "Day 5–7: Accessibility checklist + rebuild a landing section"
+        "Day 5\u20137: Accessibility checklist + rebuild a landing section"
       ]
     },
     {
@@ -208,10 +208,10 @@
         "Use variables, specificity, and clean organization"
       ],
       "study_plan": [
-        "Day 1–2: Cascade, specificity, box model",
-        "Day 3–4: Flexbox + Grid layouts",
+        "Day 1\u20132: Cascade, specificity, box model",
+        "Day 3\u20134: Flexbox + Grid layouts",
         "Day 5: Responsive design + typography",
-        "Day 6–7: Recreate a card/hero section pixel-clean"
+        "Day 6\u20137: Recreate a card/hero section pixel-clean"
       ]
     }
   ],
@@ -224,7 +224,7 @@
       "prompt": "Tell me about a system you owned end-to-end. What was hard, what did you decide, and what measurable outcome did you drive?",
       "hints": [
         "Lead with scope and users",
-        "Name 1–2 hard tradeoffs",
+        "Name 1\u20132 hard tradeoffs",
         "End with a metric (uptime, latency, manual hours saved)"
       ],
       "strong_answer_signals": [
@@ -285,7 +285,7 @@
       "prompt": "Tell me about a time you influenced a technical decision across teams without formal authority. What was the disagreement, how did you get alignment, and what shipped?",
       "hints": [
         "State the decision and who disagreed",
-        "Show data / prototype / risk framing — not politics",
+        "Show data / prototype / risk framing \u2014 not politics",
         "End with what changed and the business outcome"
       ],
       "strong_answer_signals": [
@@ -327,7 +327,7 @@
       "category": "Production",
       "prompt": "Walk me through a production incident you led or heavily influenced. How did you diagnose, mitigate, communicate, and prevent recurrence?",
       "hints": [
-        "Timeline: detect → mitigate → communicate → root cause → follow-ups",
+        "Timeline: detect \u2192 mitigate \u2192 communicate \u2192 root cause \u2192 follow-ups",
         "Distinguish customer impact vs internal noise",
         "Name a lasting fix (alert, runbook, code, process)"
       ],
@@ -347,7 +347,7 @@
       "track_id": "staff-interview",
       "topic_id": "staff-stories",
       "category": "Behavioral",
-      "prompt": "Describe how you raised the engineering bar for others — mentoring, design reviews, or standards — while still delivering your own Staff-level work.",
+      "prompt": "Describe how you raised the engineering bar for others \u2014 mentoring, design reviews, or standards \u2014 while still delivering your own Staff-level work.",
       "hints": [
         "Concrete before/after for a person or team practice",
         "How you balanced delivery with coaching time",
@@ -368,7 +368,7 @@
       "track_id": "staff-interview",
       "topic_id": "staff-ambiguity",
       "category": "Problem solving",
-      "prompt": "You're given a vague product request: 'make search smarter with AI.' How do you turn that into a Staff-level plan in the first two weeks — and what do you refuse to build yet?",
+      "prompt": "You're given a vague product request: 'make search smarter with AI.' How do you turn that into a Staff-level plan in the first two weeks \u2014 and what do you refuse to build yet?",
       "hints": [
         "Clarify users, success metric, and constraints before architecture",
         "Propose a thin vertical slice + kill criteria",
@@ -414,7 +414,7 @@
       "track_id": "em-interview",
       "topic_id": "em-people",
       "category": "Leadership",
-      "prompt": "Give your 30–40 second introduction as an Engineering Manager. Include scope, signature wins, and what you're looking for next.",
+      "prompt": "Give your 30\u201340 second introduction as an Engineering Manager. Include scope, signature wins, and what you're looking for next.",
       "hints": [
         "Lead with people ownership",
         "Mention team size / footprint",
@@ -543,7 +543,7 @@
       "prompt": "Your VP asks why a major initiative is late. How do you communicate status, options, and a recommendation in under three minutes?",
       "hints": [
         "Lead with customer/business impact, not task lists",
-        "Give 2–3 options with cost/risk",
+        "Give 2\u20133 options with cost/risk",
         "End with a clear ask or decision"
       ],
       "strong_answer_signals": [
@@ -584,7 +584,7 @@
       "track_id": "em-interview",
       "topic_id": "em-delivery",
       "category": "Delivery",
-      "prompt": "A SEV is ongoing. How do you lead as EM — who does what, how do you protect the team, and what do you tell stakeholders?",
+      "prompt": "A SEV is ongoing. How do you lead as EM \u2014 who does what, how do you protect the team, and what do you tell stakeholders?",
       "hints": [
         "Separate incident commander vs EM communication role",
         "Protect deep work; rotate; no blame during mitigate",
@@ -608,8 +608,8 @@
       "category": "Concepts",
       "prompt": "You're a Java/Spring engineer. Explain how you would structure a production AI feature service and what maps from Spring Boot patterns.",
       "hints": [
-        "Controllers → API routes",
-        "Services → orchestration + tools",
+        "Controllers \u2192 API routes",
+        "Services \u2192 orchestration + tools",
         "Observability and config still matter"
       ],
       "strong_answer_signals": [
@@ -629,8 +629,8 @@
       "category": "RAG",
       "prompt": "When would you use RAG instead of fine-tuning, and how would you evaluate whether retrieval quality is good enough?",
       "hints": [
-        "Fresh / private knowledge → RAG",
-        "Behavior/style → maybe fine-tune",
+        "Fresh / private knowledge \u2192 RAG",
+        "Behavior/style \u2192 maybe fine-tune",
         "Eval with golden questions + citation checks"
       ],
       "strong_answer_signals": [
@@ -649,7 +649,7 @@
       "category": "Agents",
       "prompt": "Design a simple document extraction agent for messy Excel/PDF inputs. What steps, tools, and failure handling do you need?",
       "hints": [
-        "Ingest → extract → validate → retry → store",
+        "Ingest \u2192 extract \u2192 validate \u2192 retry \u2192 store",
         "Deterministic validation gates",
         "Human review on low confidence"
       ],
@@ -667,7 +667,7 @@
       "track_id": "java-to-ai",
       "topic_id": "ai-evals",
       "category": "Evals",
-      "prompt": "How would you build an evaluation harness for an LLM feature before and after shipping — and what gates would stop a bad model deploy?",
+      "prompt": "How would you build an evaluation harness for an LLM feature before and after shipping \u2014 and what gates would stop a bad model deploy?",
       "hints": [
         "Golden set + regression suite",
         "Offline metrics vs online shadow traffic",
@@ -693,7 +693,7 @@
       "hints": [
         "Measure token use, cache hits, retrieval size",
         "Prompt/model routing, caching, batching",
-        "Quality guardrails so cuts don’t silently degrade"
+        "Quality guardrails so cuts don\u2019t silently degrade"
       ],
       "strong_answer_signals": [
         "latency",
@@ -753,7 +753,7 @@
       "category": "Spring Boot",
       "prompt": "Design a Spring Boot REST endpoint that validates input, calls a service, and returns consistent error responses.",
       "hints": [
-        "Controller → Service separation",
+        "Controller \u2192 Service separation",
         "@Valid + problem details",
         "Transaction boundaries"
       ],
@@ -1192,7 +1192,7 @@
       "track_id": "java-to-python",
       "topic_id": "j2p-mindset",
       "category": "Transition",
-      "prompt": "You are a Java engineer moving to Python. What skills transfer, what do you unlearn, and how do you stay production-safe without Java’s ceremony?",
+      "prompt": "You are a Java engineer moving to Python. What skills transfer, what do you unlearn, and how do you stay production-safe without Java\u2019s ceremony?",
       "hints": [
         "Keep systems / API / testing instincts",
         "Unlearn mandatory classes and getters everywhere",
@@ -1295,7 +1295,7 @@
       "category": "APIs",
       "prompt": "Explain Spring Boot REST + Bean Validation as FastAPI + Pydantic. Where does business logic live, and what do you keep identical to Java service design?",
       "hints": [
-        "Pydantic ≈ @Valid DTOs",
+        "Pydantic \u2248 @Valid DTOs",
         "thin routes, fat services",
         "OpenAPI docs parallel"
       ],
@@ -1375,7 +1375,7 @@
       "category": "Incidents",
       "prompt": "Tell me about an on-call incident where you improved the system afterward, not just restored service.",
       "hints": [
-        "Timeline: detect → mitigate → recover",
+        "Timeline: detect \u2192 mitigate \u2192 recover",
         "Root cause without blame",
         "Permanent fix + prevention"
       ],
@@ -1413,7 +1413,7 @@
       "track_id": "staff-interview",
       "topic_id": "staff-ambiguity",
       "category": "Ambiguity",
-      "prompt": "A PM asks for “AI search” with no requirements. How do you create a Staff-level plan in the first week?",
+      "prompt": "A PM asks for \u201cAI search\u201d with no requirements. How do you create a Staff-level plan in the first week?",
       "hints": [
         "Clarify users and success metrics",
         "Spike options with costs",
@@ -1573,7 +1573,7 @@
       "track_id": "em-interview",
       "topic_id": "em-transform",
       "category": "Transformation",
-      "prompt": "Leadership wants “every team using AI.” How do you turn that slogan into a durable engineering change?",
+      "prompt": "Leadership wants \u201cevery team using AI.\u201d How do you turn that slogan into a durable engineering change?",
       "hints": [
         "Pilot with clear ROI",
         "Platform + enablement",
@@ -1773,7 +1773,7 @@
       "track_id": "java-to-python",
       "topic_id": "j2p-fastapi",
       "category": "APIs",
-      "prompt": "Design JWT auth for a FastAPI service the way you would in Spring Security — what is similar and different?",
+      "prompt": "Design JWT auth for a FastAPI service the way you would in Spring Security \u2014 what is similar and different?",
       "hints": [
         "Dependency injection for auth",
         "Middleware vs Depends",
@@ -2253,7 +2253,7 @@
       "track_id": "react",
       "topic_id": "react-components",
       "category": "Forms",
-      "prompt": "Controlled vs uncontrolled inputs — how do you choose for a complex form?",
+      "prompt": "Controlled vs uncontrolled inputs \u2014 how do you choose for a complex form?",
       "hints": [
         "Validation needs",
         "Performance",
@@ -2273,7 +2273,7 @@
       "track_id": "nodejs",
       "topic_id": "node-runtime",
       "category": "Runtime",
-      "prompt": "Explain Node’s event loop phases and a bug caused by blocking the loop.",
+      "prompt": "Explain Node\u2019s event loop phases and a bug caused by blocking the loop.",
       "hints": [
         "Phases overview",
         "CPU-heavy sync work",
@@ -2553,7 +2553,7 @@
       "track_id": "css",
       "topic_id": "css-box",
       "category": "Positioning",
-      "prompt": "Explain stacking contexts and a bug where z-index “doesn’t work.”",
+      "prompt": "Explain stacking contexts and a bug where z-index \u201cdoesn\u2019t work.\u201d",
       "hints": [
         "New stacking context triggers",
         "Isolation",
@@ -2646,6 +2646,270 @@
         "tool",
         "retrieval",
         "hallucination"
+      ]
+    },
+    {
+      "id": "java-ai-react-loop",
+      "track_id": "java-to-ai",
+      "topic_id": "ai-agents",
+      "category": "Agents",
+      "prompt": "Explain the ReAct pattern for an agent that answers support tickets with tools. What are the steps in each loop, and how do you bound runaway tool use?",
+      "hints": [
+        "Reason \u2192 Act \u2192 Observe cycle",
+        "Cap steps/tokens; allowlist tools",
+        "Stop when done or confidence is low"
+      ],
+      "strong_answer_signals": [
+        "react",
+        "reason",
+        "act",
+        "observe",
+        "tool",
+        "bound",
+        "loop",
+        "allowlist"
+      ]
+    },
+    {
+      "id": "java-ai-langgraph-state",
+      "track_id": "java-to-ai",
+      "topic_id": "ai-agents",
+      "category": "LangGraph",
+      "prompt": "When would you choose a LangGraph-style stateful graph over a linear LangChain chain for an agentic workflow? Walk through nodes, edges, and checkpoints.",
+      "hints": [
+        "Branching, retries, human gates \u2192 graph",
+        "Checkpoint state for resume/audit",
+        "Known linear path \u2192 chain is enough"
+      ],
+      "strong_answer_signals": [
+        "langgraph",
+        "state",
+        "node",
+        "edge",
+        "checkpoint",
+        "branch",
+        "retry",
+        "human"
+      ]
+    },
+    {
+      "id": "java-ai-multi-agent",
+      "track_id": "java-to-ai",
+      "topic_id": "ai-agents",
+      "category": "Multi-agent",
+      "prompt": "Design a small multi-agent system (researcher + writer + reviewer) for drafting an internal RFC. How do you hand off work, share memory, and prevent conflicting edits?",
+      "hints": [
+        "Clear roles and ownership of artifacts",
+        "Shared state vs message passing",
+        "Reviewer gate before publish"
+      ],
+      "strong_answer_signals": [
+        "multi-agent",
+        "role",
+        "handoff",
+        "memory",
+        "review",
+        "state",
+        "conflict",
+        "gate"
+      ]
+    },
+    {
+      "id": "java-ai-mcp-tools",
+      "track_id": "java-to-ai",
+      "topic_id": "ai-agents",
+      "category": "Tools",
+      "prompt": "How would you expose internal APIs to an agent via MCP or function calling safely? Cover schema design, authz, and what never goes in the tool surface.",
+      "hints": [
+        "Typed schemas + server-side validation",
+        "Least-privilege credentials",
+        "No raw shell / unrestricted SQL"
+      ],
+      "strong_answer_signals": [
+        "mcp",
+        "schema",
+        "authz",
+        "validate",
+        "tool",
+        "least privilege",
+        "allowlist",
+        "audit"
+      ]
+    },
+    {
+      "id": "java-ai-hitl",
+      "track_id": "java-to-ai",
+      "topic_id": "ai-agents",
+      "category": "Safety",
+      "prompt": "Where do you put human-in-the-loop gates in an agent that can create tickets, refunds, and emails? Give a concrete approval policy.",
+      "hints": [
+        "Reads auto; irreversible writes need approval",
+        "Risk tiers by dollar amount / audience",
+        "Timeouts and audit trail"
+      ],
+      "strong_answer_signals": [
+        "human",
+        "approval",
+        "irreversible",
+        "refund",
+        "audit",
+        "policy",
+        "risk",
+        "gate"
+      ]
+    },
+    {
+      "id": "java-ai-agent-vs-workflow",
+      "track_id": "java-to-ai",
+      "topic_id": "ai-agents",
+      "category": "Architecture",
+      "prompt": "A PM wants an 'AI agent' for invoice processing. When do you push back for a deterministic workflow with LLM steps instead of a free-form agent loop?",
+      "hints": [
+        "Stable steps \u2192 workflow + LLM nodes",
+        "Open-ended exploration \u2192 agent",
+        "Compliance and SLAs favor deterministic paths"
+      ],
+      "strong_answer_signals": [
+        "workflow",
+        "deterministic",
+        "agent",
+        "sla",
+        "compliance",
+        "step",
+        "llm",
+        "tradeoff"
+      ]
+    },
+    {
+      "id": "java-ai-agentic-rag",
+      "track_id": "java-to-ai",
+      "topic_id": "ai-rag",
+      "category": "RAG",
+      "prompt": "Compare naive single-shot RAG with an agentic retrieve-then-refine loop. When is the extra retrieval hop worth the latency and cost?",
+      "hints": [
+        "Hard questions need multi-hop retrieval",
+        "Budget hops; cache intermediate results",
+        "Eval faithfulness vs latency"
+      ],
+      "strong_answer_signals": [
+        "agentic",
+        "retrieval",
+        "multi-hop",
+        "latency",
+        "cost",
+        "refine",
+        "faithfulness",
+        "rag"
+      ]
+    },
+    {
+      "id": "java-ai-rag-authz",
+      "track_id": "java-to-ai",
+      "topic_id": "ai-rag",
+      "category": "RAG",
+      "prompt": "How do you keep RAG from leaking documents a user isn't entitled to see \u2014 at index time and at query time?",
+      "hints": [
+        "Metadata filters on tenant/role",
+        "Never retrieve then filter in the prompt alone",
+        "Test negative entitlement cases"
+      ],
+      "strong_answer_signals": [
+        "entitlement",
+        "authz",
+        "metadata",
+        "filter",
+        "tenant",
+        "leak",
+        "index",
+        "query"
+      ]
+    },
+    {
+      "id": "java-ai-agent-evals",
+      "track_id": "java-to-ai",
+      "topic_id": "ai-evals",
+      "category": "Evals",
+      "prompt": "How do you evaluate an agentic workflow beyond final answer quality \u2014 including tool choice, trajectory length, and unsafe actions?",
+      "hints": [
+        "Trajectory / step-level rubrics",
+        "Golden tool sequences for common tasks",
+        "Hard fail on unsafe tool calls"
+      ],
+      "strong_answer_signals": [
+        "trajectory",
+        "tool",
+        "eval",
+        "unsafe",
+        "step",
+        "rubric",
+        "golden",
+        "agent"
+      ]
+    },
+    {
+      "id": "java-ai-prompt-patterns",
+      "track_id": "java-to-ai",
+      "topic_id": "ai-path",
+      "category": "Prompting",
+      "prompt": "Explain prompt chaining vs a single mega-prompt for an agentic backend feature. Give a production example where chaining wins.",
+      "hints": [
+        "Smaller steps = easier eval and retries",
+        "Isolate retrieval, planning, and drafting",
+        "Mega-prompts hide failure modes"
+      ],
+      "strong_answer_signals": [
+        "chain",
+        "prompt",
+        "step",
+        "eval",
+        "retry",
+        "isolate",
+        "production",
+        "failure"
+      ]
+    },
+    {
+      "id": "java-ai-agent-observability",
+      "track_id": "java-to-ai",
+      "topic_id": "ai-ops",
+      "category": "LLM Ops",
+      "prompt": "What would you put in an observability stack for production agents \u2014 traces, metrics, and alerts \u2014 so on-call can debug a bad tool loop at 2am?",
+      "hints": [
+        "Trace every LLM + tool span",
+        "Alert on loop length, error rate, cost spikes",
+        "Redact secrets from logs"
+      ],
+      "strong_answer_signals": [
+        "trace",
+        "metric",
+        "alert",
+        "tool",
+        "loop",
+        "cost",
+        "observ",
+        "on-call"
+      ]
+    },
+    {
+      "id": "java-ai-model-routing",
+      "track_id": "java-to-ai",
+      "topic_id": "ai-ops",
+      "category": "LLM Ops",
+      "prompt": "Design model routing for an agentic assistant: cheap model for planning/classification, stronger model for final answers. How do you keep quality while cutting spend?",
+      "hints": [
+        "Route by task difficulty / risk",
+        "Escalate on low confidence",
+        "Re-run evals after routing changes"
+      ],
+      "strong_answer_signals": [
+        "routing",
+        "cheap",
+        "strong",
+        "confidence",
+        "cost",
+        "quality",
+        "escalat",
+        "eval"
       ]
     }
   ]

@@ -9,6 +9,16 @@ export type PathVideo = {
   url: string
 }
 
+/** Studio track used for Agentic path spoken drills + AI feedback. */
+export const AGENTIC_PRACTICE_TRACK = 'java-to-ai' as const
+
+export type AgenticPracticeTopicId =
+  | 'ai-path'
+  | 'ai-rag'
+  | 'ai-agents'
+  | 'ai-evals'
+  | 'ai-ops'
+
 export type PathPhase = {
   id: string
   step: number
@@ -16,7 +26,20 @@ export type PathPhase = {
   blurb: string
   /** Optional habit bridge from Java / Spring / Node / .NET backends. */
   backendBridge: string
+  /** Studio topic for post-lesson "Practice with AI feedback". */
+  practiceTopicId: AgenticPracticeTopicId
+  practiceLabel: string
   videos: PathVideo[]
+}
+
+/** Deep-link into Studio speak & coach for Agentic AI topics. */
+export function agenticPracticeHref(topicId?: AgenticPracticeTopicId): string {
+  const sp = new URLSearchParams({
+    path: AGENTIC_PRACTICE_TRACK,
+    mode: 'practice',
+  })
+  if (topicId) sp.set('topic', topicId)
+  return `/?${sp.toString()}`
 }
 
 /** Validated YouTube library: backend engineer → production / agentic AI (oEmbed-checked). */
@@ -27,6 +50,8 @@ export const AGENTIC_PATH: PathPhase[] = [
     title: 'Python for AI development',
     blurb: 'Backend fluency in Python: typing, packaging instincts, asyncio, FastAPI — enough to ship AI services.',
     backendBridge: 'Java / Spring / Node / .NET habits map to modules + FastAPI + pytest; List/Map → list/dict; typed DTOs → Pydantic.',
+    practiceTopicId: 'ai-path',
+    practiceLabel: 'Backend → AI path drills',
     videos: [
       {
         id: 'python-for-ai-jH85McHenvw',
@@ -126,6 +151,8 @@ export const AGENTIC_PATH: PathPhase[] = [
     title: 'LLM foundations',
     blurb: 'Understand models, transformers, and embeddings before wiring frameworks.',
     backendBridge: 'Treat the model like an unreliable remote dependency with latency, cost, and failure modes.',
+    practiceTopicId: 'ai-path',
+    practiceLabel: 'LLM foundations drills',
     videos: [
       {
         id: 'llm-foundations-zjkBMFhNj_g',
@@ -252,6 +279,8 @@ export const AGENTIC_PATH: PathPhase[] = [
     title: 'LLM APIs, embeddings & vector DBs',
     blurb: 'Call models from Python, create embeddings, and store vectors like a production search service.',
     backendBridge: 'Same as any external API: keys, retries, timeouts, rate limits, cost dashboards — plus vector indexes as a search tier.',
+    practiceTopicId: 'ai-rag',
+    practiceLabel: 'Vectors & retrieval drills',
     videos: [
       {
         id: 'llm-apis-vectors-uRQH2CFvedY',
@@ -333,6 +362,8 @@ export const AGENTIC_PATH: PathPhase[] = [
     title: 'Tool calling & first agents',
     blurb: 'Agents = model + tools + loop. Start with function calling, MCP, and LangChain components.',
     backendBridge: 'Tool schemas are interface contracts; validate args server-side like any API; never trust model output.',
+    practiceTopicId: 'ai-agents',
+    practiceLabel: 'Agents & tools drills',
     videos: [
       {
         id: 'tools-agents-basics-F8NKVhkZZWI',
@@ -477,6 +508,8 @@ export const AGENTIC_PATH: PathPhase[] = [
     title: 'RAG systems',
     blurb: 'Ground answers in your data — the default enterprise pattern.',
     backendBridge: 'Index = search service; retriever = query API; generator = orchestration layer with caching and authz.',
+    practiceTopicId: 'ai-rag',
+    practiceLabel: 'RAG systems drills',
     videos: [
       {
         id: 'rag-T-D1OfcDW1M',
@@ -603,6 +636,8 @@ export const AGENTIC_PATH: PathPhase[] = [
     title: 'LangGraph & agentic workflows',
     blurb: 'Stateful graphs, loops, multi-agent, CrewAI / AutoGen patterns.',
     backendBridge: 'Think state machines / saga orchestration — nodes, edges, checkpoints, retries.',
+    practiceTopicId: 'ai-agents',
+    practiceLabel: 'LangGraph & agentic drills',
     videos: [
       {
         id: 'langgraph-agentic-EDb37y_MhRw',
@@ -756,6 +791,8 @@ export const AGENTIC_PATH: PathPhase[] = [
     title: 'Prompting, evals & production habits',
     blurb: 'Prompt patterns, evaluation harnesses, roadmaps, and systems thinking beyond demos.',
     backendBridge: 'Same as any backend prod bar: SLOs, authz, audit logs, circuit breakers, cost budgets, regression tests.',
+    practiceTopicId: 'ai-evals',
+    practiceLabel: 'Evals & production drills',
     videos: [
       {
         id: 'production-_ZvnD73m40o',

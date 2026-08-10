@@ -568,7 +568,8 @@ export default function App() {
                     <strong>Agentic AI curriculum</strong>
                     <p>
                       Backend → Python for AI → LLMs → tools/agents → RAG →
-                      LangGraph → production. Watch, mark done, then drill.
+                      LangGraph → production. Watch, mark done, then practice
+                      with AI feedback.
                     </p>
                     <span className="meta">Open Agentic path →</span>
                   </span>
@@ -776,8 +777,7 @@ export default function App() {
                           <Link to="/agentic-path" className="path-banner">
                             <strong>Full Agentic AI video curriculum</strong>
                             <span>
-                              Backend → Python for AI → LLMs → agents →
-                              production →
+                              Watch → mark done → practice with AI feedback →
                             </span>
                           </Link>
                           <Link to="/snowflake-path" className="path-banner">

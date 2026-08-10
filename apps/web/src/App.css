@@ -2562,6 +2562,86 @@ a.ad-slot:hover {
   margin-top: 1rem;
 }
 
+.path-practice-lede {
+  margin: 0 0 0.85rem;
+  max-width: 52rem;
+}
+
+.path-practice-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.path-practice-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem 1rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.path-practice-list .pill {
+  margin-left: 0.45rem;
+  vertical-align: middle;
+}
+
+.path-practice-step {
+  margin-top: 1.15rem;
+  padding: 1rem 1.05rem;
+  border-radius: var(--radius);
+  border: 1px solid rgba(10, 102, 194, 0.28);
+  background: linear-gradient(
+    135deg,
+    rgba(10, 102, 194, 0.08),
+    rgba(61, 214, 165, 0.06)
+  );
+}
+
+.path-practice-step h3 {
+  margin: 0.35rem 0 0.35rem;
+  font-family: var(--display);
+  font-size: 1.25rem;
+}
+
+.path-practice-step .muted {
+  margin: 0 0 0.75rem;
+}
+
+.path-practice-complete {
+  margin: 0 0 1.25rem;
+  border: 1px solid rgba(10, 102, 194, 0.3);
+  background: linear-gradient(
+    120deg,
+    rgba(10, 102, 194, 0.1),
+    rgba(61, 214, 165, 0.08)
+  );
+}
+
+.path-practice-complete h2 {
+  margin: 0.35rem 0 0.45rem;
+  font-family: var(--display);
+}
+
+.path-phase-practice {
+  display: inline-block;
+  margin-top: 0.45rem;
+  font-size: 0.9rem;
+  font-weight: 650;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.path-phase-practice:hover {
+  text-decoration: underline;
+}
+
 .path-map {
   margin-top: 1.5rem;
 }
