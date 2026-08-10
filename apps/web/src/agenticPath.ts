@@ -1,13 +1,6 @@
-export type PathVideo = {
-  id: string
-  title: string
-  channel: string
-  duration: string
-  why: string
-  youtubeId?: string
-  playlistId?: string
-  url: string
-}
+import type { PathVideo } from './pathVideo'
+
+export type { PathVideo }
 
 /** Studio track used for Agentic path spoken drills + AI feedback. */
 export const AGENTIC_PRACTICE_TRACK = 'java-to-ai' as const
@@ -855,35 +848,3 @@ export const AGENTIC_PATH: PathPhase[] = [
 export function allPathVideos(): PathVideo[] {
   return AGENTIC_PATH.flatMap((p) => p.videos)
 }
-
-export function embedUrl(video: PathVideo, startSeconds = 0): string {
-  const params = new URLSearchParams({
-    enablejsapi: '1',
-    rel: '0',
-  })
-  if (typeof window !== 'undefined' && window.location?.origin) {
-    params.set('origin', window.location.origin)
-  }
-  const start = Math.max(0, Math.floor(startSeconds))
-  if (start > 0) params.set('start', String(start))
-
-  if (video.playlistId) {
-    return `https://www.youtube.com/embed/videoseries?list=${video.playlistId}&${params}`
-  }
-  return `https://www.youtube.com/embed/${video.youtubeId}?${params}`
-}
-
-/** Progress helpers live in agenticProgress (learnProgress-style). Re-export for callers. */
-export {
-  AUTO_COMPLETE_THRESHOLD,
-  aggregateProgressPercent,
-  getWatchProgress,
-  lessonProgressPercent,
-  loadVideoProgress,
-  recordWatchProgress,
-  resumeSeconds,
-  saveVideoProgress,
-  watchPercent,
-  type VideoWatchProgress,
-  type WatchProgressMap,
-} from './agenticProgress'

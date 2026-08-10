@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// GitHub Pages project site: /ai-tutor-studio/
+// GitHub Pages project site: /practice-out-loud/ (set VITE_BASE)
 // Local/dev and Render single-service: /
 const base = process.env.VITE_BASE ?? '/'
 

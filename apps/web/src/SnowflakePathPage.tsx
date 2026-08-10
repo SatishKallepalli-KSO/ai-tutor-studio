@@ -4,10 +4,9 @@ import {
   SNOWFLAKE_PATH,
   allPathVideos,
   embedUrl,
-  loadVideoProgress,
-  saveVideoProgress,
   type PathVideo,
 } from './snowflakePath'
+import { loadVideoProgress, saveVideoProgress } from './snowflakeProgress'
 import { AdSlot } from './AdSlot'
 import { track } from './analytics'
 import { Shell } from './Shell'
@@ -112,7 +111,14 @@ export function SnowflakePathPage() {
             </strong>
             <span className="muted"> · {pct}% of library</span>
           </div>
-          <div className="progress-bar path-bar" aria-hidden="true">
+          <div
+            className="progress-bar path-bar"
+            role="progressbar"
+            aria-valuenow={pct}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label="Path progress"
+          >
             <span style={{ width: `${pct}%` }} />
           </div>
         </div>

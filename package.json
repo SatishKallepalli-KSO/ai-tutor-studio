@@ -7,10 +7,11 @@
     "apps/web"
   ],
   "scripts": {
-    "dev": "npm run dev --workspace=@ai-tutor-studio/web",
-    "dev:web": "npm run dev --workspace=@ai-tutor-studio/web",
-    "build": "npm run build --workspace=@ai-tutor-studio/web",
-    "preview": "npm run preview --workspace=@ai-tutor-studio/web"
+    "dev": "npm run dev --workspace=@practice-out-loud/web",
+    "dev:web": "npm run dev --workspace=@practice-out-loud/web",
+    "build": "npm run build --workspace=@practice-out-loud/web",
+    "lint": "npm run lint --workspace=@practice-out-loud/web",
+    "preview": "npm run preview --workspace=@practice-out-loud/web"
   },
   "engines": {
     "node": ">=20"

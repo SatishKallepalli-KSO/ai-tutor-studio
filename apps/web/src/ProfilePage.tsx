@@ -68,7 +68,7 @@ const DEMO_PROFILE: LearnerProfileView = {
     },
   ],
   target_roles: ['Staff Software Engineer', 'Principal Engineer', 'Engineering Manager'],
-  website_url: 'https://satishkallepalli-kso.github.io/ai-tutor-studio/',
+  website_url: 'https://satishkallepalli-kso.github.io/practice-out-loud/',
   linkedin_url: null,
   visibility: 'public',
   is_owner: false,

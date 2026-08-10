@@ -1,6 +1,5 @@
 import { useEffect, useId, useRef } from 'react'
-import { AUTO_COMPLETE_THRESHOLD } from './agenticProgress'
-import type { PathVideo } from './agenticPath'
+import type { PathVideo } from './pathVideo'
 import {
   loadYouTubeApi,
   type YtNamespace,
@@ -13,17 +12,21 @@ type Props = {
   /** Resume position in seconds (from localStorage). */
   startSeconds?: number
   title: string
+  /** Auto-complete when watched ratio reaches this (default 0.9). */
+  completeThreshold?: number
   onProgress: (seconds: number, duration: number) => void
-  /** Fired once when watch ratio crosses AUTO_COMPLETE_THRESHOLD or video ends. */
+  /** Fired once when watch ratio crosses completeThreshold or video ends. */
   onNearComplete?: () => void
 }
 
 const POLL_MS = 2000
+const DEFAULT_COMPLETE_THRESHOLD = 0.9
 
 export function YouTubePlayer({
   video,
   startSeconds = 0,
   title,
+  completeThreshold = DEFAULT_COMPLETE_THRESHOLD,
   onProgress,
   onNearComplete,
 }: Props) {
@@ -35,10 +38,12 @@ export function YouTubePlayer({
   const onProgressRef = useRef(onProgress)
   const onNearCompleteRef = useRef(onNearComplete)
   const startRef = useRef(startSeconds)
+  const thresholdRef = useRef(completeThreshold)
 
   onProgressRef.current = onProgress
   onNearCompleteRef.current = onNearComplete
   startRef.current = startSeconds
+  thresholdRef.current = completeThreshold
 
   useEffect(() => {
     completedRef.current = false
@@ -72,7 +77,7 @@ export function YouTubePlayer({
         if (
           !completedRef.current &&
           dur > 0 &&
-          seconds / dur >= AUTO_COMPLETE_THRESHOLD
+          seconds / dur >= thresholdRef.current
         ) {
           completedRef.current = true
           onNearCompleteRef.current?.()
@@ -192,7 +197,7 @@ export function YouTubePlayer({
   }, [video.id, video.youtubeId, video.playlistId, reactId])
 
   return (
-    <div className="video-frame" aria-label={title}>
+    <div className="video-frame" role="region" aria-label={title}>
       <div ref={shellRef} className="yt-player-shell" />
     </div>
   )

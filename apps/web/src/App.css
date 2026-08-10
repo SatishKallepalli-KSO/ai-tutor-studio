@@ -1611,7 +1611,7 @@ a {
 .progress-bar {
   height: 6px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(18, 32, 51, 0.08);
   overflow: hidden;
 }
 
@@ -4492,14 +4492,6 @@ a.ad-slot:hover {
   background: rgba(11, 107, 203, 0.1);
   border-color: rgba(11, 107, 203, 0.35);
   color: var(--accent);
-}
-
-.progress-bar {
-  background: rgba(18, 32, 51, 0.08);
-}
-
-.progress-bar > span {
-  background: linear-gradient(90deg, var(--accent), var(--accent-2));
 }
 
 .pricing-page h1,

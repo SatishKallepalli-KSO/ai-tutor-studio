@@ -1,13 +1,6 @@
-export type PathVideo = {
-  id: string
-  title: string
-  channel: string
-  duration: string
-  why: string
-  youtubeId?: string
-  playlistId?: string
-  url: string
-}
+import type { PathVideo } from './pathVideo'
+
+export type { PathVideo }
 
 export type PathPhase = {
   id: string
@@ -872,21 +865,5 @@ export function embedUrl(video: PathVideo): string {
     return `https://www.youtube.com/embed/videoseries?list=${video.playlistId}`
   }
   return `https://www.youtube.com/embed/${video.youtubeId}`
-}
-
-const PROGRESS_KEY = 'ats_snowflake_video_done'
-
-export function loadVideoProgress(): Set<string> {
-  try {
-    const raw = localStorage.getItem(PROGRESS_KEY)
-    if (!raw) return new Set()
-    return new Set(JSON.parse(raw) as string[])
-  } catch {
-    return new Set()
-  }
-}
-
-export function saveVideoProgress(done: Set<string>) {
-  localStorage.setItem(PROGRESS_KEY, JSON.stringify([...done]))
 }
 

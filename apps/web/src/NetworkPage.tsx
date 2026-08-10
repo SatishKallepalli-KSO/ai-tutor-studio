@@ -7,11 +7,14 @@ import {
   type LearnerProfileView,
 } from './api'
 import { useAuth } from './auth'
+import {
+  LOCAL_PEOPLE_KEY,
+  initials,
+  loadLocalConnections,
+  saveLocalConnections,
+} from './localSocial'
 import { Shell } from './Shell'
 import './App.css'
-
-const LOCAL_CONN_KEY = 'ats_local_connections'
-const LOCAL_PEOPLE_KEY = 'ats_local_people'
 
 type LocalPerson = {
   user_id: number
@@ -42,19 +45,6 @@ const DEMO_PEOPLE: LocalPerson[] = [
   },
 ]
 
-function loadLocalConnections(): ConnectionView[] {
-  try {
-    const raw = localStorage.getItem(LOCAL_CONN_KEY)
-    return raw ? (JSON.parse(raw) as ConnectionView[]) : []
-  } catch {
-    return []
-  }
-}
-
-function saveLocalConnections(rows: ConnectionView[]) {
-  localStorage.setItem(LOCAL_CONN_KEY, JSON.stringify(rows))
-}
-
 function loadPeople(): LocalPerson[] {
   try {
     const raw = localStorage.getItem(LOCAL_PEOPLE_KEY)
@@ -62,13 +52,6 @@ function loadPeople(): LocalPerson[] {
   } catch {
     return DEMO_PEOPLE
   }
-}
-
-function initials(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean)
-  if (!parts.length) return '?'
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
-  return `${parts[0][0]}${parts[1][0]}`.toUpperCase()
 }
 
 function makeLocalRequest(
