@@ -487,12 +487,32 @@ a {
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
+  max-width: 36rem;
+}
+
+.site-footer-privacy-note {
+  margin-top: 0.35rem;
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.site-footer-privacy-note a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .site-footer-links {
   display: flex;
   flex-wrap: wrap;
   gap: 0.85rem;
+}
+
+.privacy-disclaimer {
+  margin: 2rem 0 0.5rem;
+  font-size: 0.8rem;
+  line-height: 1.45;
 }
 
 /* Compact page headers — less copy, clearer hierarchy */

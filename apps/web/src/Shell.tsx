@@ -153,12 +153,18 @@ export function Shell({
         <div className="site-footer-copy">
           <strong>{BRAND.product}</strong>
           <span className="site-footer-legal">{BRAND.copyright}</span>
+          <span className="site-footer-privacy-note">
+            We collect account, usage, and practice data to run coaching and
+            improve the product. We do not sell personal information.{' '}
+            <Link to="/privacy">Read our Privacy Policy</Link>.
+          </span>
         </div>
         <div className="site-footer-links">
           <Link to="/about">About</Link>
           <Link to="/pricing">Plans</Link>
           <Link to="/for-companies">Hire</Link>
           <Link to="/company">Company</Link>
+          <Link to="/privacy">Privacy</Link>
           <a href={docsHref}>Docs</a>
         </div>
       </footer>

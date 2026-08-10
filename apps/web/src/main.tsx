@@ -17,6 +17,7 @@ import { MessagesPage } from './MessagesPage.tsx'
 import { NetworkPage } from './NetworkPage.tsx'
 import { PersonaProvider } from './persona.tsx'
 import { PricingPage } from './PricingPage.tsx'
+import { PrivacyPage } from './PrivacyPage.tsx'
 import { ProfilePage } from './ProfilePage.tsx'
 import { SnowflakePathPage } from './SnowflakePathPage.tsx'
 import './index.css'
@@ -35,6 +36,7 @@ createRoot(document.getElementById('root')!).render(
             <Route path="/snowflake-path" element={<SnowflakePathPage />} />
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/about" element={<AboutPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/company" element={<CompanyPage />} />
             <Route path="/for-companies" element={<ForCompaniesPage />} />
             <Route path="/jobs" element={<JobsBoardPage />} />
