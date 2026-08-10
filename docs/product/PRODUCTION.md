@@ -43,6 +43,7 @@ Browser
 - [x] Admin overview (`ADMIN_EMAILS` + `is_admin`)
 - [x] Neon backups: `./scripts/backup-db.sh --neon`
 - [x] Learn loop: deeper Staff/EM topics · local path progress · retry/next after coaching
+- [x] Expanded paths: Staff 7 topics/9 drills · EM 6 topics/9 drills · Java→AI 5 topics/5 drills
 
 ## Operator docs
 

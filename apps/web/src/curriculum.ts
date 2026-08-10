@@ -866,6 +866,61 @@ Fix: circuit breaker + runbook + alert`,
       'Name the prevention that still exists today.',
     ],
   }),
+  t('staff-ambiguity', 'staff-interview', 'Ambiguous Problems', 'Turn fog into a plan.', {
+    overview:
+      'Staff interviews often open with vague asks. Strong candidates clarify users and metrics, propose a thin slice, and explicitly refuse unbounded scope.',
+    keyPoints: [
+      'Clarify who, success metric, and constraints first.',
+      'Ship a vertical slice with kill criteria.',
+      'Name risks early: data, authz, cost, evals.',
+      'Say what you will not build in v0.',
+    ],
+    example: {
+      title: 'Ambiguity spine',
+      code: `Ask: "make search smarter with AI"
+Week 1: top queries, fail modes, entitle model
+Slice: rewrite + rank for 20 intents, eval set n=100
+Refuse: open-ended chat until retrieval quality ≥ bar`,
+      note: 'Clarity beats clever architecture.',
+    },
+    commonMistakes: [
+      'Jumping to LangChain/architecture diagrams.',
+      'No success metric.',
+      'Boiling the ocean in week one.',
+    ],
+    beforeYouPractice: [
+      'Pick a vague ask from your job and write the first two weeks.',
+      'List three things you refuse in v0.',
+    ],
+  }),
+  t('staff-strategy', 'staff-interview', 'Technical Strategy', 'Multi-quarter direction.', {
+    overview:
+      'Staff strategy is influence over time: diagnose cost/complexity, paint a north star, sequence migrations, and build a coalition without needing a VP title.',
+    keyPoints: [
+      'Start with quantified pain (cost, incidents, velocity).',
+      'North-star architecture with staged migration.',
+      'Early wins that fund trust.',
+      'Explicit owners and decision forums.',
+    ],
+    example: {
+      title: 'Platform consolidation',
+      code: `Pain: 3 overlapping pipelines, $X/mo waste
+North star: one event bus + shared schemas
+Stage 1: stop net-new on legacy
+Stage 2: migrate top 2 producers
+Coalition: EM partners + FinOps metric dashboard`,
+      note: 'Strategy without sequencing is a slide deck.',
+    },
+    commonMistakes: [
+      'Big-bang rewrite proposals.',
+      'No coalition / only IC heroics.',
+      'No measurable milestones.',
+    ],
+    beforeYouPractice: [
+      'Draft a 4-quarter strategy in 8 bullets.',
+      'Name your first win in 30 days.',
+    ],
+  }),
   t('em-people', 'em-interview', 'People Leadership', 'Hiring, coaching, performance.', {
     overview:
       'EM interviews lead with people outcomes: hiring bar, growth, performance, and healthy delivery systems.',
@@ -974,6 +1029,60 @@ Recommend B + written risk to VP Product`,
       'Name the reliability work you protected.',
     ],
   }),
+  t('em-exec', 'em-interview', 'Exec Communication', 'Status, options, asks.', {
+    overview:
+      'EMs who get promoted speak in impact and decisions. Practice short updates: what changed for customers, options, recommendation, and the ask.',
+    keyPoints: [
+      'Lead with impact, not task inventory.',
+      'Always offer options with risk.',
+      'Make a clear recommendation and ask.',
+      'No surprise — surface risk early.',
+    ],
+    example: {
+      title: '3-minute VP update',
+      code: `Impact: checkout errors ↑ affecting 4% sessions
+Why: capacity miss + flaky dependency
+Options: (A) cut scope (B) add on-call surge (C) slip 1 week
+Recommend B + ask for contractor budget approval today`,
+      note: 'Decision-ready, not status theater.',
+    },
+    commonMistakes: [
+      'Jira walkthroughs.',
+      'Problems without options.',
+      'Hiding bad news.',
+    ],
+    beforeYouPractice: [
+      'Rewrite one late project as a 3-minute exec brief.',
+      'Practice the ask out loud.',
+    ],
+  }),
+  t('em-org', 'em-interview', 'Org Design', 'Teams, ownership, span.', {
+    overview:
+      'When teams grow, delivery slows from unclear ownership and meeting load. EM interviews probe how you redesign missions and spans without chaos.',
+    keyPoints: [
+      'Diagnose: ownership, skill mix, or process?',
+      'Mission-based teams beat arbitrary headcount splits.',
+      'Manager span and IC career paths both matter.',
+      'Transitions need explicit people + system plans.',
+    ],
+    example: {
+      title: 'Split a 18-person team',
+      code: `Missions: Platform Reliability | Product Surfaces
+Managers: 2 (span ~8)
+Shared: on-call + architecture review
+Transition: 4 weeks dual ownership, then cutover`,
+      note: 'Org chart follows work, not the reverse.',
+    },
+    commonMistakes: [
+      'Reorg for politics, not missions.',
+      'No transition plan.',
+      'Ignoring IC Staff career paths.',
+    ],
+    beforeYouPractice: [
+      'Draw current vs proposed missions for a team you know.',
+      'List risks of the reorg.',
+    ],
+  }),
   t('ai-path', 'java-to-ai', 'Backend → AI Path', 'Map Spring skills to AI systems.', {
     overview:
       'Your Java/Spring strengths transfer: APIs, validation, queues, observability. Learn Python + RAG/agent patterns on top.',
@@ -1053,6 +1162,60 @@ nightly: eval set → score faithfulness / citation coverage`,
     beforeYouPractice: [
       'When is an agent better than a fixed pipeline?',
       'How do you stop runaway tool use?',
+    ],
+  }),
+  t('ai-evals', 'java-to-ai', 'Evals & Gates', 'Prove quality before deploy.', {
+    overview:
+      'Production AI needs an evaluation harness: golden sets, regression gates, and fail-closed safety checks — the same seriousness you’d give a payment API.',
+    keyPoints: [
+      'Golden questions with expected citations/answers.',
+      'Offline regression before every prompt/model change.',
+      'Online shadow traffic when risk is high.',
+      'Hard gates for entitlement/safety failures.',
+    ],
+    example: {
+      title: 'Deploy gate',
+      code: `suite: 120 golden + 30 adversarial
+metrics: faithfulness, citation hit, latency p95
+block deploy if safety fail > 0 OR faithfulness ↓ > 3%`,
+      note: 'Evals are a product feature, not a research side quest.',
+    },
+    commonMistakes: [
+      'Shipping on vibe checks.',
+      'Only happy-path examples.',
+      'No owner for the eval suite.',
+    ],
+    beforeYouPractice: [
+      'Describe your pre-prod eval gate in 60 seconds.',
+      'What would auto-block a release?',
+    ],
+  }),
+  t('ai-ops', 'java-to-ai', 'LLM Ops & Cost', 'Latency, tokens, quality.', {
+    overview:
+      'LLM features fail in production on cost and latency. Staff-level AI engineers measure tokens, cache, retrieval size, and protect quality while cutting spend.',
+    keyPoints: [
+      'Instrument token use, cache hit rate, retrieval k.',
+      'Route cheap vs strong models deliberately.',
+      'Cache embeddings and frequent prompts safely.',
+      'Never cut cost without a quality check.',
+    ],
+    example: {
+      title: 'Cost attack plan',
+      code: `1) Trace top expensive routes
+2) Shrink context / top-k
+3) Cache retrieval for hot queries
+4) Route FAQ → small model; hard cases → large
+5) Re-run eval suite`,
+      note: 'Ops without quality gates creates silent regressions.',
+    },
+    commonMistakes: [
+      'No token dashboards.',
+      'One model for every request.',
+      'Cutting context blindly.',
+    ],
+    beforeYouPractice: [
+      'Explain how you’d cut LLM cost 40% safely.',
+      'Which metrics do you watch weekly?',
     ],
   }),
 
