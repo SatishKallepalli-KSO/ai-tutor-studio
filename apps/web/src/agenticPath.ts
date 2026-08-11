@@ -35,6 +35,19 @@ export function agenticPracticeHref(topicId?: AgenticPracticeTopicId): string {
   return `/?${sp.toString()}`
 }
 
+/** Deep-link into custom-question practice for an Agentic topic. */
+export function agenticCustomPracticeHref(
+  topicId?: AgenticPracticeTopicId,
+): string {
+  const sp = new URLSearchParams({
+    path: AGENTIC_PRACTICE_TRACK,
+    mode: 'practice',
+    custom: '1',
+  })
+  if (topicId) sp.set('topic', topicId)
+  return `/?${sp.toString()}`
+}
+
 /** Validated YouTube library: backend engineer → production / agentic AI (oEmbed-checked). */
 export const AGENTIC_PATH: PathPhase[] = [
   {

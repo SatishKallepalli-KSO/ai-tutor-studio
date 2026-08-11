@@ -9,13 +9,17 @@ export const BRAND = {
   /** Primary headline under the product name. */
   magnet: 'Learn, practice out loud, get AI feedback',
   magnetSub:
-    'For engineers leveling into AI and interview-ready oral practice. Study a path, speak answers out loud, and get coaching on content and delivery — free to start.',
+    'For engineers leveling into AI and interview-ready oral practice. Study a path, speak curated drills or bring your own interview question, and get coaching on content and delivery — free to start.',
   /** Homepage primary CTA label. */
   ctaStart: 'Start practicing',
   ctaContinue: 'Continue',
+  ctaCustomQuestion: 'Practice your own question',
   ctaExploreAgentic: 'Explore Agentic AI',
+  customFeatureTitle: 'Bring any interview question',
+  customFeatureBlurb:
+    'Paste a real panel prompt, speak or type your answer, and get AI coaching on content, clarity, and delivery — same coach as the curated bank.',
   oneLiner:
-    'Practice Out Loud helps you learn AI engineering, practice out loud, and get AI feedback — Agentic paths, interviews, and stack depth in one place. Free to start, Pro for full access.',
+    'Practice Out Loud helps you learn AI engineering, practice out loud, and get AI feedback — including your own interview questions, Agentic paths, and stack depth. Free to start, Pro for full access.',
   copyright: '© 2026 Practice Out Loud · Kallepalli Labs. All rights reserved.',
   contactEmail: 'hello@practiceoutloud.com',
 } as const
@@ -65,12 +69,14 @@ export const AI_ENGINEER_JOURNEY = [
   {
     step: '02',
     title: 'Practice',
-    blurb: 'Speak answers out loud on real prompts — timed drills, not silent reading.',
+    blurb:
+      'Speak curated drills — or bring your own interview question — timed out loud, not silent reading.',
   },
   {
     step: '03',
     title: 'Get AI feedback',
-    blurb: 'Coaching on content and delivery so you know what to fix before the next try.',
+    blurb:
+      'Coaching on content, clarity, and delivery for bank drills and your own prompts.',
   },
   {
     step: '04',

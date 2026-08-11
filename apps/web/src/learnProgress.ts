@@ -286,11 +286,18 @@ export function buildLearnSearch(opts: {
   mode?: 'learn' | 'practice'
   topic?: string | null
   q?: string | null
+  custom?: boolean
+  cq?: string | null
 }): string {
   const sp = new URLSearchParams()
   sp.set('path', opts.path)
   sp.set('mode', opts.mode ?? 'learn')
   if (opts.topic) sp.set('topic', opts.topic)
-  if (opts.q) sp.set('q', opts.q)
+  if (opts.custom) {
+    sp.set('custom', '1')
+    if (opts.cq) sp.set('cq', opts.cq)
+  } else if (opts.q) {
+    sp.set('q', opts.q)
+  }
   return `?${sp.toString()}`
 }

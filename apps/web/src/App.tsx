@@ -15,6 +15,18 @@ import { AUDIENCES, AI_ENGINEER_JOURNEY, BRAND } from './brand'
 import { getTopic, topicsForTrack, type Topic } from './curriculum'
 import { localQuestions } from './data'
 import {
+  defaultCustomTitle,
+  deleteCustomQuestion,
+  getCustomQuestion,
+  listCustomQuestions,
+  mergeCloudCustomQuestions,
+  recordCustomAttemptLocal,
+  renameCustomQuestion,
+  setCustomQuestionSaved,
+  upsertCustomQuestion,
+  type CustomQuestionRecord,
+} from './customQuestions'
+import {
   DEFAULT_PRACTICE_TRACK,
   getRecommendedNext,
   getResumePointer,
@@ -58,6 +70,12 @@ export default function App() {
   const [error, setError] = useState<string | null>(null)
   const [paywall, setPaywall] = useState<string | null>(null)
   const [progressTick, setProgressTick] = useState(0)
+  const [customMode, setCustomMode] = useState(false)
+  const [customPrompt, setCustomPrompt] = useState('')
+  const [customQuestionId, setCustomQuestionId] = useState<string | null>(null)
+  const [customTick, setCustomTick] = useState(0)
+  const [renameId, setRenameId] = useState<string | null>(null)
+  const [renameDraft, setRenameDraft] = useState('')
   const loadingTrackRef = useRef<string | null>(null)
 
   /** Keep learn/practice in the URL so browser Back works. */
@@ -66,6 +84,8 @@ export default function App() {
     mode?: 'learn' | 'practice'
     topic?: string | null
     q?: string | null
+    custom?: boolean
+    cq?: string | null
     replace?: boolean
   }) {
     const sp = new URLSearchParams()
@@ -75,7 +95,12 @@ export default function App() {
       sp.set('path', next.path)
       sp.set('mode', next.mode ?? 'learn')
       if (next.topic) sp.set('topic', next.topic)
-      if (next.q) sp.set('q', next.q)
+      if (next.custom) {
+        sp.set('custom', '1')
+        if (next.cq) sp.set('cq', next.cq)
+      } else if (next.q) {
+        sp.set('q', next.q)
+      }
     }
     const search = sp.toString()
     navigate({ pathname: '/', search: search ? `?${search}` : '' }, {
@@ -198,6 +223,18 @@ export default function App() {
   const sessionPct =
     queueTotal > 0 ? Math.round((queuePos / queueTotal) * 100) : 0
 
+  const customHistory = useMemo(() => {
+    void customTick
+    if (!trackId) return [] as CustomQuestionRecord[]
+    return listCustomQuestions({ trackId })
+  }, [trackId, customTick])
+
+  const topicCustomHistory = useMemo(() => {
+    if (!topicId) return customHistory
+    const scoped = customHistory.filter((r) => (r.topicId || '') === topicId)
+    return scoped.length ? scoped : customHistory
+  }, [customHistory, topicId])
+
   useEffect(() => {
     api
       .tracks()
@@ -215,6 +252,8 @@ export default function App() {
     const urlMode = params.get('mode') === 'practice' ? 'practice' : 'learn'
     const urlTopic = params.get('topic')
     const urlQ = params.get('q')
+    const urlCustom = params.get('custom') === '1'
+    const urlCq = params.get('cq')
 
     if (!urlPath) {
       if (step !== 'tracks' || trackId) {
@@ -225,6 +264,9 @@ export default function App() {
         setQuestions([])
         setFeedback(null)
         setPaywall(null)
+        setCustomMode(false)
+        setCustomPrompt('')
+        setCustomQuestionId(null)
         speech.stop()
         stopSpeaking()
       }
@@ -232,13 +274,22 @@ export default function App() {
     }
 
     setStep(urlMode)
+    setCustomMode(urlCustom && urlMode === 'practice')
     if (urlTopic) setTopicId(urlTopic)
-    if (urlQ) setQuestionId(urlQ)
+    if (urlCustom) {
+      if (urlCq) {
+        const saved = getCustomQuestion(urlCq)
+        setCustomQuestionId(urlCq)
+        if (saved) setCustomPrompt(saved.prompt)
+      }
+    } else if (urlQ) {
+      setQuestionId(urlQ)
+    }
 
     if (trackId === urlPath && questions.length > 0) {
       if (urlTopic && urlTopic !== topicId) {
         const qs = questions.filter((q) => q.topic_id === urlTopic)
-        if (!urlQ) setQuestionId(qs[0]?.id ?? null)
+        if (!urlCustom && !urlQ) setQuestionId(qs[0]?.id ?? null)
       }
       return
     }
@@ -268,8 +319,9 @@ export default function App() {
           topicQs[0]?.id ||
           qs[0]?.id ||
           null
-        setQuestionId(qid)
+        if (!urlCustom) setQuestionId(qid)
         setStep(urlMode)
+        setCustomMode(urlCustom && urlMode === 'practice')
       })
       .catch((err: Error) => {
         setError(err.message)
@@ -281,6 +333,25 @@ export default function App() {
       })
     // eslint-disable-next-line react-hooks/exhaustive-deps -- sync from URL params only
   }, [params])
+
+  // Cloud sync custom questions when signed in on a practice path.
+  useEffect(() => {
+    if (!user || !trackId || step !== 'practice') return
+    let cancelled = false
+    void api
+      .listCustomQuestions({ track_id: trackId })
+      .then((rows) => {
+        if (cancelled) return
+        mergeCloudCustomQuestions(rows)
+        setCustomTick((n) => n + 1)
+      })
+      .catch(() => {
+        /* offline / unsigned API — localStorage only */
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [user, trackId, step])
 
   async function selectTrack(id: string) {
     setError(null)
@@ -314,6 +385,12 @@ export default function App() {
       path: trackId ?? params.get('path'),
       mode: step === 'practice' ? 'practice' : 'learn',
       topic: next.id,
+      custom: step === 'practice' && customMode,
+      cq: step === 'practice' && customMode ? customQuestionId : null,
+      q:
+        step === 'practice' && !customMode
+          ? (questions.find((q) => q.topic_id === next.id)?.id ?? null)
+          : null,
     })
     trackEvent('topic_open', {
       path: '/',
@@ -413,6 +490,122 @@ export default function App() {
     })
   }
 
+  function startCustomPractice(opts?: { path?: string; topic?: string | null }) {
+    setError(null)
+    setPaywall(null)
+    setFeedback(null)
+    setAnswer('')
+    setInterim('')
+    setInputMode('text')
+    speech.stop()
+    stopSpeaking()
+    const pointer = getResumePointer()
+    const canUseResume =
+      !!pointer &&
+      (FREE_PRACTICE_TRACKS.has(pointer.trackId) || !!user?.is_pro)
+    const path =
+      opts?.path ||
+      (canUseResume && pointer ? pointer.trackId : DEFAULT_PRACTICE_TRACK)
+    const topics = topicsForTrack(path)
+    const topic =
+      opts?.topic ??
+      (canUseResume && pointer?.lastTopicId
+        ? pointer.lastTopicId
+        : null) ??
+      topics[0]?.id ??
+      null
+    setCustomMode(true)
+    setCustomPrompt('')
+    setCustomQuestionId(null)
+    writeLearnUrl({
+      path,
+      mode: 'practice',
+      topic,
+      custom: true,
+    })
+    trackEvent('practice_start', {
+      path: '/',
+      properties: {
+        track_id: path,
+        topic_id: topic,
+        source: 'custom_question_cta',
+        custom: true,
+      },
+    })
+    trackEvent('custom_practice', {
+      path: '/',
+      properties: { track_id: path, topic_id: topic, source: 'entry' },
+    })
+  }
+
+  function enterCustomMode() {
+    if (!trackId) return
+    setFeedback(null)
+    setAnswer('')
+    setInterim('')
+    setInputMode('text')
+    speech.stop()
+    stopSpeaking()
+    setCustomMode(true)
+    writeLearnUrl({
+      path: trackId,
+      mode: 'practice',
+      topic: topicId,
+      custom: true,
+      cq: customQuestionId,
+    })
+  }
+
+  function exitCustomMode() {
+    if (!trackId) return
+    setFeedback(null)
+    setAnswer('')
+    setInterim('')
+    setInputMode('text')
+    speech.stop()
+    stopSpeaking()
+    setCustomMode(false)
+    writeLearnUrl({
+      path: trackId,
+      mode: 'practice',
+      topic: topicId,
+      q: questionId ?? topicQuestions[0]?.id ?? null,
+    })
+  }
+
+  function reuseCustomQuestion(row: CustomQuestionRecord) {
+    setCustomMode(true)
+    setCustomQuestionId(row.id)
+    setCustomPrompt(row.prompt)
+    setFeedback(null)
+    setAnswer('')
+    setInterim('')
+    setInputMode('text')
+    speech.stop()
+    stopSpeaking()
+    upsertCustomQuestion(row)
+    setCustomTick((n) => n + 1)
+    writeLearnUrl({
+      path: trackId ?? row.trackId,
+      mode: 'practice',
+      topic: row.topicId ?? topicId,
+      custom: true,
+      cq: row.id,
+    })
+    if (user) {
+      void api
+        .upsertCustomQuestion({
+          client_id: row.id,
+          track_id: row.trackId,
+          topic_id: row.topicId,
+          prompt: row.prompt,
+          title: row.title,
+          saved: row.saved,
+        })
+        .catch(() => undefined)
+    }
+  }
+
   function continueWhereLeftOff() {
     const pointer = getResumePointer()
     if (!pointer) return
@@ -473,9 +666,14 @@ export default function App() {
   }
 
   async function submitAnswer() {
-    if (!trackId || !questionId) return
+    if (!trackId) return
     const spokenOrTyped = liveAnswer.trim()
     if (!spokenOrTyped) return
+    if (customMode && customPrompt.trim().length < 8) {
+      setError('Write your interview question first (at least a short prompt).')
+      return
+    }
+    if (!customMode && !questionId) return
     if (!user) {
       setPaywall('Sign in to get feedback.')
       return
@@ -487,16 +685,69 @@ export default function App() {
     setError(null)
     setFeedback(null)
     setPaywall(null)
+
+    let activeCustom: CustomQuestionRecord | null = null
+    if (customMode) {
+      activeCustom = upsertCustomQuestion({
+        id: customQuestionId ?? undefined,
+        trackId,
+        topicId,
+        prompt: customPrompt,
+        title: customQuestionId
+          ? getCustomQuestion(customQuestionId)?.title
+          : defaultCustomTitle(customPrompt),
+      })
+      setCustomQuestionId(activeCustom.id)
+      setCustomTick((n) => n + 1)
+      writeLearnUrl({
+        path: trackId,
+        mode: 'practice',
+        topic: topicId,
+        custom: true,
+        cq: activeCustom.id,
+        replace: true,
+      })
+    }
+
     try {
       const result = await api.feedback({
         track_id: trackId as Track['id'],
-        question_id: questionId,
+        question_id: customMode ? null : questionId,
+        custom_prompt: customMode ? customPrompt.trim() : null,
+        topic_id: topicId,
+        custom_question_client_id: activeCustom?.id ?? null,
         answer: spokenOrTyped,
         input_mode: inputMode,
       })
       setFeedback(result)
-      recordAttempt(trackId, questionId, result.score, result.provider)
-      setProgressTick((n) => n + 1)
+      if (customMode && activeCustom) {
+        recordCustomAttemptLocal(activeCustom.id, result.score)
+        setCustomTick((n) => n + 1)
+        void api
+          .recordCustomAttempt({
+            client_id: activeCustom.id,
+            track_id: trackId,
+            topic_id: topicId ?? undefined,
+            prompt: activeCustom.prompt,
+            title: activeCustom.title,
+            score: result.score,
+            provider: result.provider,
+            input_mode: inputMode,
+          })
+          .catch(() => undefined)
+        trackEvent('custom_practice', {
+          path: '/practice',
+          properties: {
+            track_id: trackId,
+            topic_id: topicId,
+            score: result.score,
+            source: 'submit',
+          },
+        })
+      } else if (questionId) {
+        recordAttempt(trackId, questionId, result.score, result.provider)
+        setProgressTick((n) => n + 1)
+      }
       await refresh()
     } catch (err) {
       if (err instanceof ApiError && err.status === 402) {
@@ -519,13 +770,19 @@ export default function App() {
         } else {
           const result = api.localFeedback({
             track_id: trackId as Track['id'],
-            question_id: questionId,
+            question_id: customMode ? null : questionId,
+            custom_prompt: customMode ? customPrompt.trim() : null,
             answer: spokenOrTyped,
             input_mode: inputMode,
           })
           setFeedback(result)
-          recordAttempt(trackId, questionId, result.score, result.provider)
-          setProgressTick((n) => n + 1)
+          if (customMode && activeCustom) {
+            recordCustomAttemptLocal(activeCustom.id, result.score)
+            setCustomTick((n) => n + 1)
+          } else if (questionId) {
+            recordAttempt(trackId, questionId, result.score, result.provider)
+            setProgressTick((n) => n + 1)
+          }
           if (!user.is_pro) localStorage.setItem(key, String(used + 1))
         }
       } else {
@@ -594,6 +851,14 @@ export default function App() {
                   >
                     {BRAND.ctaStart}
                   </button>
+                  <button
+                    type="button"
+                    className="btn ghost hero-cta-custom"
+                    disabled={loading}
+                    onClick={() => startCustomPractice()}
+                  >
+                    {BRAND.ctaCustomQuestion}
+                  </button>
                   {resume && (
                     <button
                       type="button"
@@ -616,11 +881,11 @@ export default function App() {
                 <span className="pulse-dot" />
                 {isRecruiter
                   ? 'Hiring · phase 2'
-                  : 'Learn · practice · AI feedback'}
+                  : 'Bank drills · your questions · AI feedback'}
                 <em>
                   {isRecruiter
                     ? '“Reach candidates who already practiced out loud.”'
-                    : '“I learned the path, practiced out loud, and the coach told me exactly what to fix.”'}
+                    : '“I pasted a real panel question, spoke the answer, and the coach told me exactly what to fix.”'}
                 </em>
               </div>
             </div>
@@ -632,7 +897,7 @@ export default function App() {
                 <b>Learn</b> AI paths &amp; Agentic curriculum
               </span>
               <span>
-                <b>Practice</b> out loud on real prompts
+                <b>Practice</b> bank drills or your own question
               </span>
               <span>
                 <b>AI feedback</b> on content &amp; delivery
@@ -641,6 +906,37 @@ export default function App() {
                 <b>Free</b> to start · Pro when ready
               </span>
             </div>
+          )}
+
+          {!isRecruiter && (
+            <section
+              className="feature-callout custom-question-callout reveal"
+              aria-label="Practice your own question"
+            >
+              <div>
+                <p className="eyebrow">Flagship capability</p>
+                <h2>{BRAND.customFeatureTitle}</h2>
+                <p>{BRAND.customFeatureBlurb}</p>
+              </div>
+              <div className="feature-callout-actions">
+                <button
+                  type="button"
+                  className="btn primary"
+                  disabled={loading}
+                  onClick={() => startCustomPractice()}
+                >
+                  {BRAND.ctaCustomQuestion}
+                </button>
+                <button
+                  type="button"
+                  className="btn ghost"
+                  disabled={loading}
+                  onClick={startPracticing}
+                >
+                  Or start with curated drills
+                </button>
+              </div>
+            </section>
           )}
 
           {!isRecruiter && resumeCard && (
@@ -1242,6 +1538,12 @@ export default function App() {
                     setQuestionId(questions[0]?.id ?? null)
                     setFeedback(null)
                     setAnswer('')
+                    writeLearnUrl({
+                      path: trackId,
+                      mode: 'practice',
+                      custom: customMode,
+                      cq: customMode ? customQuestionId : null,
+                    })
                   }}
                 >
                   <strong>All topics</strong>
@@ -1267,6 +1569,19 @@ export default function App() {
                   )
                 })}
 
+                <button
+                  type="button"
+                  className={
+                    customMode
+                      ? 'topic-item active custom-entry'
+                      : 'topic-item custom-entry'
+                  }
+                  onClick={enterCustomMode}
+                >
+                  <strong>Practice your own question</strong>
+                  <span>Bring any interview prompt · AI coach</span>
+                </button>
+
                 <AdSlot
                   id="practice-sidebar"
                   variant="sidebar"
@@ -1274,56 +1589,214 @@ export default function App() {
                   detail="Reserved while you queue the next spoken answer."
                 />
 
-                <h3>Queue</h3>
-                {topicQuestions.map((q, idx) => (
-                  <button
-                    key={q.id}
-                    className={q.id === questionId ? 'q-item active' : 'q-item'}
-                    onClick={() => {
-                      setFeedback(null)
-                      setAnswer('')
-                      setInterim('')
-                      setInputMode('text')
-                      speech.stop()
-                      stopSpeaking()
-                      writeLearnUrl({
-                        path: trackId,
-                        mode: 'practice',
-                        topic: topicId,
-                        q: q.id,
-                      })
-                    }}
-                  >
-                    <span>
-                      {q.category} · Q{idx + 1}
-                    </span>
-                    <strong>{q.prompt.slice(0, 72)}…</strong>
-                  </button>
-                ))}
+                {customMode ? (
+                  <>
+                    <h3>Your questions</h3>
+                    {!topicCustomHistory.length && (
+                      <p className="muted custom-history-empty">
+                        Recent and saved prompts for this path show up here.
+                      </p>
+                    )}
+                    {topicCustomHistory.map((row) => (
+                      <div
+                        key={row.id}
+                        className={
+                          row.id === customQuestionId
+                            ? 'custom-q-item active'
+                            : 'custom-q-item'
+                        }
+                      >
+                        <button
+                          type="button"
+                          className="custom-q-main"
+                          onClick={() => reuseCustomQuestion(row)}
+                        >
+                          <span>
+                            {row.saved ? 'Saved' : 'Recent'}
+                            {row.lastScore != null
+                              ? ` · last ${row.lastScore}/5`
+                              : ''}
+                            {row.attemptCount
+                              ? ` · ${row.attemptCount} try${row.attemptCount === 1 ? '' : 'ies'}`
+                              : ''}
+                          </span>
+                          <strong>
+                            {(row.title || defaultCustomTitle(row.prompt)).slice(
+                              0,
+                              72,
+                            )}
+                          </strong>
+                        </button>
+                        <div className="custom-q-tools">
+                          <button
+                            type="button"
+                            className="linkish"
+                            onClick={() => {
+                              const next = setCustomQuestionSaved(
+                                row.id,
+                                !row.saved,
+                              )
+                              setCustomTick((n) => n + 1)
+                              if (next && user) {
+                                void api
+                                  .patchCustomQuestion(row.id, {
+                                    saved: next.saved,
+                                  })
+                                  .catch(() => undefined)
+                              }
+                            }}
+                          >
+                            {row.saved ? 'Unsave' : 'Save'}
+                          </button>
+                          <button
+                            type="button"
+                            className="linkish"
+                            onClick={() => {
+                              setRenameId(row.id)
+                              setRenameDraft(row.title || '')
+                            }}
+                          >
+                            Rename
+                          </button>
+                          <button
+                            type="button"
+                            className="linkish danger"
+                            onClick={() => {
+                              deleteCustomQuestion(row.id)
+                              if (customQuestionId === row.id) {
+                                setCustomQuestionId(null)
+                                setCustomPrompt('')
+                              }
+                              setCustomTick((n) => n + 1)
+                              if (user) {
+                                void api
+                                  .deleteCustomQuestion(row.id)
+                                  .catch(() => undefined)
+                              }
+                            }}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                        {renameId === row.id && (
+                          <form
+                            className="custom-rename-form"
+                            onSubmit={(e) => {
+                              e.preventDefault()
+                              const next = renameCustomQuestion(
+                                row.id,
+                                renameDraft,
+                              )
+                              setRenameId(null)
+                              setCustomTick((n) => n + 1)
+                              if (next && user) {
+                                void api
+                                  .patchCustomQuestion(row.id, {
+                                    title: next.title || '',
+                                  })
+                                  .catch(() => undefined)
+                              }
+                            }}
+                          >
+                            <input
+                              value={renameDraft}
+                              onChange={(e) => setRenameDraft(e.target.value)}
+                              placeholder="Short title"
+                              maxLength={200}
+                              aria-label="Rename custom question"
+                            />
+                            <button type="submit" className="btn ghost sm">
+                              OK
+                            </button>
+                          </form>
+                        )}
+                      </div>
+                    ))}
+                  </>
+                ) : (
+                  <>
+                    <h3>Queue</h3>
+                    {topicQuestions.map((q, idx) => (
+                      <button
+                        key={q.id}
+                        className={
+                          q.id === questionId ? 'q-item active' : 'q-item'
+                        }
+                        onClick={() => {
+                          setFeedback(null)
+                          setAnswer('')
+                          setInterim('')
+                          setInputMode('text')
+                          speech.stop()
+                          stopSpeaking()
+                          setCustomMode(false)
+                          writeLearnUrl({
+                            path: trackId,
+                            mode: 'practice',
+                            topic: topicId,
+                            q: q.id,
+                          })
+                        }}
+                      >
+                        <span>
+                          {q.category} · Q{idx + 1}
+                        </span>
+                        <strong>{q.prompt.slice(0, 72)}…</strong>
+                      </button>
+                    ))}
+                  </>
+                )}
               </aside>
 
               <div className="panel practice-main">
-                <div className="session-progress">
-                  <div className="session-progress-meta">
-                    <span>
-                      {queueTotal > 0
-                        ? `Question ${queuePos} of ${queueTotal}`
-                        : 'Practice session'}
-                      {topic ? ` · ${topic.title}` : ''}
-                    </span>
-                    <span>{sessionPct}%</span>
-                  </div>
-                  <div
-                    className="session-progress-bar"
-                    role="progressbar"
-                    aria-valuenow={sessionPct}
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                    aria-label="Session progress"
+                <div
+                  className="practice-source-switch"
+                  role="tablist"
+                  aria-label="Practice source"
+                >
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={!customMode}
+                    className={!customMode ? 'source-tab active' : 'source-tab'}
+                    onClick={exitCustomMode}
                   >
-                    <span style={{ width: `${sessionPct}%` }} />
-                  </div>
+                    Curated bank
+                  </button>
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={customMode}
+                    className={customMode ? 'source-tab active' : 'source-tab'}
+                    onClick={enterCustomMode}
+                  >
+                    Your own question
+                  </button>
                 </div>
+
+                {!customMode && (
+                  <div className="session-progress">
+                    <div className="session-progress-meta">
+                      <span>
+                        {queueTotal > 0
+                          ? `Question ${queuePos} of ${queueTotal}`
+                          : 'Practice session'}
+                        {topic ? ` · ${topic.title}` : ''}
+                      </span>
+                      <span>{sessionPct}%</span>
+                    </div>
+                    <div
+                      className="session-progress-bar"
+                      role="progressbar"
+                      aria-valuenow={sessionPct}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-label="Session progress"
+                    >
+                      <span style={{ width: `${sessionPct}%` }} />
+                    </div>
+                  </div>
+                )}
 
                 {topic && (
                   <button
@@ -1340,28 +1813,68 @@ export default function App() {
                   </button>
                 )}
 
-                {question && (
+                {customMode ? (
                   <>
                     <div className="question-tools">
-                      <p className="pill">{question.category}</p>
-                      <button
-                        type="button"
-                        className="btn ghost sm"
-                        onClick={() => speakText(question.prompt)}
-                      >
-                        Hear question
-                      </button>
+                      <p className="pill">Your question</p>
+                      {customPrompt.trim().length >= 8 && (
+                        <button
+                          type="button"
+                          className="btn ghost sm"
+                          onClick={() => speakText(customPrompt)}
+                        >
+                          Hear question
+                        </button>
+                      )}
                     </div>
-                    <h3 className="prompt">{question.prompt}</h3>
-                    <div className="hint-row">
-                      <p className="muted">Hints</p>
-                      <ul className="hint-chips">
-                        {question.hints.map((h) => (
-                          <li key={h}>{h}</li>
-                        ))}
-                      </ul>
-                    </div>
+                    <label className="answer-label" htmlFor="custom-prompt">
+                      Interview question
+                    </label>
+                    <textarea
+                      id="custom-prompt"
+                      className="custom-prompt-input"
+                      value={customPrompt}
+                      onChange={(e) => {
+                        setCustomPrompt(e.target.value)
+                        setFeedback(null)
+                      }}
+                      placeholder="Paste any interview question — from a real panel, job post, or mock…"
+                      rows={4}
+                    />
+                    <p className="muted custom-prompt-hint">
+                      Scoped to this path
+                      {topic ? ` · ${topic.title}` : ''}. Custom tries do not
+                      inflate bank mastery scores.
+                    </p>
+                  </>
+                ) : (
+                  question && (
+                    <>
+                      <div className="question-tools">
+                        <p className="pill">{question.category}</p>
+                        <button
+                          type="button"
+                          className="btn ghost sm"
+                          onClick={() => speakText(question.prompt)}
+                        >
+                          Hear question
+                        </button>
+                      </div>
+                      <h3 className="prompt">{question.prompt}</h3>
+                      <div className="hint-row">
+                        <p className="muted">Hints</p>
+                        <ul className="hint-chips">
+                          {question.hints.map((h) => (
+                            <li key={h}>{h}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </>
+                  )
+                )}
 
+                {(customMode || question) && (
+                  <>
                     <div className="answer-toolbar">
                       <label className="answer-label" htmlFor="answer">
                         Your answer{' '}
@@ -1389,7 +1902,10 @@ export default function App() {
                               setInputMode('voice')
                               speech.start()
                             }}
-                            disabled={!speech.supported}
+                            disabled={
+                              !speech.supported ||
+                              (customMode && customPrompt.trim().length < 8)
+                            }
                           >
                             Speak
                           </button>
@@ -1410,18 +1926,24 @@ export default function App() {
                           type="button"
                           className="btn primary"
                           onClick={submitAnswer}
-                          disabled={loading || !liveAnswer.trim()}
+                          disabled={
+                            loading ||
+                            !liveAnswer.trim() ||
+                            (customMode && customPrompt.trim().length < 8)
+                          }
                         >
                           {loading ? 'Coaching…' : 'Submit'}
                         </button>
-                        <button
-                          type="button"
-                          className="btn ghost sm"
-                          onClick={goNextQuestion}
-                          disabled={queueTotal <= 1}
-                        >
-                          Skip
-                        </button>
+                        {!customMode && (
+                          <button
+                            type="button"
+                            className="btn ghost sm"
+                            onClick={goNextQuestion}
+                            disabled={queueTotal <= 1}
+                          >
+                            Skip
+                          </button>
+                        )}
                       </div>
                     </div>
 
@@ -1482,6 +2004,7 @@ export default function App() {
                           {feedback.input_mode === 'voice'
                             ? ' · voice coaching'
                             : ''}
+                          {customMode ? ' · custom question' : ''}
                         </small>
                       </div>
                     </div>
@@ -1519,7 +2042,8 @@ export default function App() {
                           </ul>
                         ) : (
                           <p className="muted">
-                            No delivery notes — try Speak next time for voice tips.
+                            No delivery notes — try Speak next time for voice
+                            tips.
                           </p>
                         )}
                       </div>
@@ -1537,13 +2061,35 @@ export default function App() {
                       >
                         Practice again
                       </button>
-                      <button
-                        type="button"
-                        className="btn ghost"
-                        onClick={goNextQuestion}
-                      >
-                        Next question
-                      </button>
+                      {!customMode && (
+                        <button
+                          type="button"
+                          className="btn ghost"
+                          onClick={goNextQuestion}
+                        >
+                          Next question
+                        </button>
+                      )}
+                      {customMode && (
+                        <button
+                          type="button"
+                          className="btn ghost"
+                          onClick={() => {
+                            setCustomQuestionId(null)
+                            setCustomPrompt('')
+                            setFeedback(null)
+                            setAnswer('')
+                            writeLearnUrl({
+                              path: trackId,
+                              mode: 'practice',
+                              topic: topicId,
+                              custom: true,
+                            })
+                          }}
+                        >
+                          New custom question
+                        </button>
+                      )}
                       <button
                         type="button"
                         className="btn ghost"

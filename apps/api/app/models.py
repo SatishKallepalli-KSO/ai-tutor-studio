@@ -123,3 +123,37 @@ class ChatMessage(Base):
     body: Mapped[str] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
     read_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class CustomQuestion(Base):
+    """User-authored practice prompts (per track/topic). Synced when signed in."""
+
+    __tablename__ = "custom_questions"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(Integer, index=True)
+    client_id: Mapped[str] = mapped_column(String(64), index=True)
+    track_id: Mapped[str] = mapped_column(String(64), index=True)
+    topic_id: Mapped[str] = mapped_column(String(120), default="")
+    prompt: Mapped[str] = mapped_column(Text)
+    title: Mapped[str] = mapped_column(String(200), default="")
+    saved: Mapped[bool] = mapped_column(Boolean, default=False)
+    attempt_count: Mapped[int] = mapped_column(Integer, default=0)
+    last_score: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    last_used_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class CustomQuestionAttempt(Base):
+    """Attempts on custom prompts — separate from curriculum bank mastery."""
+
+    __tablename__ = "custom_question_attempts"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(Integer, index=True)
+    custom_question_id: Mapped[int] = mapped_column(Integer, index=True)
+    score: Mapped[int] = mapped_column(Integer, default=0)
+    provider: Mapped[str] = mapped_column(String(40), default="")
+    input_mode: Mapped[str] = mapped_column(String(16), default="text")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)

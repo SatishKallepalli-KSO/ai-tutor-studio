@@ -4915,3 +4915,184 @@ textarea {
     grid-template-columns: 1fr;
   }
 }
+
+.feature-callout.custom-question-callout {
+  display: grid;
+  grid-template-columns: 1.6fr auto;
+  gap: 1.25rem;
+  align-items: center;
+  margin: 0 0 1.75rem;
+  padding: 1.35rem 1.4rem;
+  border: 1px solid rgba(11, 107, 203, 0.28);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(
+      135deg,
+      rgba(11, 107, 203, 0.08),
+      rgba(255, 255, 255, 0.72)
+    );
+  box-shadow: 0 10px 28px rgba(18, 32, 51, 0.05);
+}
+
+.feature-callout.custom-question-callout .eyebrow {
+  margin: 0 0 0.35rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.feature-callout.custom-question-callout h2 {
+  margin: 0 0 0.45rem;
+  font-family: var(--display);
+  font-size: clamp(1.35rem, 2.2vw, 1.7rem);
+  letter-spacing: -0.03em;
+  color: var(--ink);
+}
+
+.feature-callout.custom-question-callout p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+  max-width: 46rem;
+}
+
+.feature-callout-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  min-width: 14rem;
+}
+
+.hero-cta-custom {
+  border-color: rgba(255, 255, 255, 0.42) !important;
+}
+
+.practice-source-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
+  margin: 0 0 1rem;
+  padding: 0.3rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel-2, rgba(255, 255, 255, 0.03));
+}
+
+.source-tab {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 0.65rem 0.85rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.source-tab.active {
+  background: rgba(11, 107, 203, 0.12);
+  color: var(--accent);
+  border: 1px solid rgba(11, 107, 203, 0.28);
+}
+
+.topic-item.custom-entry {
+  border-color: rgba(11, 107, 203, 0.35);
+  background: rgba(11, 107, 203, 0.06);
+}
+
+.topic-item.custom-entry.active {
+  border-color: rgba(11, 107, 203, 0.5);
+  background: rgba(11, 107, 203, 0.12);
+}
+
+.custom-prompt-input {
+  width: 100%;
+  margin: 0.35rem 0 0.5rem;
+  resize: vertical;
+}
+
+.custom-prompt-hint {
+  margin: 0 0 1rem;
+  font-size: 0.88rem;
+}
+
+.custom-history-empty {
+  margin: 0.25rem 0 0.5rem;
+  font-size: 0.85rem;
+}
+
+.custom-q-item {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 0.55rem 0.65rem 0.45rem;
+}
+
+.custom-q-item.active {
+  border-color: rgba(11, 107, 203, 0.45);
+  background: rgba(11, 107, 203, 0.08);
+}
+
+.custom-q-main {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  padding: 0.15rem 0;
+}
+
+.custom-q-main span {
+  display: block;
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  margin-bottom: 0.15rem;
+}
+
+.custom-q-main strong {
+  display: block;
+  font-weight: 600;
+  font-size: 0.92rem;
+  line-height: 1.35;
+}
+
+.custom-q-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 0.35rem;
+}
+
+.custom-q-tools .linkish.danger {
+  color: #b42318;
+}
+
+.custom-rename-form {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.45rem;
+}
+
+.custom-rename-form input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.4rem 0.55rem;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+}
+
+@media (max-width: 900px) {
+  .feature-callout.custom-question-callout {
+    grid-template-columns: 1fr;
+  }
+
+  .feature-callout-actions {
+    min-width: 0;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+}

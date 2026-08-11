@@ -2923,10 +2923,111 @@ export function localQuestions(trackId: string): TutorQuestion[] {
 
 export function localFeedback(input: {
   track_id: TrackId
-  question_id: string
+  question_id?: string | null
+  custom_prompt?: string | null
   answer: string
   input_mode?: 'text' | 'voice'
 }): Feedback {
+  const mode = input.input_mode ?? 'text'
+  const text = input.answer.trim()
+  const lower = text.toLowerCase()
+  const words = lower.match(/[a-z0-9']+/g) ?? []
+  const customPrompt = (input.custom_prompt || '').trim()
+
+  if (customPrompt) {
+    const promptTokens = (customPrompt.toLowerCase().match(/[a-z0-9']+/g) ?? [])
+      .filter((t) => t.length > 3)
+      .slice(0, 12)
+    const overlap = promptTokens.filter((t) => lower.includes(t)).length
+    let score = 2
+    if (words.length >= 80) score += 1
+    if (overlap >= 2) score += 1
+    if (/\d|%|uptime|million|latency|users|team/.test(lower)) score += 1
+    score = Math.max(1, Math.min(5, score))
+
+    const strengths: string[] = []
+    const gaps: string[] = []
+    if (words.length >= 60) {
+      strengths.push('Enough length for a spoken interview answer.')
+    } else {
+      gaps.push(
+        'Expand to ~90–120 seconds: context → what you did → outcome.',
+      )
+    }
+    if (overlap >= 2) {
+      strengths.push('Answer stays on the question you asked.')
+    } else {
+      gaps.push(
+        'Name the key terms from your question early so the answer feels targeted.',
+      )
+    }
+    if (/\b(first|then|so|because|tradeoff|result|impact|decided|owned)\b/.test(lower)) {
+      strengths.push('Has a narrative spine (decision/result language).')
+    } else {
+      gaps.push(
+        'Add structure: open with the answer, then ownership, tradeoff, metric.',
+      )
+    }
+
+    const fillers = [
+      'um',
+      'uh',
+      'like',
+      'you know',
+      'sort of',
+      'kind of',
+      'basically',
+      'actually',
+      'i mean',
+    ]
+    const delivery_tips: string[] = []
+    if (mode === 'voice') {
+      const found = fillers.filter((f) => new RegExp(`\\b${f}\\b`).test(lower))
+      if (found.length) {
+        delivery_tips.push(
+          `Reduce filler words (${found.slice(0, 4).join(', ')}). Pause instead.`,
+        )
+      } else {
+        delivery_tips.push(
+          'Clean delivery — few filler words. Keep that in live interviews.',
+        )
+      }
+      if (words.length < 70) {
+        delivery_tips.push(
+          'Interview answers usually need ~90–120 seconds. Add context → action → outcome.',
+        )
+      }
+    }
+
+    return {
+      score,
+      summary: `Custom-question rubric ${score}/5. ${
+        mode === 'voice'
+          ? 'Voice mode: includes spoken grammar and delivery tips.'
+          : 'Offline coaching for your own prompt.'
+      }`,
+      strengths: strengths.length
+        ? strengths
+        : ['You attempted a full answer — good start.'],
+      gaps: gaps.length
+        ? gaps
+        : ['Tighten structure and end on a measurable outcome.'],
+      better_answer: [
+        'Stronger spoken answer for YOUR question:',
+        '1) Open with a one-sentence direct answer (no filler).',
+        '2) Context: the system/situation the question implies.',
+        '3) Ownership + decision/tradeoff specific to the prompt.',
+        '4) Outcome with a metric — then stop.',
+        `Stay anchored to: ${customPrompt.slice(0, 180)}${customPrompt.length > 180 ? '…' : ''}`,
+      ].join('\n'),
+      next_drill:
+        'Retry the same custom question out loud — tighter open, clearer metric.',
+      provider: 'browser-custom-rubric',
+      delivery_tips,
+      input_mode: mode,
+    }
+  }
+
   const question = QUESTIONS.find(
     (q) => q.id === input.question_id && q.track_id === input.track_id,
   )
@@ -2934,10 +3035,6 @@ export function localFeedback(input: {
     throw new Error('Unknown question')
   }
 
-  const mode = input.input_mode ?? 'text'
-  const text = input.answer.trim()
-  const lower = text.toLowerCase()
-  const words = lower.match(/[a-z0-9']+/g) ?? []
   const hits = question.strong_answer_signals.filter((s) => lower.includes(s))
 
   let score = 2

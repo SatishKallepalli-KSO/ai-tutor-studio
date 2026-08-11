@@ -21,6 +21,7 @@ from app.auth import (
 )
 from app.billing import router as billing_router
 from app.connections import router as connections_router
+from app.custom_questions import router as custom_questions_router
 from app.db import SessionLocal, get_db, init_db
 from app.events import record_event, router as events_router
 from app.jobs import router as jobs_router
@@ -82,6 +83,7 @@ app.include_router(jobs_router)
 app.include_router(profiles_router)
 app.include_router(connections_router)
 app.include_router(messages_router)
+app.include_router(custom_questions_router)
 
 
 @app.on_event("startup")
@@ -160,6 +162,7 @@ def tutor_feedback(
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     record_feedback_usage(db, user)
+    is_custom = bool((body.custom_prompt or "").strip())
     record_event(
         db,
         event_name="feedback_submit",
@@ -168,18 +171,31 @@ def tutor_feedback(
         properties={
             "track_id": body.track_id,
             "question_id": body.question_id,
+            "custom": is_custom,
             "input_mode": getattr(body, "input_mode", "text") or "text",
             "score": result.score,
             "provider": result.provider,
         },
     )
+    if is_custom:
+        record_event(
+            db,
+            event_name="custom_practice",
+            user_id=user.id,
+            path="/practice",
+            properties={
+                "track_id": body.track_id,
+                "topic_id": body.topic_id,
+                "score": result.score,
+            },
+        )
     if getattr(body, "input_mode", None) == "voice":
         record_event(
             db,
             event_name="voice_practice",
             user_id=user.id,
             path="/practice",
-            properties={"track_id": body.track_id},
+            properties={"track_id": body.track_id, "custom": is_custom},
         )
     db.commit()
     return result

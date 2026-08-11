@@ -191,7 +191,10 @@ export const api = {
 
   async feedback(body: {
     track_id: TrackId
-    question_id: string
+    question_id?: string | null
+    custom_prompt?: string | null
+    topic_id?: string | null
+    custom_question_client_id?: string | null
     answer: string
     input_mode?: 'text' | 'voice'
   }): Promise<Feedback> {
@@ -207,11 +210,78 @@ export const api = {
   /** Offline/demo fallback when API is unreachable (Pages-only). */
   localFeedback(body: {
     track_id: TrackId
-    question_id: string
+    question_id?: string | null
+    custom_prompt?: string | null
     answer: string
     input_mode?: 'text' | 'voice'
   }): Feedback {
     return localFeedback(body)
+  },
+
+  async listCustomQuestions(params?: {
+    track_id?: string
+    topic_id?: string
+  }): Promise<CloudCustomQuestion[]> {
+    const sp = new URLSearchParams()
+    if (params?.track_id) sp.set('track_id', params.track_id)
+    if (params?.topic_id) sp.set('topic_id', params.topic_id)
+    const qs = sp.toString()
+    return request(`/v1/tutor/custom-questions${qs ? `?${qs}` : ''}`)
+  },
+
+  async upsertCustomQuestion(input: {
+    client_id: string
+    track_id: string
+    topic_id?: string
+    prompt: string
+    title?: string
+    saved?: boolean
+  }): Promise<CloudCustomQuestion> {
+    return request('/v1/tutor/custom-questions', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    })
+  },
+
+  async patchCustomQuestion(
+    clientId: string,
+    input: {
+      prompt?: string
+      title?: string
+      saved?: boolean
+      topic_id?: string
+    },
+  ): Promise<CloudCustomQuestion> {
+    return request(`/v1/tutor/custom-questions/${encodeURIComponent(clientId)}`, {
+      method: 'PATCH',
+      body: JSON.stringify(input),
+    })
+  },
+
+  async deleteCustomQuestion(clientId: string): Promise<{ ok: boolean }> {
+    return request(
+      `/v1/tutor/custom-questions/${encodeURIComponent(clientId)}`,
+      { method: 'DELETE' },
+    )
+  },
+
+  async recordCustomAttempt(input: {
+    client_id: string
+    track_id: string
+    topic_id?: string
+    prompt: string
+    title?: string
+    score: number
+    provider?: string
+    input_mode?: 'text' | 'voice'
+  }): Promise<CloudCustomQuestion> {
+    return request('/v1/tutor/custom-questions/attempt', {
+      method: 'POST',
+      body: JSON.stringify({
+        ...input,
+        input_mode: input.input_mode ?? 'text',
+      }),
+    })
   },
 
   async register(input: {
@@ -519,6 +589,21 @@ export type JobCreateInput = {
   requirements?: string
   salary_range?: string | null
   apply_url?: string | null
+}
+
+export type CloudCustomQuestion = {
+  id: number
+  client_id: string
+  track_id: string
+  topic_id: string
+  prompt: string
+  title: string
+  saved: boolean
+  attempt_count: number
+  last_score: number | null
+  last_used_at: string
+  created_at: string
+  updated_at: string
 }
 
 export const FREE_PRACTICE_TRACKS = new Set([

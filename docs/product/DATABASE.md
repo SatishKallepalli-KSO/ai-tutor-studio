@@ -13,6 +13,17 @@ Live app **https://practiceoutloud.com** (fallback https://ai-tutor-studio.onren
 
 Neon Free includes ~0.5 GB storage, 100 CU-hours/mo, scale-to-zero when idle, 6h restore history, and **1 manual snapshot**.
 
+## Schema notes (custom questions)
+
+On API startup, SQLAlchemy `create_all` ensures these tables exist (no separate migration runner):
+
+| Table | Purpose |
+|--|--|
+| `custom_questions` | Per-user prompts (`client_id` for local↔cloud sync), track/topic scope, saved flag, attempt counters |
+| `custom_question_attempts` | Attempt history for custom prompts (separate from bank/curriculum mastery) |
+
+Env: same as the rest of the app — set Neon pooled `DATABASE_URL` on Render (see `.env.example`). Local default remains SQLite under `apps/api/data/tutor.db`.
+
 See also: [PRODUCTION.md](./PRODUCTION.md) · [DEPLOY-FREE.md](./DEPLOY-FREE.md)
 
 ---

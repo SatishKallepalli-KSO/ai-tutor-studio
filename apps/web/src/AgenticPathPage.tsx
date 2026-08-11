@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import {
   AGENTIC_PATH,
   AGENTIC_PRACTICE_TRACK,
+  agenticCustomPracticeHref,
   agenticPracticeHref,
   allPathVideos,
   type PathVideo,
@@ -75,6 +76,9 @@ export function AgenticPathPage() {
   const pathComplete = videos.length > 0 && doneCount === videos.length
   const phaseComplete = !!activePhase?.videos.every((v) => done.has(v.id))
   const practiceHref = agenticPracticeHref(
+    activePhase?.practiceTopicId ?? 'ai-agents',
+  )
+  const customPracticeHref = agenticCustomPracticeHref(
     activePhase?.practiceTopicId ?? 'ai-agents',
   )
   const activeLessonPct = active
@@ -193,6 +197,23 @@ export function AgenticPathPage() {
               }
             >
               Practice with AI feedback
+            </Link>
+            <Link
+              className="btn ghost"
+              to={agenticCustomPracticeHref('ai-agents')}
+              onClick={() =>
+                track('agentic_practice_cta', {
+                  path: '/agentic-path',
+                  properties: {
+                    source: 'path_complete_custom',
+                    track_id: AGENTIC_PRACTICE_TRACK,
+                    topic_id: 'ai-agents',
+                    custom: true,
+                  },
+                })
+              }
+            >
+              Practice your own question
             </Link>
             <Link className="btn ghost" to={agenticPracticeHref('ai-rag')}>
               Start with RAG drills
@@ -323,6 +344,26 @@ export function AgenticPathPage() {
                           }
                         >
                           Practice with AI feedback
+                        </Link>
+                        <Link
+                          className="btn ghost"
+                          to={customPracticeHref}
+                          onClick={() =>
+                            track('agentic_practice_cta', {
+                              path: '/agentic-path',
+                              properties: {
+                                source: phaseComplete
+                                  ? 'phase_complete_custom'
+                                  : 'video_complete_custom',
+                                phase_id: activePhase.id,
+                                topic_id: activePhase.practiceTopicId,
+                                video_id: active.id,
+                                custom: true,
+                              },
+                            })
+                          }
+                        >
+                          Practice your own question
                         </Link>
                         {!pathComplete && (
                           <a className="btn ghost" href="#practice-map">

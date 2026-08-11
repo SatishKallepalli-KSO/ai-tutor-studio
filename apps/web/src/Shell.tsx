@@ -84,6 +84,25 @@ export function Shell({
     })}`
   }, [user?.is_pro])
 
+  const customPracticeHref = useMemo(() => {
+    const resume = getResumePointer()
+    const canResume =
+      !!resume &&
+      (FREE_PRACTICE_TRACKS.has(resume.trackId) || !!user?.is_pro)
+    const path =
+      canResume && resume ? resume.trackId : DEFAULT_PRACTICE_TRACK
+    const topic =
+      (canResume && resume?.lastTopicId) ||
+      topicsForTrack(path)[0]?.id ||
+      null
+    return `/${buildLearnSearch({
+      path,
+      mode: 'practice',
+      topic,
+      custom: true,
+    })}`
+  }, [user?.is_pro])
+
   return (
     <div className={wide ? 'shell shell-wide' : 'shell'}>
       <div className="atmosphere" aria-hidden="true" />
@@ -119,6 +138,9 @@ export function Shell({
             <>
               <Link to="/">Learn</Link>
               <Link to={practiceHref}>Practice</Link>
+              <Link to={customPracticeHref} title="Bring any interview question">
+                Your question
+              </Link>
               <Link to="/agentic-path">Agentic AI</Link>
               <Link to="/snowflake-path">Snowflake</Link>
               <Link to="/jobs">Jobs</Link>

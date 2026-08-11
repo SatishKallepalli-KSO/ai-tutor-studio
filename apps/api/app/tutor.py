@@ -33,7 +33,17 @@ class TutorQuestion(BaseModel):
 
 class FeedbackRequest(BaseModel):
     track_id: str
-    question_id: str
+    question_id: str | None = Field(
+        default=None,
+        description="Bank question id. Optional when practicing a custom_prompt.",
+    )
+    custom_prompt: str | None = Field(
+        default=None,
+        max_length=2000,
+        description="Freeform user question. When set, bank question_id is not required.",
+    )
+    topic_id: str | None = Field(default=None, max_length=120)
+    custom_question_client_id: str | None = Field(default=None, max_length=64)
     answer: str = Field(min_length=1, max_length=8000)
     input_mode: str = Field(default="text", pattern="^(text|voice)$")
 
@@ -300,13 +310,253 @@ def _openai_feedback(
         return None
 
 
+def _heuristic_custom_feedback(
+    track: Track,
+    prompt: str,
+    answer: str,
+    input_mode: str = "text",
+) -> FeedbackResponse:
+    """Offline/local rubric for freeform user questions (no bank signals)."""
+    text = answer.strip()
+    lower = text.lower()
+    words = re.findall(r"[a-z0-9']+", lower)
+    prompt_tokens = [
+        t
+        for t in re.findall(r"[a-z0-9']+", prompt.lower())
+        if len(t) > 3
+        and t
+        not in {
+            "what",
+            "when",
+            "where",
+            "which",
+            "would",
+            "could",
+            "should",
+            "about",
+            "your",
+            "with",
+            "from",
+            "that",
+            "this",
+            "have",
+            "does",
+            "tell",
+            "explain",
+            "describe",
+            "how",
+        }
+    ]
+    overlap = sum(1 for t in prompt_tokens[:12] if t in lower)
+
+    score = 2
+    if len(words) >= 80:
+        score += 1
+    if overlap >= 2:
+        score += 1
+    if re.search(r"\d|%|uptime|million|latency|users|team", lower):
+        score += 1
+    has_structure = bool(
+        re.search(
+            r"\b(first|then|so|because|tradeoff|result|impact|decided|owned)\b",
+            lower,
+        )
+    )
+    if has_structure and score < 5:
+        score += 0  # already generous; keep for clarity branch below
+    score = max(1, min(5, score))
+
+    strengths: list[str] = []
+    gaps: list[str] = []
+    if len(words) >= 60:
+        strengths.append("Enough length for a spoken interview answer.")
+    else:
+        gaps.append(
+            "Expand to ~90–120 seconds: context → what you did → outcome."
+        )
+    if overlap >= 2:
+        strengths.append("Answer stays on the question you asked.")
+    else:
+        gaps.append(
+            "Name the key terms from your question early so the answer feels targeted."
+        )
+    if has_structure:
+        strengths.append("Has a narrative spine (decision/result language).")
+    else:
+        gaps.append(
+            "Add structure: open with the answer, then ownership, tradeoff, metric."
+        )
+    if re.search(r"\d|%|million|latency|users", lower):
+        strengths.append("Includes concrete scale or metrics.")
+    else:
+        gaps.append("Add one concrete example or metric when possible.")
+
+    delivery = _delivery_tips(answer) if input_mode == "voice" else []
+    if input_mode == "voice":
+        filler_heavy = sum(
+            1 for f in FILLERS if len(re.findall(rf"\b{re.escape(f)}\b", lower)) >= 3
+        )
+        if filler_heavy >= 2:
+            score = max(1, score - 1)
+            gaps.append("Spoken delivery had repeated fillers — practice a cleaner take.")
+
+    mode_note = (
+        " Voice mode: coaching includes spoken grammar and delivery."
+        if input_mode == "voice"
+        else ""
+    )
+    better = (
+        "Stronger spoken answer for YOUR question:\n"
+        "1) Open with a one-sentence direct answer (no filler).\n"
+        "2) Context: the system/situation the question implies.\n"
+        "3) Ownership + decision/tradeoff specific to the prompt.\n"
+        "4) Outcome with a metric — then stop.\n"
+        f"Stay anchored to: {prompt[:180]}{'…' if len(prompt) > 180 else ''}"
+    )
+    return FeedbackResponse(
+        score=score,
+        summary=(
+            f"Custom-question rubric {score}/5 on {track.title}. "
+            "Local heuristic for freeform prompts"
+            + (
+                " — set OPENAI_API_KEY for richer LLM coaching."
+                if not os.getenv("OPENAI_API_KEY")
+                else "."
+            )
+            + mode_note
+        ),
+        strengths=strengths or ["You attempted a full answer — good start."],
+        gaps=gaps or ["Tighten structure and end on a measurable outcome."],
+        better_answer=better,
+        next_drill=(
+            "Retry the same custom question out loud — tighter open, clearer metric."
+            if input_mode == "voice"
+            else "Practice the same custom question once out loud, timed to 90–120s."
+        ),
+        provider="local-custom-rubric",
+        delivery_tips=delivery,
+        input_mode=input_mode,
+    )
+
+
+def _openai_custom_feedback(
+    track: Track,
+    prompt: str,
+    answer: str,
+    input_mode: str = "text",
+    topic_id: str | None = None,
+) -> FeedbackResponse | None:
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        return None
+    try:
+        from openai import OpenAI
+    except ImportError:
+        return None
+
+    client = OpenAI(api_key=api_key)
+    voice_extra = ""
+    if input_mode == "voice":
+        voice_extra = (
+            " The answer was spoken (speech-to-text). Coach spoken interview delivery: "
+            "grammar that sounds natural when spoken, filler words, pacing, clarity, "
+            "and a crisp ending. Put delivery notes in delivery_tips."
+        )
+    system = (
+        "You are a tough but fair interview coach for software engineers. "
+        "The candidate brought their OWN interview question (not from our bank). "
+        "Score 1-5 on: (1) structure — clear open, ownership, tradeoff, outcome; "
+        "(2) specificity — answers THIS exact question, not a generic spiel; "
+        "(3) delivery readiness — concise spoken shape. "
+        "Do not invent bank 'signal words'. Coach as if this question will be asked live."
+        + voice_extra
+    )
+    if track.id == "staff-interview":
+        system += (
+            " Staff lens: personal ownership, explicit tradeoffs, systems thinking, influence."
+        )
+    elif track.id == "em-interview":
+        system += (
+            " EM lens: people ownership, hiring bar, delivery prioritization, stakeholders."
+        )
+    user = (
+        f"Track: {track.title}\n"
+        f"Topic id: {topic_id or 'n/a'}\n"
+        f"Input mode: {input_mode}\n"
+        f"Candidate's own question:\n{prompt}\n\n"
+        f"Candidate answer:\n{answer}\n\n"
+        "Respond in JSON with keys: score (int 1-5), summary, strengths (array), "
+        "gaps (array), better_answer (string — rewrite shape for THIS question), "
+        "next_drill (string), "
+        "delivery_tips (array of spoken grammar/delivery tips; empty if text mode)."
+    )
+    try:
+        completion = client.chat.completions.create(
+            model=os.getenv("OPENAI_TUTOR_MODEL", "gpt-4o-mini"),
+            temperature=0.3,
+            response_format={"type": "json_object"},
+            messages=[
+                {"role": "system", "content": system},
+                {"role": "user", "content": user},
+            ],
+        )
+        raw = completion.choices[0].message.content or "{}"
+        data = json.loads(raw)
+        tips = list(data.get("delivery_tips") or [])[:4]
+        if input_mode == "voice" and not tips:
+            tips = _delivery_tips(answer)
+        return FeedbackResponse(
+            score=max(1, min(5, int(data.get("score", 3)))),
+            summary=str(data.get("summary", "Custom-question coaching complete.")),
+            strengths=list(data.get("strengths") or [])[:4],
+            gaps=list(data.get("gaps") or [])[:4],
+            better_answer=str(data.get("better_answer", "")),
+            next_drill=str(
+                data.get("next_drill", "Practice the same custom question again out loud.")
+            ),
+            provider="openai-custom",
+            delivery_tips=tips,
+            input_mode=input_mode,
+        )
+    except Exception:
+        return None
+
+
+def generate_custom_feedback(
+    track: Track,
+    prompt: str,
+    answer: str,
+    input_mode: str = "text",
+    topic_id: str | None = None,
+) -> FeedbackResponse:
+    mode = input_mode if input_mode in {"text", "voice"} else "text"
+    cleaned = prompt.strip()
+    if len(cleaned) < 8:
+        raise ValueError("Custom prompt is too short")
+    llm = _openai_custom_feedback(track, cleaned, answer, mode, topic_id)
+    if llm:
+        return llm
+    return _heuristic_custom_feedback(track, cleaned, answer, mode)
+
+
 def generate_feedback(body: FeedbackRequest) -> FeedbackResponse:
     track = get_track(body.track_id)
-    question = get_question(body.question_id)
-    if not track or not question or question.track_id != body.track_id:
-        raise ValueError("Unknown track or question")
+    if not track:
+        raise ValueError("Unknown track")
 
     mode = body.input_mode if body.input_mode in {"text", "voice"} else "text"
+    custom_prompt = (body.custom_prompt or "").strip()
+    if custom_prompt:
+        return generate_custom_feedback(
+            track, custom_prompt, body.answer, mode, body.topic_id
+        )
+
+    if not body.question_id:
+        raise ValueError("question_id or custom_prompt required")
+    question = get_question(body.question_id)
+    if not question or question.track_id != body.track_id:
+        raise ValueError("Unknown track or question")
+
     llm = _openai_feedback(question, track, body.answer, mode)
     if llm:
         return llm
