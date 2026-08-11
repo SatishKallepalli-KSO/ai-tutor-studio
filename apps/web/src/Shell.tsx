@@ -1,9 +1,16 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { AmbientField } from './AmbientField'
+import { FREE_PRACTICE_TRACKS } from './api'
 import { useAuth } from './auth'
 import { BRAND, PERSONAS, type Persona } from './brand'
 import { ChatDock } from './ChatDock'
+import { topicsForTrack } from './curriculum'
+import {
+  buildLearnSearch,
+  DEFAULT_PRACTICE_TRACK,
+  getResumePointer,
+} from './learnProgress'
 import { usePersona } from './persona'
 // Hashed under /assets/ so CDN cannot reuse a poisoned /logo.png SPA HTML cache entry.
 import brandMarkUrl from './assets/pol-mark.png'
@@ -58,6 +65,25 @@ export function Shell({
   const docsHref = `${import.meta.env.BASE_URL}product/`
   const [logoFailed, setLogoFailed] = useState(false)
 
+  const practiceHref = useMemo(() => {
+    const resume = getResumePointer()
+    const canResume =
+      !!resume &&
+      (FREE_PRACTICE_TRACKS.has(resume.trackId) || !!user?.is_pro)
+    const path =
+      canResume && resume ? resume.trackId : DEFAULT_PRACTICE_TRACK
+    const topic =
+      (canResume && resume?.lastTopicId) ||
+      topicsForTrack(path)[0]?.id ||
+      null
+    return `/${buildLearnSearch({
+      path,
+      mode: 'practice',
+      topic,
+      q: canResume && resume ? resume.lastQuestionId : null,
+    })}`
+  }, [user?.is_pro])
+
   return (
     <div className={wide ? 'shell shell-wide' : 'shell'}>
       <div className="atmosphere" aria-hidden="true" />
@@ -92,6 +118,7 @@ export function Shell({
           {isLearner ? (
             <>
               <Link to="/">Learn</Link>
+              <Link to={practiceHref}>Practice</Link>
               <Link to="/agentic-path">Agentic AI</Link>
               <Link to="/snowflake-path">Snowflake</Link>
               <Link to="/jobs">Jobs</Link>

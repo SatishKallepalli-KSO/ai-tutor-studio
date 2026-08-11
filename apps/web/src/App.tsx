@@ -13,7 +13,11 @@ import { track as trackEvent } from './analytics'
 import { useAuth } from './auth'
 import { AUDIENCES, AI_ENGINEER_JOURNEY, BRAND } from './brand'
 import { getTopic, topicsForTrack, type Topic } from './curriculum'
+import { localQuestions } from './data'
 import {
+  DEFAULT_PRACTICE_TRACK,
+  getRecommendedNext,
+  getResumePointer,
   getTrackProgress,
   markTopicStudied,
   pathStats,
@@ -152,6 +156,47 @@ export default function App() {
     void progressTick
     return trackId ? getTrackProgress(trackId) : null
   }, [trackId, progressTick])
+
+  const resume = useMemo(() => {
+    void progressTick
+    return getResumePointer()
+  }, [progressTick])
+
+  const resumeCard = useMemo(() => {
+    if (!resume) return null
+    const topicIds = topicsForTrack(resume.trackId).map((t) => t.id)
+    const qs = localQuestions(resume.trackId)
+    const stats = pathStats(
+      resume.trackId,
+      topicIds,
+      qs.map((q) => q.id),
+    )
+    const recommended = getRecommendedNext({
+      trackId: resume.trackId,
+      topicIds,
+      questions: qs,
+      topicTitle: (id) => getTopic(id)?.title,
+    })
+    return {
+      ...resume,
+      stats,
+      recommended,
+      trackTitle:
+        tracks.find((t) => t.id === resume.trackId)?.title ?? resume.trackId,
+      topicTitle: resume.lastTopicId
+        ? (getTopic(resume.lastTopicId)?.title ?? resume.lastTopicId)
+        : undefined,
+    }
+  }, [resume, tracks])
+
+  const queueIndex = useMemo(() => {
+    if (!questionId) return -1
+    return topicQuestions.findIndex((q) => q.id === questionId)
+  }, [questionId, topicQuestions])
+  const queuePos = queueIndex >= 0 ? queueIndex + 1 : 0
+  const queueTotal = topicQuestions.length
+  const sessionPct =
+    queueTotal > 0 ? Math.round((queuePos / queueTotal) * 100) : 0
 
   useEffect(() => {
     api
@@ -334,6 +379,67 @@ export default function App() {
     stopSpeaking()
   }
 
+  function startPracticing() {
+    setError(null)
+    setPaywall(null)
+    setFeedback(null)
+    setAnswer('')
+    const pointer = getResumePointer()
+    const canUseResume =
+      !!pointer &&
+      (FREE_PRACTICE_TRACKS.has(pointer.trackId) || !!user?.is_pro)
+    const path = canUseResume && pointer ? pointer.trackId : DEFAULT_PRACTICE_TRACK
+    const topics = topicsForTrack(path)
+    const topic =
+      (canUseResume && pointer?.lastTopicId) || topics[0]?.id || null
+    const qs = localQuestions(path)
+    const topicQs = topic ? qs.filter((q) => q.topic_id === topic) : qs
+    const q =
+      (canUseResume &&
+        pointer?.lastQuestionId &&
+        qs.some((item) => item.id === pointer.lastQuestionId) &&
+        pointer.lastQuestionId) ||
+      topicQs[0]?.id ||
+      null
+    writeLearnUrl({
+      path,
+      mode: 'practice',
+      topic,
+      q,
+    })
+    trackEvent('practice_start', {
+      path: '/',
+      properties: { track_id: path, topic_id: topic, source: 'hero_start' },
+    })
+  }
+
+  function continueWhereLeftOff() {
+    const pointer = getResumePointer()
+    if (!pointer) return
+    setError(null)
+    setPaywall(null)
+    setFeedback(null)
+    setAnswer('')
+    const canPracticeTrack =
+      FREE_PRACTICE_TRACKS.has(pointer.trackId) || !!user?.is_pro
+    const mode =
+      pointer.lastQuestionId && canPracticeTrack ? 'practice' : 'learn'
+    writeLearnUrl({
+      path: pointer.trackId,
+      mode,
+      topic: pointer.lastTopicId ?? null,
+      q: mode === 'practice' ? (pointer.lastQuestionId ?? null) : null,
+    })
+    trackEvent(mode === 'practice' ? 'practice_start' : 'learn_open', {
+      path: '/',
+      properties: {
+        track_id: pointer.trackId,
+        topic_id: pointer.lastTopicId,
+        source: 'hero_continue',
+      },
+    })
+  }
+
   function goPractice(forTopicId?: string) {
     if (!user) {
       setPaywall('Sign in to practice and get feedback on your answers.')
@@ -480,20 +586,27 @@ export default function App() {
                 </>
               ) : (
                 <>
-                  <Link className="btn primary" to="/agentic-path">
-                    Explore Agentic AI
-                  </Link>
                   <button
                     type="button"
-                    className="btn ghost"
+                    className="btn primary"
                     disabled={loading}
-                    onClick={() => void selectTrack('staff-interview')}
+                    onClick={startPracticing}
                   >
-                    Practice Staff loop
+                    {BRAND.ctaStart}
                   </button>
-                  <a className="btn ghost" href="#paths">
-                    Browse all paths
-                  </a>
+                  {resume && (
+                    <button
+                      type="button"
+                      className="btn ghost"
+                      disabled={loading}
+                      onClick={continueWhereLeftOff}
+                    >
+                      {BRAND.ctaContinue}
+                    </button>
+                  )}
+                  <Link className="btn ghost" to="/agentic-path">
+                    {BRAND.ctaExploreAgentic}
+                  </Link>
                 </>
               )}
             </div>
@@ -528,6 +641,74 @@ export default function App() {
                 <b>Free</b> to start · Pro when ready
               </span>
             </div>
+          )}
+
+          {!isRecruiter && resumeCard && (
+            <section
+              className="personalization-strip reveal"
+              aria-label="Continue learning"
+            >
+              <div className="personalization-continue">
+                <p className="eyebrow">Continue where you left off</p>
+                <strong>
+                  {resumeCard.trackTitle}
+                  {resumeCard.topicTitle ? ` · ${resumeCard.topicTitle}` : ''}
+                </strong>
+                <div className="personalization-progress">
+                  <div
+                    className="personalization-progress-bar"
+                    role="progressbar"
+                    aria-valuenow={resumeCard.stats.pct}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-label={`${resumeCard.stats.pct}% path progress`}
+                  >
+                    <span style={{ width: `${resumeCard.stats.pct}%` }} />
+                  </div>
+                  <em>{resumeCard.stats.pct}% complete</em>
+                </div>
+                <button
+                  type="button"
+                  className="btn primary sm"
+                  disabled={loading}
+                  onClick={continueWhereLeftOff}
+                >
+                  {BRAND.ctaContinue}
+                </button>
+              </div>
+              {resumeCard.recommended && (
+                <div className="personalization-next">
+                  <p className="eyebrow">Recommended next</p>
+                  <strong>{resumeCard.recommended.label}</strong>
+                  <p className="muted">
+                    {resumeCard.recommended.reason === 'weakest'
+                      ? 'Revisit a weak answer until it lands.'
+                      : resumeCard.recommended.reason === 'unattempted'
+                        ? 'Keep the practice loop moving.'
+                        : 'Study the next topic, then speak it.'}
+                  </p>
+                  <button
+                    type="button"
+                    className="btn ghost sm"
+                    disabled={loading}
+                    onClick={() => {
+                      const rec = resumeCard.recommended
+                      if (!rec) return
+                      writeLearnUrl({
+                        path: rec.trackId,
+                        mode: rec.questionId ? 'practice' : 'learn',
+                        topic: rec.topicId,
+                        q: rec.questionId ?? null,
+                      })
+                    }}
+                  >
+                    {resumeCard.recommended.questionId
+                      ? 'Practice this'
+                      : 'Open topic'}
+                  </button>
+                </div>
+              )}
+            </section>
           )}
 
           {!isRecruiter && <SocialProof />}
@@ -1122,6 +1303,28 @@ export default function App() {
               </aside>
 
               <div className="panel practice-main">
+                <div className="session-progress">
+                  <div className="session-progress-meta">
+                    <span>
+                      {queueTotal > 0
+                        ? `Question ${queuePos} of ${queueTotal}`
+                        : 'Practice session'}
+                      {topic ? ` · ${topic.title}` : ''}
+                    </span>
+                    <span>{sessionPct}%</span>
+                  </div>
+                  <div
+                    className="session-progress-bar"
+                    role="progressbar"
+                    aria-valuenow={sessionPct}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-label="Session progress"
+                  >
+                    <span style={{ width: `${sessionPct}%` }} />
+                  </div>
+                </div>
+
                 {topic && (
                   <button
                     className="linkish doc-link"
@@ -1166,7 +1369,7 @@ export default function App() {
                           <span className="pill voice">Voice</span>
                         )}
                       </label>
-                      <div className="voice-actions">
+                      <div className="practice-actions">
                         {speech.listening ? (
                           <button
                             type="button"
@@ -1188,20 +1391,36 @@ export default function App() {
                             }}
                             disabled={!speech.supported}
                           >
-                            Speak answer
+                            Speak
                           </button>
                         )}
                         <button
                           type="button"
-                          className="btn ghost sm"
+                          className="btn ghost"
                           onClick={() => {
-                            setAnswer('')
-                            setInterim('')
                             setInputMode('text')
                             speech.stop()
+                            setInterim('')
+                            document.getElementById('answer')?.focus()
                           }}
                         >
-                          Clear
+                          Type
+                        </button>
+                        <button
+                          type="button"
+                          className="btn primary"
+                          onClick={submitAnswer}
+                          disabled={loading || !liveAnswer.trim()}
+                        >
+                          {loading ? 'Coaching…' : 'Submit'}
+                        </button>
+                        <button
+                          type="button"
+                          className="btn ghost sm"
+                          onClick={goNextQuestion}
+                          disabled={queueTotal <= 1}
+                        >
+                          Skip
                         </button>
                       </div>
                     </div>
@@ -1239,19 +1458,6 @@ export default function App() {
                         Target 90–120s
                       </span>
                     </div>
-                    <div className="actions">
-                      <button
-                        className="btn primary"
-                        onClick={submitAnswer}
-                        disabled={loading || !liveAnswer.trim()}
-                      >
-                        {loading
-                          ? 'Coaching…'
-                          : inputMode === 'voice'
-                            ? 'Get voice + content feedback'
-                            : 'Get AI feedback'}
-                      </button>
-                    </div>
                   </>
                 )}
 
@@ -1279,34 +1485,45 @@ export default function App() {
                         </small>
                       </div>
                     </div>
-                    <div className="feedback-grid">
-                      <div className="fb-col good">
-                        <h4>Strengths</h4>
-                        <ul>
-                          {feedback.strengths.map((s) => (
-                            <li key={s}>{s}</li>
-                          ))}
-                        </ul>
+                    <div className="feedback-dims">
+                      <div className="fb-dim content">
+                        <h4>Content</h4>
+                        <p className="muted">{feedback.summary}</p>
+                        {!!feedback.strengths.length && (
+                          <ul>
+                            {feedback.strengths.map((s) => (
+                              <li key={s}>{s}</li>
+                            ))}
+                          </ul>
+                        )}
                       </div>
-                      <div className="fb-col gap">
-                        <h4>Gaps</h4>
-                        <ul>
-                          {feedback.gaps.map((g) => (
-                            <li key={g}>{g}</li>
-                          ))}
-                        </ul>
+                      <div className="fb-dim clarity">
+                        <h4>Clarity</h4>
+                        {feedback.gaps.length ? (
+                          <ul>
+                            {feedback.gaps.map((g) => (
+                              <li key={g}>{g}</li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="muted">No clarity gaps called out.</p>
+                        )}
+                      </div>
+                      <div className="fb-dim delivery">
+                        <h4>Delivery</h4>
+                        {feedback.delivery_tips?.length ? (
+                          <ul>
+                            {feedback.delivery_tips.map((tip) => (
+                              <li key={tip}>{tip}</li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="muted">
+                            No delivery notes — try Speak next time for voice tips.
+                          </p>
+                        )}
                       </div>
                     </div>
-                    {!!feedback.delivery_tips?.length && (
-                      <div className="delivery">
-                        <h4>Spoken delivery &amp; grammar</h4>
-                        <ul>
-                          {feedback.delivery_tips.map((tip) => (
-                            <li key={tip}>{tip}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
                     <h4>Stronger answer shape</h4>
                     <pre>{feedback.better_answer}</pre>
                     <p className="next">
@@ -1318,9 +1535,7 @@ export default function App() {
                         className="btn primary"
                         onClick={retrySameQuestion}
                       >
-                        {feedback.score < 4
-                          ? 'Retry out loud (aim ≥4)'
-                          : 'Retry for polish'}
+                        Practice again
                       </button>
                       <button
                         type="button"
@@ -1340,7 +1555,7 @@ export default function App() {
                           })
                         }
                       >
-                        Review docs for gaps
+                        Review docs
                       </button>
                     </div>
                   </div>

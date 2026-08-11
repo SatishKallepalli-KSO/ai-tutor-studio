@@ -7,9 +7,13 @@ export const BRAND = {
   /** Short nav line under the brand. */
   tagline: 'Learn · Practice · AI feedback',
   /** Primary headline under the product name. */
-  magnet: 'Learn, practice, and get AI feedback',
+  magnet: 'Learn, practice out loud, get AI feedback',
   magnetSub:
-    'One platform to become an AI engineer — study paths, practice out loud, and get coaching on content and delivery. Free to start.',
+    'For engineers leveling into AI and interview-ready oral practice. Study a path, speak answers out loud, and get coaching on content and delivery — free to start.',
+  /** Homepage primary CTA label. */
+  ctaStart: 'Start practicing',
+  ctaContinue: 'Continue',
+  ctaExploreAgentic: 'Explore Agentic AI',
   oneLiner:
     'Practice Out Loud helps you learn AI engineering, practice out loud, and get AI feedback — Agentic paths, interviews, and stack depth in one place. Free to start, Pro for full access.',
   copyright: '© 2026 Practice Out Loud · Kallepalli Labs. All rights reserved.',
