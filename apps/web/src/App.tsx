@@ -27,7 +27,7 @@ import {
   type CustomQuestionRecord,
 } from './customQuestions'
 import {
-  DEFAULT_PRACTICE_TRACK,
+  DEFAULT_CUSTOM_CONTEXT_TRACK,
   getRecommendedNext,
   getResumePointer,
   getTrackProgress,
@@ -115,6 +115,20 @@ export default function App() {
     const search = sp.toString()
     navigate({ pathname: '/', search: search ? `?${search}` : '' })
   }
+
+  /** Open Home focused on the Practice hub chooser — never auto-enter a track. */
+  function openPracticeHub(opts?: { replace?: boolean }) {
+    const sp = new URLSearchParams()
+    const billing = params.get('billing')
+    if (billing) sp.set('billing', billing)
+    sp.set('hub', 'practice')
+    navigate(
+      { pathname: '/', search: `?${sp.toString()}` },
+      { replace: opts?.replace },
+    )
+  }
+
+  const practiceHubFocused = params.get('hub') === 'practice' && !params.get('path')
 
   const speech = useSpeechAnswer({
     onTranscript: (finalChunk, liveInterim) => {
@@ -245,6 +259,17 @@ export default function App() {
   useEffect(() => {
     if (params.get('billing') === 'success') void refresh()
   }, [params, refresh])
+
+  // Focus Practice hub when navigated via nav or Start practicing (no silent path dump).
+  useEffect(() => {
+    if (params.get('hub') !== 'practice' || params.get('path')) return
+    const el = document.getElementById('practice-hub')
+    if (!el) return
+    const t = window.setTimeout(() => {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 60)
+    return () => window.clearTimeout(t)
+  }, [params])
 
   // Browser Back/Forward + deep links: URL is the source of truth for workspace.
   useEffect(() => {
@@ -465,15 +490,21 @@ export default function App() {
     const canUseResume =
       !!pointer &&
       (FREE_PRACTICE_TRACKS.has(pointer.trackId) || !!user?.is_pro)
-    const path = canUseResume && pointer ? pointer.trackId : DEFAULT_PRACTICE_TRACK
+    if (!canUseResume || !pointer) {
+      openPracticeHub()
+      trackEvent('practice_hub_open', {
+        path: '/',
+        properties: { source: 'hero_start' },
+      })
+      return
+    }
+    const path = pointer.trackId
     const topics = topicsForTrack(path)
-    const topic =
-      (canUseResume && pointer?.lastTopicId) || topics[0]?.id || null
+    const topic = pointer.lastTopicId || topics[0]?.id || null
     const qs = localQuestions(path)
     const topicQs = topic ? qs.filter((q) => q.topic_id === topic) : qs
     const q =
-      (canUseResume &&
-        pointer?.lastQuestionId &&
+      (pointer.lastQuestionId &&
         qs.some((item) => item.id === pointer.lastQuestionId) &&
         pointer.lastQuestionId) ||
       topicQs[0]?.id ||
@@ -487,6 +518,38 @@ export default function App() {
     trackEvent('practice_start', {
       path: '/',
       properties: { track_id: path, topic_id: topic, source: 'hero_start' },
+    })
+  }
+
+  function startPracticeOnTrack(path: string) {
+    setError(null)
+    setPaywall(null)
+    setFeedback(null)
+    setAnswer('')
+    if (!FREE_PRACTICE_TRACKS.has(path) && !user?.is_pro) {
+      if (!user) {
+        setPaywall('Sign in to practice and get feedback on your answers.')
+        return
+      }
+      setPaywall(
+        'This path is Pro-only. Go Pro to unlock Staff, EM, Java→AI, and advanced language drills.',
+      )
+      void selectTrack(path)
+      return
+    }
+    const topics = topicsForTrack(path)
+    const topic = topics[0]?.id || null
+    const qs = localQuestions(path)
+    const topicQs = topic ? qs.filter((q) => q.topic_id === topic) : qs
+    writeLearnUrl({
+      path,
+      mode: 'practice',
+      topic,
+      q: topicQs[0]?.id ?? null,
+    })
+    trackEvent('practice_start', {
+      path: '/',
+      properties: { track_id: path, topic_id: topic, source: 'practice_hub' },
     })
   }
 
@@ -505,7 +568,7 @@ export default function App() {
       (FREE_PRACTICE_TRACKS.has(pointer.trackId) || !!user?.is_pro)
     const path =
       opts?.path ||
-      (canUseResume && pointer ? pointer.trackId : DEFAULT_PRACTICE_TRACK)
+      (canUseResume && pointer ? pointer.trackId : DEFAULT_CUSTOM_CONTEXT_TRACK)
     const topics = topicsForTrack(path)
     const topic =
       opts?.topic ??
@@ -910,6 +973,114 @@ export default function App() {
 
           {!isRecruiter && (
             <section
+              id="practice-hub"
+              className={`practice-hub reveal${practiceHubFocused ? ' focused' : ''}`}
+              aria-label="Practice hub"
+            >
+              <div className="section-title">
+                <h2>Practice</h2>
+                <p className="muted">
+                  Choose a clear next step — continue, bring your own question, or
+                  pick a path. Nothing auto-starts until you choose.
+                </p>
+              </div>
+
+              <div className="practice-hub-grid">
+                {resumeCard && (
+                  <button
+                    type="button"
+                    className="practice-hub-card continue"
+                    disabled={loading}
+                    onClick={continueWhereLeftOff}
+                  >
+                    <span className="eyebrow">Continue</span>
+                    <strong>
+                      {resumeCard.trackTitle}
+                      {resumeCard.topicTitle
+                        ? ` · ${resumeCard.topicTitle}`
+                        : ''}
+                    </strong>
+                    <p>
+                      {resumeCard.stats.pct}% complete
+                      {resumeCard.recommended
+                        ? ` · ${resumeCard.recommended.label}`
+                        : ''}
+                    </p>
+                    <span className="meta">{BRAND.ctaContinue} →</span>
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  className="practice-hub-card custom"
+                  disabled={loading}
+                  onClick={() => startCustomPractice()}
+                >
+                  <span className="eyebrow">Your question</span>
+                  <strong>{BRAND.customFeatureTitle}</strong>
+                  <p>Paste a real panel prompt and get the same AI coach.</p>
+                  <span className="meta">{BRAND.ctaCustomQuestion} →</span>
+                </button>
+
+                <Link to="/agentic-path" className="practice-hub-card agentic">
+                  <span className="eyebrow">Featured path</span>
+                  <strong>Agentic AI curriculum</strong>
+                  <p>Watch → mark done → practice with AI feedback.</p>
+                  <span className="meta">Open Agentic path →</span>
+                </Link>
+
+                <button
+                  type="button"
+                  className="practice-hub-card"
+                  disabled={loading}
+                  onClick={() => startPracticeOnTrack('python')}
+                >
+                  <span className="eyebrow">Free practice</span>
+                  <strong>Python</strong>
+                  <p>Curated drills — free speak &amp; coach loop.</p>
+                  <span className="meta">Start practicing →</span>
+                </button>
+
+                <button
+                  type="button"
+                  className="practice-hub-card"
+                  disabled={loading}
+                  onClick={() => startPracticeOnTrack('javascript')}
+                >
+                  <span className="eyebrow">Free practice</span>
+                  <strong>JavaScript</strong>
+                  <p>Language fundamentals, spoken out loud.</p>
+                  <span className="meta">Start practicing →</span>
+                </button>
+
+                <button
+                  type="button"
+                  className="practice-hub-card"
+                  disabled={loading}
+                  onClick={() => void selectTrack('staff-interview')}
+                >
+                  <span className="eyebrow">Interview</span>
+                  <strong>Staff Engineer loop</strong>
+                  <p>
+                    Ownership, design, influence — Pro to practice with feedback.
+                  </p>
+                  <span className="meta">Open path →</span>
+                </button>
+              </div>
+
+              <div className="practice-hub-more">
+                <a className="linkish" href="#paths">
+                  Browse full catalog ↓
+                </a>
+                <Link className="linkish" to="/snowflake-path">
+                  Snowflake path →
+                </Link>
+              </div>
+            </section>
+          )}
+
+          {!isRecruiter && (
+            <section
               className="feature-callout custom-question-callout reveal"
               aria-label="Practice your own question"
             >
@@ -931,79 +1102,11 @@ export default function App() {
                   type="button"
                   className="btn ghost"
                   disabled={loading}
-                  onClick={startPracticing}
+                  onClick={() => openPracticeHub()}
                 >
-                  Or start with curated drills
+                  See all practice options
                 </button>
               </div>
-            </section>
-          )}
-
-          {!isRecruiter && resumeCard && (
-            <section
-              className="personalization-strip reveal"
-              aria-label="Continue learning"
-            >
-              <div className="personalization-continue">
-                <p className="eyebrow">Continue where you left off</p>
-                <strong>
-                  {resumeCard.trackTitle}
-                  {resumeCard.topicTitle ? ` · ${resumeCard.topicTitle}` : ''}
-                </strong>
-                <div className="personalization-progress">
-                  <div
-                    className="personalization-progress-bar"
-                    role="progressbar"
-                    aria-valuenow={resumeCard.stats.pct}
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                    aria-label={`${resumeCard.stats.pct}% path progress`}
-                  >
-                    <span style={{ width: `${resumeCard.stats.pct}%` }} />
-                  </div>
-                  <em>{resumeCard.stats.pct}% complete</em>
-                </div>
-                <button
-                  type="button"
-                  className="btn primary sm"
-                  disabled={loading}
-                  onClick={continueWhereLeftOff}
-                >
-                  {BRAND.ctaContinue}
-                </button>
-              </div>
-              {resumeCard.recommended && (
-                <div className="personalization-next">
-                  <p className="eyebrow">Recommended next</p>
-                  <strong>{resumeCard.recommended.label}</strong>
-                  <p className="muted">
-                    {resumeCard.recommended.reason === 'weakest'
-                      ? 'Revisit a weak answer until it lands.'
-                      : resumeCard.recommended.reason === 'unattempted'
-                        ? 'Keep the practice loop moving.'
-                        : 'Study the next topic, then speak it.'}
-                  </p>
-                  <button
-                    type="button"
-                    className="btn ghost sm"
-                    disabled={loading}
-                    onClick={() => {
-                      const rec = resumeCard.recommended
-                      if (!rec) return
-                      writeLearnUrl({
-                        path: rec.trackId,
-                        mode: rec.questionId ? 'practice' : 'learn',
-                        topic: rec.topicId,
-                        q: rec.questionId ?? null,
-                      })
-                    }}
-                  >
-                    {resumeCard.recommended.questionId
-                      ? 'Practice this'
-                      : 'Open topic'}
-                  </button>
-                </div>
-              )}
             </section>
           )}
 
@@ -1028,9 +1131,9 @@ export default function App() {
               aria-label="Featured learning paths"
             >
               <div className="section-title">
-                <h2>Learn · practice · AI feedback</h2>
+                <h2>Featured paths</h2>
                 <p className="muted">
-                  Agentic AI, production AI upskilling, and interview loops —
+                  Agentic AI, Staff interviews, and production AI upskilling —
                   same study → speak → coach loop.
                 </p>
               </div>
@@ -1227,12 +1330,12 @@ export default function App() {
               <h2>
                 {isRecruiter
                   ? 'Paths talent trains on'
-                  : 'Full catalog — AI engineer to interview'}
+                  : 'Path catalog'}
               </h2>
               <p className="muted">
                 {isRecruiter
                   ? `${tracks.length} paths learners use before they apply`
-                  : 'Learn · practice · AI feedback · become an AI engineer'}
+                  : 'Grouped by Career switches · Interview · Languages — study free, practice when ready'}
               </p>
             </div>
 
@@ -1249,7 +1352,7 @@ export default function App() {
                         <h3>{group.title}</h3>
                         <p>{group.blurb}</p>
                       </div>
-                      {group.id === 'ai-engineer' && (
+                      {group.id === 'career' && (
                         <>
                           <Link to="/agentic-path" className="path-banner">
                             <strong>Full Agentic AI video curriculum</strong>
@@ -1335,14 +1438,35 @@ export default function App() {
       {activeTrack && step !== 'tracks' && (
         <section className="workspace reveal">
           <div className="workspace-head">
-            <button
-              className="linkish"
-              onClick={() => {
-                clearLearnUrl()
-              }}
-            >
-              ← All paths
-            </button>
+            <nav className="workspace-crumb" aria-label="Breadcrumb">
+              <button
+                type="button"
+                className="linkish"
+                onClick={() => clearLearnUrl()}
+              >
+                Home
+              </button>
+              <span className="crumb-sep" aria-hidden="true">
+                /
+              </span>
+              <button
+                type="button"
+                className="linkish"
+                onClick={() => {
+                  if (step === 'practice') {
+                    openPracticeHub()
+                    return
+                  }
+                  clearLearnUrl()
+                }}
+              >
+                {step === 'practice' ? 'Practice' : 'Study'}
+              </button>
+              <span className="crumb-sep" aria-hidden="true">
+                /
+              </span>
+              <span className="crumb-current">{activeTrack.title}</span>
+            </nav>
             <div className="workspace-title">
               <h2>
                 {activeTrack.title}

@@ -8,7 +8,8 @@ import { ChatDock } from './ChatDock'
 import { topicsForTrack } from './curriculum'
 import {
   buildLearnSearch,
-  DEFAULT_PRACTICE_TRACK,
+  buildPracticeHubSearch,
+  DEFAULT_CUSTOM_CONTEXT_TRACK,
   getResumePointer,
 } from './learnProgress'
 import { usePersona } from './persona'
@@ -65,22 +66,25 @@ export function Shell({
   const docsHref = `${import.meta.env.BASE_URL}product/`
   const [logoFailed, setLogoFailed] = useState(false)
 
+  /**
+   * Practice nav: continue last path/topic when progress exists;
+   * otherwise open the Practice hub chooser on Home — never dump into a random track.
+   */
   const practiceHref = useMemo(() => {
     const resume = getResumePointer()
     const canResume =
       !!resume &&
       (FREE_PRACTICE_TRACKS.has(resume.trackId) || !!user?.is_pro)
-    const path =
-      canResume && resume ? resume.trackId : DEFAULT_PRACTICE_TRACK
+    if (!canResume || !resume) {
+      return `/${buildPracticeHubSearch()}`
+    }
     const topic =
-      (canResume && resume?.lastTopicId) ||
-      topicsForTrack(path)[0]?.id ||
-      null
+      resume.lastTopicId || topicsForTrack(resume.trackId)[0]?.id || null
     return `/${buildLearnSearch({
-      path,
+      path: resume.trackId,
       mode: 'practice',
       topic,
-      q: canResume && resume ? resume.lastQuestionId : null,
+      q: resume.lastQuestionId ?? null,
     })}`
   }, [user?.is_pro])
 
@@ -90,7 +94,7 @@ export function Shell({
       !!resume &&
       (FREE_PRACTICE_TRACKS.has(resume.trackId) || !!user?.is_pro)
     const path =
-      canResume && resume ? resume.trackId : DEFAULT_PRACTICE_TRACK
+      canResume && resume ? resume.trackId : DEFAULT_CUSTOM_CONTEXT_TRACK
     const topic =
       (canResume && resume?.lastTopicId) ||
       topicsForTrack(path)[0]?.id ||
@@ -136,15 +140,15 @@ export function Shell({
         <nav className="site-links" aria-label="Primary">
           {isLearner ? (
             <>
-              <Link to="/">Learn</Link>
+              <Link to="/">Home</Link>
               <Link to={practiceHref}>Practice</Link>
               <Link to={customPracticeHref} title="Bring any interview question">
                 Your question
               </Link>
               <Link to="/agentic-path">Agentic AI</Link>
-              <Link to="/snowflake-path">Snowflake</Link>
-              <Link to="/jobs">Jobs</Link>
               <MoreMenu label="More">
+                <Link to="/snowflake-path">Snowflake</Link>
+                <Link to="/jobs">Jobs</Link>
                 <Link to="/network">Network</Link>
                 <Link to="/messages">Chat</Link>
                 <Link to="/profile">Profile</Link>
@@ -245,23 +249,23 @@ export const TRACK_GROUPS: {
   trackIds: string[]
 }[] = [
   {
-    id: 'ai-engineer',
-    title: 'Become an AI engineer',
+    id: 'career',
+    title: 'Career switches',
     blurb:
-      'Production AI upskilling — RAG, agents, evals, LLM ops — plus Agentic and Snowflake video paths.',
+      'Map your current stack into AI engineering — then practice the story out loud.',
     trackIds: ['java-to-ai', 'java-to-python'],
   },
   {
     id: 'interview',
-    title: 'Interview practice',
-    blurb: 'Staff & EM loops when you need the panel — speak them until they land.',
+    title: 'Interview loops',
+    blurb: 'Staff & EM panels — speak ownership, design, and leadership until they land.',
     trackIds: ['staff-interview', 'em-interview'],
   },
   {
     id: 'languages',
-    title: 'Foundations & stack depth',
+    title: 'Languages & stack',
     blurb:
-      'Language fundamentals that every AI engineer leans on day to day.',
+      'Foundations every AI engineer leans on day to day. Free practice on HTML, CSS, JS, and Python.',
     trackIds: [
       'python',
       'java',

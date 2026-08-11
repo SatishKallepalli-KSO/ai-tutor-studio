@@ -32,8 +32,16 @@ export type RecommendedNext = {
 const KEY = 'ats_learn_progress_v1'
 const LAST_TRACK_KEY = 'ats_learn_last_track_v1'
 
-/** Default free practice path — AI-oriented, no Pro gate. */
-export const DEFAULT_PRACTICE_TRACK = 'java-to-python'
+/**
+ * Neutral free track used only when custom practice needs a path context
+ * and the learner has no resume pointer. Never use this as a silent Practice dump.
+ */
+export const DEFAULT_CUSTOM_CONTEXT_TRACK = 'python'
+
+/** Homepage Practice hub chooser (`/?hub=practice`) — pick a path, don't auto-enter one. */
+export function buildPracticeHubSearch(): string {
+  return '?hub=practice'
+}
 
 function readAll(): Record<string, TrackProgress> {
   try {
@@ -301,3 +309,4 @@ export function buildLearnSearch(opts: {
   }
   return `?${sp.toString()}`
 }
+
