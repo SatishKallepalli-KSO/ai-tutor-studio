@@ -63,10 +63,10 @@ export const AUDIENCES = {
       'Backend and fullstack engineers leveling into production AI — and anyone who wants to learn, practice out loud, and get AI coaching before the real interview.',
   },
   companies: {
-    label: 'Later · B2B',
-    title: 'Hiring teams (phase 2)',
+    label: 'For companies',
+    title: 'Hiring teams',
     blurb:
-      'Jobs, talent profiles, and messaging exist today — sold as a hiring pilot after the practice product wins learners.',
+      'Post roles, find practice-ready talent, and message candidates who already drilled the interview out loud.',
   },
 } as const
 
