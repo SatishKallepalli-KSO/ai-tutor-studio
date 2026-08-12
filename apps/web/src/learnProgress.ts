@@ -98,6 +98,18 @@ export function markTopicStudied(trackId: string, topicId: string) {
   return cur
 }
 
+/** Clear notes-reviewed flag for a topic (explicit toggle only). */
+export function unmarkTopicStudied(trackId: string, topicId: string) {
+  const all = readAll()
+  const cur = getTrackProgress(trackId)
+  cur.studiedTopicIds = cur.studiedTopicIds.filter((id) => id !== topicId)
+  cur.lastTopicId = topicId
+  all[trackId] = cur
+  writeAll(all)
+  setLastTrackId(trackId)
+  return cur
+}
+
 export function recordAttempt(
   trackId: string,
   questionId: string,
@@ -281,7 +293,7 @@ export function getRecommendedNext(input: {
       trackId,
       topicId: unstudied,
       reason: 'unstudied',
-      label: title ? `Study: ${title}` : 'Next unstudied topic',
+      label: title ? `Review notes: ${title}` : 'Next unreviewed topic',
     }
   }
 

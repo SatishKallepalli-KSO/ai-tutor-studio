@@ -36,6 +36,7 @@ import {
   markTopicStudied,
   pathStats,
   recordAttempt,
+  unmarkTopicStudied,
 } from './learnProgress'
 import { usePersona } from './persona'
 import { Shell, TRACK_GROUPS } from './Shell'
@@ -459,10 +460,6 @@ export default function App() {
   function selectTopic(next: Topic) {
     setFeedback(null)
     setAnswer('')
-    if (trackId) {
-      markTopicStudied(trackId, next.id)
-      setProgressTick((n) => n + 1)
-    }
     writeLearnUrl({
       path: trackId ?? params.get('path'),
       mode: step === 'practice' ? 'practice' : 'learn',
@@ -480,9 +477,11 @@ export default function App() {
     })
   }
 
-  function markCurrentStudied() {
+  function toggleCurrentReviewed() {
     if (!trackId || !topicId) return
-    markTopicStudied(trackId, topicId)
+    const already = getTrackProgress(trackId).studiedTopicIds.includes(topicId)
+    if (already) unmarkTopicStudied(trackId, topicId)
+    else markTopicStudied(trackId, topicId)
     setProgressTick((n) => n + 1)
   }
 
@@ -497,10 +496,6 @@ export default function App() {
       const tIdx = topics.findIndex((t) => t.id === topicId)
       const nextTopic = topics[tIdx + 1]
       if (nextTopic) {
-        if (trackId) {
-          markTopicStudied(trackId, nextTopic.id)
-          setProgressTick((n) => n + 1)
-        }
         writeLearnUrl({
           path: trackId,
           mode: 'practice',
@@ -733,10 +728,6 @@ export default function App() {
       return
     }
     const id = forTopicId ?? topicId
-    if (id && trackId) {
-      markTopicStudied(trackId, id)
-      setProgressTick((n) => n + 1)
-    }
     setFeedback(null)
     setAnswer('')
     setPaywall(null)
@@ -1419,7 +1410,7 @@ export default function App() {
             </div>
             <div className="progress-block">
               <div className="progress-label">
-                Path {learnStats?.pct ?? progressPct}% · studied{' '}
+                Path {learnStats?.pct ?? progressPct}% · reviewed{' '}
                 {learnStats?.studied ?? 0}/{learnStats?.topicsTotal ?? topics.length} ·
                 practiced {learnStats?.practiced ?? 0}/
                 {learnStats?.questionsTotal ?? questions.length}
@@ -1475,7 +1466,9 @@ export default function App() {
               <aside className="topic-list">
                 <h3>Curriculum</h3>
                 {topics.map((item, idx) => {
-                  const studied = trackProgress?.studiedTopicIds.includes(item.id)
+                  const reviewed = !!trackProgress?.studiedTopicIds.includes(
+                    item.id,
+                  )
                   const topicQs = questions.filter((q) => q.topic_id === item.id)
                   const best = topicQs
                     .map((q) => trackProgress?.attempts[q.id]?.score ?? 0)
@@ -1491,7 +1484,9 @@ export default function App() {
                     <em>{String(idx + 1).padStart(2, '0')}</em>
                     <strong>
                       {item.title}
-                      {studied ? <span className="pill done">Studied</span> : null}
+                      {reviewed ? (
+                        <span className="pill done">Reviewed</span>
+                      ) : null}
                       {best > 0 ? (
                         <span className={`pill ${best >= 4 ? 'good' : 'soft'}`}>
                           {best}/5
@@ -1559,9 +1554,11 @@ export default function App() {
                       <button
                         className="btn ghost"
                         type="button"
-                        onClick={markCurrentStudied}
+                        onClick={toggleCurrentReviewed}
                       >
-                        Mark studied
+                        {trackProgress?.studiedTopicIds.includes(topic.id)
+                          ? 'Mark as not reviewed'
+                          : 'Mark as reviewed'}
                       </button>
                       <button
                         className="btn primary"
