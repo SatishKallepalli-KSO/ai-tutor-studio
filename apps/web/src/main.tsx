@@ -19,6 +19,7 @@ import { PersonaProvider } from './persona.tsx'
 import { PricingPage } from './PricingPage.tsx'
 import { PrivacyPage } from './PrivacyPage.tsx'
 import { ProfilePage } from './ProfilePage.tsx'
+import { ShareScorecardPage } from './ShareScorecardPage.tsx'
 import { SnowflakePathPage } from './SnowflakePathPage.tsx'
 import './index.css'
 
@@ -46,6 +47,8 @@ createRoot(document.getElementById('root')!).render(
             <Route path="/messages" element={<MessagesPage />} />
             <Route path="/compare" element={<ComparePage />} />
             <Route path="/investors" element={<InvestorsPage />} />
+            <Route path="/scorecard/:id" element={<ShareScorecardPage />} />
+            <Route path="/scorecard" element={<ShareScorecardPage />} />
             <Route path="/admin" element={<AdminDashboardPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />

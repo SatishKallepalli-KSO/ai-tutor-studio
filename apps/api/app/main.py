@@ -31,6 +31,7 @@ from app.messages import router as messages_router
 from app.models import User
 from app.plans import can_practice_track
 from app.profiles import router as profiles_router
+from app.scorecards import router as scorecards_router
 from app.stats import router as stats_router
 from app.tutor import (
     TRACKS,
@@ -86,6 +87,7 @@ app.include_router(profiles_router)
 app.include_router(connections_router)
 app.include_router(messages_router)
 app.include_router(custom_questions_router)
+app.include_router(scorecards_router)
 
 
 @app.on_event("startup")

@@ -488,6 +488,22 @@ export const api = {
       body: JSON.stringify(input),
     })
   },
+
+  async createScorecard(input: {
+    title: string
+    summary: Record<string, unknown>
+  }): Promise<{ id: string; title: string; summary: Record<string, unknown>; created_at: string }> {
+    return request('/v1/scorecards', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    })
+  },
+
+  async getScorecard(
+    id: string,
+  ): Promise<{ id: string; title: string; summary: Record<string, unknown>; created_at: string }> {
+    return request(`/v1/scorecards/${encodeURIComponent(id)}`)
+  },
 }
 
 export type ExperienceItem = {

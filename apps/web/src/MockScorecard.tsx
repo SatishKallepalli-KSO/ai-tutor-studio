@@ -1,5 +1,9 @@
-import type { CSSProperties } from 'react'
+import { useState, type CSSProperties } from 'react'
+import { Link } from 'react-router-dom'
+import { api } from './api'
 import type { MockSessionSummary } from './mockSession'
+import { localSharePath, toShareable } from './shareScorecard'
+import { track as trackEvent } from './analytics'
 
 type Props = {
   summary: MockSessionSummary
@@ -16,6 +20,54 @@ export function MockScorecard({ summary, onClose, onRetry }: Props) {
   const answered = summary.results.filter((r) => !r.skipped).length
   const skipped = summary.results.filter((r) => r.skipped).length
   const mins = Math.max(1, Math.round(summary.durationSec / 60))
+  const [shareUrl, setShareUrl] = useState<string | null>(null)
+  const [shareBusy, setShareBusy] = useState(false)
+  const [shareError, setShareError] = useState<string | null>(null)
+
+  async function resolveShareUrl(): Promise<string> {
+    if (shareUrl) return shareUrl
+    setShareBusy(true)
+    setShareError(null)
+    const card = toShareable(summary)
+    try {
+      const row = await api.createScorecard({
+        title: card.title,
+        summary: card as unknown as Record<string, unknown>,
+      })
+      const url = `${window.location.origin}/scorecard/${row.id}`
+      setShareUrl(url)
+      trackEvent('scorecard_share', {
+        path: '/scorecard',
+        properties: { id: row.id, via: 'api' },
+      })
+      return url
+    } catch {
+      const path = localSharePath(card)
+      const url = `${window.location.origin}${path}`
+      setShareUrl(url)
+      trackEvent('scorecard_share', {
+        path: '/scorecard',
+        properties: { via: 'local' },
+      })
+      if (url.length > 1800) {
+        setShareError(
+          'Link created locally (API unavailable). Very long — prefer Print/PDF.',
+        )
+      }
+      return url
+    } finally {
+      setShareBusy(false)
+    }
+  }
+
+  async function copyShare() {
+    const url = await resolveShareUrl()
+    try {
+      await navigator.clipboard.writeText(url)
+    } catch {
+      setShareError('Copy failed — select the link manually.')
+    }
+  }
 
   return (
     <section className="mock-scorecard panel reveal" aria-label="Mock scorecard">
@@ -69,16 +121,40 @@ export function MockScorecard({ summary, onClose, onRetry }: Props) {
                   {r.dims.delivery}
                 </span>
               ) : null}
-              <p>{r.prompt.slice(0, 120)}{r.prompt.length > 120 ? '…' : ''}</p>
+              <p>
+                {r.prompt.slice(0, 120)}
+                {r.prompt.length > 120 ? '…' : ''}
+              </p>
             </div>
           </li>
         ))}
       </ol>
 
+      {shareUrl ? (
+        <p className="share-link-row">
+          <span className="muted">Share link</span>
+          <a href={shareUrl}>{shareUrl}</a>
+        </p>
+      ) : null}
+      {shareError ? <p className="muted">{shareError}</p> : null}
+
       <div className="actions">
         <button type="button" className="btn primary" onClick={onClose}>
           Back to practice hub
         </button>
+        <button
+          type="button"
+          className="btn ghost"
+          disabled={shareBusy}
+          onClick={() => void copyShare()}
+        >
+          {shareUrl ? 'Copy share link' : 'Share scorecard'}
+        </button>
+        {shareUrl ? (
+          <Link className="btn ghost" to={shareUrl.replace(window.location.origin, '')}>
+            Open page
+          </Link>
+        ) : null}
         {onRetry ? (
           <button type="button" className="btn ghost" onClick={onRetry}>
             Run mock again

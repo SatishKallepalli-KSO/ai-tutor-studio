@@ -175,3 +175,15 @@ class CustomFeedbackUsage(Base):
     topic_id: Mapped[str] = mapped_column(String(120), default="", index=True)
     feedback_count: Mapped[int] = mapped_column(Integer, default=0)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class SharedScorecard(Base):
+    """Public shareable mock/session scorecard snapshots (short id links)."""
+
+    __tablename__ = "shared_scorecards"
+
+    id: Mapped[str] = mapped_column(String(16), primary_key=True)
+    user_id: Mapped[Optional[int]] = mapped_column(Integer, index=True, nullable=True)
+    title: Mapped[str] = mapped_column(String(200), default="")
+    payload: Mapped[str] = mapped_column(Text)  # JSON summary
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)

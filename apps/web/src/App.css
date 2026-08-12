@@ -5113,6 +5113,51 @@ textarea {
   }
 }
 
+.share-scorecard {
+  max-width: 720px;
+  margin: 0 auto 3rem;
+  padding: 1.5rem 0 2rem;
+}
+
+.share-scorecard h1 {
+  margin: 0.25rem 0 0.35rem;
+  letter-spacing: -0.03em;
+}
+
+.share-scorecard h2 {
+  margin: 1.25rem 0 0.65rem;
+  font-size: 1.05rem;
+}
+
+.share-scorecard-actions {
+  margin-top: 1.25rem;
+}
+
+.share-link-row {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0 0 0.85rem;
+  font-size: 0.9rem;
+  word-break: break-all;
+}
+
+@media print {
+  .shell-nav,
+  .ambient-field,
+  .share-scorecard-actions,
+  .mock-scorecard .actions,
+  .banner,
+  .ad-slot {
+    display: none !important;
+  }
+
+  .share-scorecard,
+  .mock-scorecard {
+    box-shadow: none;
+    border: 0;
+  }
+}
+
 .continue-strip-copy .eyebrow {
   margin: 0;
   font-size: 0.7rem;
