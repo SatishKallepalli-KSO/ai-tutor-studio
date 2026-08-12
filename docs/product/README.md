@@ -1,7 +1,7 @@
 # Practice Out Loud — Product documentation
 
-**Positioning:** Learn, practice, get AI feedback.  
-Slim launchpad homes (Learn + Hire). Flagship: **Practice your own question**. Role packs, timed mocks, weak-spot coach, before/after replay, and shareable scorecards.
+**Positioning:** Learn Agentic AI. Rehearse interviews out loud.  
+Slim launchpad homes (Learn + Hire). Dual path: **Become an Agentic AI developer** + oral interview practice (your own question, role packs, timed mocks). Weak-spot coach, before/after replay, shareable scorecards.
 
 **Live:** https://practiceoutloud.com  
 **Fallback:** https://ai-tutor-studio.onrender.com  

@@ -113,11 +113,11 @@ export function PricingPage() {
     <Shell>
       <div className="pricing-page reveal">
         <p className="eyebrow">Practice Out Loud · Plans</p>
-        <h1>Free to learn. Pro when you compete for AI roles.</h1>
+        <h1>Agentic skill + interview readiness — free to start.</h1>
         <p className="muted pricing-lede">
-          Study every AI and interview path free. Unlock production AI drills,
-          Staff/EM voice coaching, and unlimited feedback when you need the
-          edge.
+          Study the Agentic path and every interview track free. Unlock
+          production drills, Staff/EM voice coaching, and unlimited AI feedback
+          when you compete for AI roles.
         </p>
 
         {params.get('billing') === 'success' && (

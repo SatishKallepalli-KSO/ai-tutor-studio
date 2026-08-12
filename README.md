@@ -1,10 +1,10 @@
 # Practice Out Loud
 
-**Learn, practice, get AI feedback**
+**Learn Agentic AI. Rehearse interviews out loud.**
 
 Built by **Kallepalli Labs** (Satish Kallepalli).
 
-Slim launchpad homes (Learn + Hire), oral practice with AI coaching, and a curated catalog. Flagship: **Practice your own question** — speak or type any panel prompt and get Content / Clarity / Delivery feedback.
+Slim launchpad homes (Learn + Hire). Dual selling path: **Become an Agentic AI developer** (`/agentic-path`) and oral interview practice (role packs, timed mocks, your own question) with AI coaching.
 
 | | |
 |--|--|

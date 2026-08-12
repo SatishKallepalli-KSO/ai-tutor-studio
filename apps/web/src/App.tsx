@@ -1515,7 +1515,7 @@ export default function App() {
             </div>
             {!isRecruiter && (
               <p className="hero-secondary">
-                <Link to="/agentic-path">{BRAND.ctaExploreAgentic} path →</Link>
+                <Link to="/agentic-path">{BRAND.ctaExploreAgentic} →</Link>
               </p>
             )}
             <div className="hero-stage" aria-hidden="true">
@@ -1523,12 +1523,12 @@ export default function App() {
               <div className="hero-panel">
                 <span className="pulse-dot" />
                 {isRecruiter
-                  ? 'Hire · oral practice signal'
-                  : 'Bank drills · your questions · AI feedback'}
+                  ? 'Hire · Agentic + oral practice signal'
+                  : 'Agentic path · interview drills · AI feedback'}
                 <em>
                   {isRecruiter
                     ? '“See who already drilled the loop — then post the role.”'
-                    : '“Speak the answer. Get coached on what to fix.”'}
+                    : '“Learn Agentic AI. Speak the interview. Get coached.”'}
                 </em>
               </div>
             </div>
@@ -1603,25 +1603,30 @@ export default function App() {
 
               <div className="practice-hub-grid doors-4">
                 <Link to="/agentic-path" className="practice-hub-card agentic">
-                  <span className="eyebrow">Path</span>
-                  <strong>Agentic AI</strong>
-                  <p>Watch → mark done → practice with AI feedback.</p>
-                  <span className="meta">Open path →</span>
+                  <span className="eyebrow">Agentic</span>
+                  <strong>Become an Agentic AI developer</strong>
+                  <p>
+                    Watch concepts → practice out loud → get AI feedback.
+                  </p>
+                  <span className="meta">Open Agentic path →</span>
                 </Link>
 
                 <button
                   type="button"
                   className="practice-hub-card"
-                  disabled={loading}
                   onClick={() => {
-                    const pack = ROLE_PACKS[0]
-                    if (pack) startPack(pack)
+                    const el = document.getElementById(
+                      'role-packs',
+                    ) as HTMLElement | null
+                    el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
                   }}
                 >
-                  <span className="eyebrow">Pack</span>
-                  <strong>Staff loop</strong>
-                  <p>12 oral drills — ownership, design, influence, AI safety.</p>
-                  <span className="meta">Start pack →</span>
+                  <span className="eyebrow">Interview</span>
+                  <strong>Role packs &amp; timed mock</strong>
+                  <p>
+                    Staff · EM · AI engineer — oral queues with scorecards.
+                  </p>
+                  <span className="meta">See packs →</span>
                 </button>
 
                 <button
@@ -1641,15 +1646,17 @@ export default function App() {
                   className="practice-hub-card"
                   onClick={() => {
                     const el = document.getElementById(
-                      'role-packs',
-                    ) as HTMLElement | null
-                    el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                      'paths-catalog',
+                    ) as HTMLDetailsElement | null
+                    if (!el) return
+                    el.open = true
+                    el.scrollIntoView({ behavior: 'smooth', block: 'start' })
                   }}
                 >
-                  <span className="eyebrow">Packs</span>
-                  <strong>All role packs</strong>
-                  <p>Staff · EM hiring manager · AI engineer screen.</p>
-                  <span className="meta">See packs →</span>
+                  <span className="eyebrow">Catalog</span>
+                  <strong>Browse paths</strong>
+                  <p>Career, interview, and language tracks — study free.</p>
+                  <span className="meta">Browse paths →</span>
                 </button>
               </div>
 
@@ -1757,23 +1764,15 @@ export default function App() {
               </div>
 
               <div className="practice-hub-grid doors-4">
-                <button
-                  type="button"
-                  className="practice-hub-card"
-                  onClick={() => {
-                    const el = document.getElementById(
-                      'paths-catalog',
-                    ) as HTMLDetailsElement | null
-                    if (!el) return
-                    el.open = true
-                    el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                  }}
-                >
-                  <span className="eyebrow">Paths</span>
-                  <strong>Candidate-ready paths</strong>
-                  <p>Browse what talent studies before they apply.</p>
-                  <span className="meta">Browse paths →</span>
-                </button>
+                <Link to="/agentic-path" className="practice-hub-card agentic">
+                  <span className="eyebrow">Signal</span>
+                  <strong>Agentic AI + oral practice</strong>
+                  <p>
+                    Talent trains on the Agentic path and interview drills out
+                    loud.
+                  </p>
+                  <span className="meta">See Agentic path →</span>
+                </Link>
 
                 <Link to="/jobs" className="practice-hub-card">
                   <span className="eyebrow">Jobs</span>
@@ -1838,9 +1837,9 @@ export default function App() {
                       {group.id === 'career' && (
                         <>
                           <Link to="/agentic-path" className="path-banner">
-                            <strong>Full Agentic AI video curriculum</strong>
+                            <strong>Become an Agentic AI developer</strong>
                             <span>
-                              Watch → mark done → practice with AI feedback →
+                              Watch concepts → practice out loud → AI feedback →
                             </span>
                           </Link>
                           <Link to="/snowflake-path" className="path-banner">

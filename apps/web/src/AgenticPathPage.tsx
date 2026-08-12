@@ -96,14 +96,14 @@ export function AgenticPathPage() {
   return (
     <Shell wide>
       <section className="path-hero reveal">
-        <p className="eyebrow">Practice Out Loud · Career switch</p>
-        <h1>Backend → Agentic AI Engineer</h1>
+        <p className="eyebrow">Practice Out Loud · Career path</p>
+        <h1>Become an Agentic AI developer</h1>
         <p className="hero-lede">
-          {videos.length} validated free YouTube courses &amp; playlists for
-          backend engineers: Python for AI → LLMs → APIs &amp; vectors →
-          tools/agents → RAG → LangGraph → prompting, evals &amp; production.
-          Watch in the player (progress resumes), mark complete, then practice
-          out loud with AI feedback on the matching Studio topics.
+          Outcome: ship as an Agentic AI developer. Loop: watch concepts →
+          practice out loud → get AI feedback on matching topics. {videos.length}{' '}
+          validated free YouTube courses — Python for AI → LLMs → APIs &amp;
+          vectors → tools/agents → RAG → LangGraph → prompting, evals &amp;
+          production. Progress resumes in the player; mark done, then speak.
         </p>
         <div className="path-progress-head">
           <div>
@@ -168,6 +168,22 @@ export function AgenticPathPage() {
             }
           >
             Practice with AI feedback
+          </Link>
+          <Link
+            className="btn ghost"
+            to={agenticCustomPracticeHref('ai-agents')}
+            onClick={() =>
+              track('agentic_practice_cta', {
+                path: '/agentic-path',
+                properties: {
+                  source: 'hero_custom',
+                  track_id: AGENTIC_PRACTICE_TRACK,
+                  topic_id: 'ai-agents',
+                },
+              })
+            }
+          >
+            Your own question
           </Link>
         </div>
       </section>
