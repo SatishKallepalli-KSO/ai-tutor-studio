@@ -66,6 +66,7 @@ a {
   position: fixed;
   inset: 0;
   z-index: -4;
+  pointer-events: none;
   background:
     radial-gradient(920px 520px at 8% -12%, rgba(11, 107, 203, 0.12), transparent 58%),
     radial-gradient(780px 480px at 92% 0%, rgba(10, 143, 108, 0.08), transparent 55%),

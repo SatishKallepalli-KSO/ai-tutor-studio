@@ -15,7 +15,7 @@ import { track as trackEvent } from './analytics'
 import { useAuth } from './auth'
 import { BRAND } from './brand'
 import { getTopic, topicsForTrack, type Topic } from './curriculum'
-import { localQuestions } from './data'
+import { localQuestions, TRACKS } from './data'
 import {
   defaultCustomTitle,
   deleteCustomQuestion,
@@ -213,10 +213,14 @@ export default function App() {
     },
   })
 
-  const activeTrack = useMemo(
-    () => tracks.find((t) => t.id === trackId) ?? null,
-    [trackId, tracks],
-  )
+  const activeTrack = useMemo(() => {
+    if (!trackId) return null
+    return (
+      tracks.find((t) => t.id === trackId) ??
+      TRACKS.find((t) => t.id === trackId) ??
+      null
+    )
+  }, [trackId, tracks])
   const activePack = useMemo(
     () => getPack(params.get('pack')),
     [params],
@@ -242,7 +246,12 @@ export default function App() {
       const order = new Map(
         activeMock.questionIds.map((id, i) => [id, i] as const),
       )
-      return questions
+      const fromApi = questions
+        .filter((q) => order.has(q.id))
+        .sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0))
+      if (fromApi.length) return fromApi
+      // API/local lag: keep the mock queue from curated ids so the CTA never dead-ends.
+      return localQuestions(activeMock.trackId)
         .filter((q) => order.has(q.id))
         .sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0))
     }
@@ -407,6 +416,9 @@ export default function App() {
     const urlCq = params.get('cq')
 
     if (!urlPath) {
+      // Leaving a path: always clear sticky loading so Home CTAs stay clickable.
+      setLoading(false)
+      loadingTrackRef.current = null
       if (step !== 'tracks' || trackId) {
         setStep('tracks')
         setTrackId(null)
@@ -888,21 +900,34 @@ export default function App() {
     setMockSummary(null)
     speech.stop()
     stopSpeaking()
-    if (!user) {
+    const isFreeShort = pack.id === FREE_SHORT_MOCK.id || !pack.proPractice
+    // Free short mock is the product's ungated demo — start without sign-in.
+    // AI feedback still requires auth at submit time.
+    if (!user && !isFreeShort) {
       setPaywall('Sign in to run a timed mock and get AI feedback.')
       trackEvent('mock_gate', {
         path: '/',
         properties: { pack_id: pack.id, reason: 'auth' },
       })
+      window.requestAnimationFrame(() => {
+        document
+          .querySelector('.banner.paywall')
+          ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      })
       return
     }
-    if (pack.proPractice && !user.is_pro) {
+    if (pack.proPractice && !user?.is_pro) {
       setPaywall(
-        'Full timed mocks on role packs are Pro. Free includes a short 15-minute mock — start that below.',
+        'Full timed mocks on role packs are Pro. Use the free 15-minute mock below, or go Pro for full packs.',
       )
       trackEvent('mock_gate', {
         path: '/',
         properties: { pack_id: pack.id, reason: 'pro' },
+      })
+      window.requestAnimationFrame(() => {
+        document
+          .getElementById('timed-mock-strip')
+          ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
       })
       return
     }
@@ -928,6 +953,7 @@ export default function App() {
         track_id: pack.trackId,
         questions: mock.questionIds.length,
         duration_min: pack.durationMin,
+        guest: !user,
       },
     })
   }
@@ -1674,7 +1700,7 @@ export default function App() {
                     )
                   })}
                 </div>
-                <div className="timed-mock-strip">
+                <div id="timed-mock-strip" className="timed-mock-strip">
                   <div>
                     <strong>Timed mock loop</strong>
                     <p className="muted">
@@ -1685,7 +1711,6 @@ export default function App() {
                   <button
                     type="button"
                     className="btn primary"
-                    disabled={loading}
                     onClick={() =>
                       startTimedMock(
                         user?.is_pro
