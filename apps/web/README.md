@@ -2,6 +2,17 @@
 
 React + TypeScript + Vite client for **https://practiceoutloud.com**.
 
+## Surfaces
+
+- **Learn home** — slim launchpad: hero → doors → collapsed catalog  
+- **Nav** — Home · Practice (hub/continue) · Your question · Agentic AI · More  
+- **Practice hub** — role packs, timed mock, weak-spot coach, bank drills, custom questions  
+- **Your question** — speak/type any prompt → Content / Clarity / Delivery feedback  
+- **Agentic AI** — YouTube watch resume + per-lesson progress; Practice with AI feedback after phases  
+- **Learn docs** — **Reviewed** / Mark as reviewed (manual, not auto on click)  
+- **Hire** — `/jobs` launchpad + `/for-companies` for hiring teams  
+- **Scorecards** — `/scorecard/:id` shareable mock results  
+
 ## Local
 
 ```bash

@@ -1,6 +1,6 @@
 # Production status (live)
 
-**Last updated:** 2026-08-10
+**Last updated:** 2026-08-12
 
 ## Live URLs
 
@@ -10,6 +10,8 @@
 | Render fallback | https://ai-tutor-studio.onrender.com |
 | Privacy | https://practiceoutloud.com/privacy |
 | Login | https://practiceoutloud.com/login |
+| For companies | https://practiceoutloud.com/for-companies |
+| Shareable scorecard | https://practiceoutloud.com/scorecard/:id |
 | Admin dashboard | https://practiceoutloud.com/admin |
 | Jobs board | https://practiceoutloud.com/jobs |
 | API docs | https://practiceoutloud.com/docs |
@@ -22,10 +24,12 @@
 ```
 Browser
   → https://practiceoutloud.com  (Cloudflare DNS → Render Free Docker web)
-      ├── React SPA (/static)
+      ├── React SPA (/static)  — Vite/React
       └── FastAPI (/v1, /healthz)
             ├── Neon Free Postgres (DATABASE_URL, pooled)
             ├── OpenAI gpt-4o-mini (OPENAI_API_KEY) → provider "openai"
+            ├── Custom questions + per-topic feedback quota
+            ├── Shareable scorecards
             ├── Demo Pro upgrade (ALLOW_DEMO_UPGRADE=true; Stripe not live yet)
             └── ADMIN_EMAILS → /admin
 ```
@@ -37,28 +41,33 @@ Browser
 | Database | **Neon Free** project `ai-tutor-studio` | Durable; Render free Postgres **deleted** |
 | AI coaching | **OpenAI** `gpt-4o-mini` | Falls back to `local-rubric` if key/credits missing |
 | Payments | Demo upgrade on | Wire Stripe before charging real money |
-| Catalog | ~120 questions · 12 tracks | Staff/EM are tracks in the catalog |
-| UI motion | Ambient voice/signal field | CSS; respects `prefers-reduced-motion` |
+| Catalog | ~120 questions · 12 tracks · role packs | Custom bank separate from curated questions |
+| UI | Slim Learn + Hire launchpads | Nav: Home · Practice · Your question · Agentic AI |
 
-## Verified working
+## Product shape (verified)
 
-- [x] Register / login / JWT
-- [x] Neon persistence (users, profiles, events)
-- [x] `POST /v1/tutor/feedback` with `provider: "openai"`
-- [x] Multi-track oral practice + Pro unlock (incl. Staff / EM) via demo upgrade
-- [x] Learn mode / curriculum paths + local path progress
-- [x] Jobs board
-- [x] Privacy policy at `/privacy`
-- [x] Admin overview (`ADMIN_EMAILS` + `is_admin`)
+- [x] Slim Learn home: hero → doors → collapsed catalog
+- [x] Hire launchpad (`/jobs`, `/for-companies`) — For companies / Hiring teams (no “phase 2” naming)
+- [x] Nav: Home · Practice (hub/continue) · Your question · Agentic AI
+- [x] **Practice your own question** — speak/type → AI feedback; cloud sync when signed in
+- [x] Free = **2 custom AI feedbacks per topic**, then Pro; curated bank quota separate (5/day free)
+- [x] Feedback dimensions: **Content / Clarity / Delivery**
+- [x] Role packs (Staff / EM / AI engineer screen)
+- [x] Timed mock loop + end scorecard (free 15-min mock; Pro full packs)
+- [x] Weak-spot coach
+- [x] Before/after replay in feedback
+- [x] Shareable scorecard `/scorecard/:id`
+- [x] Agentic path: YouTube watch resume + per-lesson progress; Practice with AI feedback after phases
+- [x] Learn progress: **Reviewed** / Mark as reviewed (not auto on click)
+- [x] Register / login / JWT · Neon persistence · Jobs · Privacy · Admin
 - [x] Neon backups: `./scripts/backup-db.sh --neon`
-- [x] Expanded practice catalog (~120 questions across 12 tracks)
 
 ## Operator docs
 
 | Doc | Purpose |
 |-----|---------|
 | [DEPLOY-FREE.md](./DEPLOY-FREE.md) | Free Render + Neon deploy path |
-| [DATABASE.md](./DATABASE.md) | Neon IDs, backup / restore |
+| [DATABASE.md](./DATABASE.md) | Neon IDs, backup / restore, custom Q + scorecards |
 | [GO-LIVE.md](./GO-LIVE.md) | Full go-live + Stripe checklist |
 | [README.md](./README.md) (product) | Doc index |
 

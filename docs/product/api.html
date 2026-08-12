@@ -16,7 +16,7 @@
     <div class="wrap">
       <nav class="nav">
         <a class="nav-brand" href="./"
-          >Practice Out Loud Docs<span>Learn · Practice · Get hired</span></a
+          >Practice Out Loud Docs<span>Learn · Practice · AI feedback</span></a
         >
         <div class="nav-links">
           <a href="./">Overview</a>
@@ -33,8 +33,9 @@
       <p class="eyebrow">Integration</p>
       <h1>API reference</h1>
       <p class="lede">
-        FastAPI v0.6 surface for the web app, partners, and white-label clients.
-        Interactive docs: <code>/docs</code> on a running API.
+        FastAPI surface for the web app: bank + custom-question feedback
+        (Content / Clarity / Delivery), custom-question CRUD + quota, shareable
+        scorecards. Interactive docs: <code>/docs</code> on a running API.
       </p>
 
       <h2>Auth</h2>
@@ -101,13 +102,16 @@
             <tr>
               <td>POST</td>
               <td><code>/v1/tutor/feedback</code></td>
-              <td>Auth · <code>input_mode: text|voice</code></td>
+              <td>
+                Auth · bank <code>question_id</code> <em>or</em>
+                <code>custom_prompt</code> · <code>input_mode: text|voice</code>
+              </td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <h3>Feedback request</h3>
+      <h3>Feedback request (bank)</h3>
       <pre>{
   "track_id": "staff-interview",
   "question_id": "staff-ownership",
@@ -115,7 +119,82 @@
   "input_mode": "voice"
 }</pre>
 
-      <h2>Profiles</h2>
+      <h3>Feedback request (your own question)</h3>
+      <pre>{
+  "track_id": "python",
+  "topic_id": "py-lists",
+  "custom_prompt": "Explain GIL tradeoffs for a web API…",
+  "custom_question_client_id": "local-uuid",
+  "answer": "The GIL means…",
+  "input_mode": "voice"
+}</pre>
+      <p class="muted">
+        UI maps coaching into <strong>Content / Clarity / Delivery</strong>. Free
+        custom AI feedbacks: <strong>2 per topic</strong>; Pro unlimited. Bank
+        free quota: 5/day (separate).
+      </p>
+
+      <h2>Custom questions</h2>
+      <div class="panel">
+        <table>
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Path</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>GET</td>
+              <td><code>/v1/tutor/custom-questions</code></td>
+              <td>List · optional <code>track_id</code> / <code>topic_id</code></td>
+            </tr>
+            <tr>
+              <td>POST</td>
+              <td><code>/v1/tutor/custom-questions</code></td>
+              <td>Upsert prompt · cloud sync when signed in</td>
+            </tr>
+            <tr>
+              <td>PATCH / DELETE</td>
+              <td><code>/v1/tutor/custom-questions/{id}</code></td>
+              <td>Update / remove</td>
+            </tr>
+            <tr>
+              <td>GET</td>
+              <td><code>/v1/tutor/custom-questions/quota</code></td>
+              <td>used / remaining / limit (free limit = 2/topic)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Scorecards</h2>
+      <div class="panel">
+        <table>
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Path</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>POST</td>
+              <td><code>/v1/scorecards</code></td>
+              <td>Create shareable mock/session snapshot → short id</td>
+            </tr>
+            <tr>
+              <td>GET</td>
+              <td><code>/v1/scorecards/{id}</code></td>
+              <td>Public read · UI at <code>/scorecard/:id</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Profiles · Jobs · Connections · Messages</h2>
       <div class="panel">
         <table>
           <thead>
@@ -133,113 +212,23 @@
             </tr>
             <tr>
               <td>GET</td>
-              <td><code>/v1/profiles/{user_id}</code></td>
-              <td>Public unless private</td>
-            </tr>
-            <tr>
-              <td>GET</td>
               <td><code>/v1/profiles/</code></td>
-              <td>Talent browse · <code>q</code>, <code>open_to_work</code></td>
+              <td>Talent browse</td>
             </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <h2>Jobs</h2>
-      <div class="panel">
-        <table>
-          <thead>
             <tr>
-              <th>Method</th>
-              <th>Path</th>
-              <th>Notes</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>GET</td>
+              <td>GET / POST</td>
               <td><code>/v1/jobs</code></td>
-              <td><code>q</code>, workplace, mine, status</td>
+              <td>Board · recruiter post</td>
             </tr>
             <tr>
-              <td>POST</td>
-              <td><code>/v1/jobs</code></td>
-              <td>Recruiter persona (or admin)</td>
-            </tr>
-            <tr>
-              <td>PATCH / DELETE</td>
-              <td><code>/v1/jobs/{id}</code></td>
-              <td>Owner updates / close</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <h2>Connections</h2>
-      <div class="panel">
-        <table>
-          <thead>
-            <tr>
-              <th>Method</th>
-              <th>Path</th>
-              <th>Notes</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>GET</td>
+              <td>GET / POST / PATCH</td>
               <td><code>/v1/connections/</code></td>
-              <td>status · direction filters</td>
+              <td>Network requests</td>
             </tr>
             <tr>
-              <td>GET</td>
-              <td><code>/v1/connections/with/{user_id}</code></td>
-              <td>Relationship with peer</td>
-            </tr>
-            <tr>
-              <td>POST</td>
-              <td><code>/v1/connections/</code></td>
-              <td>Send request + optional note</td>
-            </tr>
-            <tr>
-              <td>PATCH</td>
-              <td><code>/v1/connections/{id}</code></td>
-              <td>accepted | declined | withdrawn</td>
-            </tr>
-            <tr>
-              <td>DELETE</td>
-              <td><code>/v1/connections/{id}</code></td>
-              <td>Remove</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <h2>Messages</h2>
-      <div class="panel">
-        <table>
-          <thead>
-            <tr>
-              <th>Method</th>
-              <th>Path</th>
-              <th>Notes</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>GET</td>
-              <td><code>/v1/messages/threads</code></td>
-              <td>Inbox list</td>
-            </tr>
-            <tr>
-              <td>GET</td>
-              <td><code>/v1/messages/with/{peer_id}</code></td>
-              <td>Requires accepted connection</td>
-            </tr>
-            <tr>
-              <td>POST</td>
+              <td>GET / POST</td>
               <td><code>/v1/messages/</code></td>
-              <td><code>recipient_id</code> + <code>body</code></td>
+              <td>Inbox · requires accepted connection</td>
             </tr>
           </tbody>
         </table>

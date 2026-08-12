@@ -35,7 +35,7 @@
     <div class="wrap">
       <nav class="nav">
         <a class="nav-brand" href="./"
-          >Practice Out Loud Docs<span>Learn · Practice · Get hired</span></a
+          >Practice Out Loud Docs<span>Learn · Practice · AI feedback</span></a
         >
         <div class="nav-links">
           <a href="./">Overview</a>
@@ -52,20 +52,18 @@
       <p class="eyebrow">Technical design</p>
       <h1>System architecture</h1>
       <p class="lede">
-        Multi-track practice product: React client, FastAPI, Neon Postgres,
-        OpenAI coaching, Stripe-ready billing — plus a static GitHub Pages docs
-        mirror. <strong>Production:</strong>
+        Practice product: Vite/React client, FastAPI, Neon Postgres, OpenAI
+        coaching, Stripe-ready billing — plus a static GitHub Pages docs mirror.
+        <strong>Production:</strong>
         <a href="https://practiceoutloud.com">practiceoutloud.com</a>
-        (fallback
-        <a href="https://ai-tutor-studio.onrender.com">ai-tutor-studio.onrender.com</a>;
-        Render Free + Neon + OpenAI + Cloudflare).
+        (Cloudflare → Render Free + Neon + OpenAI).
       </p>
 
       <h2>High-level topology</h2>
       <div class="mermaid">
 flowchart LR
-  L[Learner] --> W[Web React + Vite]
-  R[Recruiter] --> W
+  L[Learner] --> W[Web Vite React]
+  R[Hiring team] --> W
   W -->|JWT + REST| A[FastAPI API]
   A --> DB[(Neon Postgres)]
   A --> S[Stripe optional]
@@ -73,10 +71,10 @@ flowchart LR
   W -.->|Pages demo| LOC[Local rubric + localStorage]
   S --> A
   DB --- U[Users personas]
+  DB --- CQ[Custom questions + quota]
+  DB --- SC[Shared scorecards]
   DB --- P[Profiles]
   DB --- J[Jobs]
-  DB --- C[Connections]
-  DB --- M[Messages]
   DB --- E[Feature events]
       </div>
 
@@ -85,24 +83,26 @@ flowchart LR
         <div class="card">
           <strong>apps/web</strong>
           <p class="muted">
-            Learn/Practice · Jobs · Profile · Network · Chat · Paths · Pricing ·
-            Admin. Persona switcher (learner / recruiter). Lean primary nav +
-            More menu.
+            Slim Learn + Hire launchpads · Practice hub · Your question · Role
+            packs · Timed mocks · Weak-spot · Replay · Scorecards · Agentic /
+            Snowflake paths · Jobs · Pricing · Admin. Nav: Home · Practice · Your
+            question · Agentic AI · More.
           </p>
         </div>
         <div class="card">
           <strong>apps/api</strong>
           <p class="muted">
-            Auth + persona · entitlements · Stripe · tutor feedback · jobs ·
-            profiles · connections · messages · admin analytics · public stats.
+            Auth + persona · entitlements · Stripe · tutor feedback (bank +
+            custom_prompt) · custom questions + quota · scorecards · jobs ·
+            profiles · connections · messages · admin analytics.
           </p>
         </div>
         <div class="card">
           <strong>Curriculum</strong>
           <p class="muted">
-            <code>curriculum.ts</code> topic docs · question banks ·
+            <code>curriculum.ts</code> topic docs · question banks · role packs ·
             <code>agenticPath.ts</code> / <code>snowflakePath.ts</code> video
-            curricula.
+            curricula. Learn progress: <strong>Reviewed</strong> (manual).
           </p>
         </div>
         <div class="card">
@@ -122,23 +122,13 @@ flowchart LR
   persona: learner | recruiter
   is_admin
 
-LearnerProfile
-  user_id, headline, location, about
-  open_to_work, skills[], experience[], education[]
-  target_roles[], visibility: public | private
+CustomQuestion · CustomQuestionAttempt · CustomFeedbackUsage
+  free: 2 AI feedbacks per topic; Pro unlimited
 
-JobPost
-  posted_by_user_id, title, company, location
-  employment_type, workplace, description, status
+SharedScorecard
+  short id → public /scorecard/:id
 
-Connection
-  requester_id, addressee_id
-  status: pending | accepted | declined | withdrawn
-  note
-
-ChatMessage
-  sender_id, recipient_id, body, read_at
-
+LearnerProfile · JobPost · Connection · ChatMessage
 UsageCounter · FeatureEvent</pre>
       </div>
 
@@ -151,15 +141,15 @@ sequenceDiagram
   participant DB as Database
   participant LLM as OpenAI optional
 
-  User->>Web: Speak or type answer
+  User->>Web: Speak or type answer bank or custom
   Web->>API: POST /v1/tutor/feedback + JWT
-  API->>DB: Load plan + daily usage
+  API->>DB: Load plan + bank/custom usage
   alt Free quota exceeded or Pro track locked
     API-->>Web: 402 paywall
   else Allowed
     API->>LLM: Coach JSON if key set
     API->>DB: Increment usage + feature event
-    API-->>Web: Score strengths gaps delivery tips
+    API-->>Web: Content Clarity Delivery tips
   end
       </div>
 
@@ -172,7 +162,7 @@ sequenceDiagram
   participant API
   participant DB
 
-  Recruiter->>Web: Post job
+  Recruiter->>Web: For companies / Jobs launchpad
   Web->>API: POST /v1/jobs
   API->>DB: JobPost open
   Learner->>Web: Browse jobs / Easy apply
@@ -187,15 +177,19 @@ sequenceDiagram
       <h2>Entitlements</h2>
       <div class="panel">
         <ul>
-          <li><strong>Learn:</strong> all tracks + video paths always readable.</li>
+          <li><strong>Learn:</strong> all tracks + video paths always readable; mark Reviewed manually.</li>
           <li>
-            <strong>Free practice:</strong> html, css, javascript, python,
-            java-to-python · 5 feedbacks / UTC day.
+            <strong>Free practice:</strong> starter language tracks · 5 bank
+            feedbacks / UTC day · <strong>2 custom AI feedbacks / topic</strong> ·
+            15-min timed mock.
           </li>
-          <li><strong>Pro:</strong> all tracks · unlimited feedback · Stripe portal.</li>
           <li>
-            <strong>Social + jobs:</strong> available on Free and Pro (persist
-            with API; localStorage fallback on Pages).
+            <strong>Pro:</strong> all tracks · unlimited bank + custom · full role
+            packs &amp; timed mocks · Stripe portal.
+          </li>
+          <li>
+            <strong>Social + jobs:</strong> available on Free and Pro (Hire
+            launchpad — For companies / Hiring teams).
           </li>
           <li><strong>Admin:</strong> <code>ADMIN_EMAILS</code> → <code>/admin</code>.</li>
         </ul>
@@ -205,9 +199,9 @@ sequenceDiagram
       <div class="panel">
         <ul>
           <li>Editorial dark theme: Fraunces + Sora · jade + champagne accents.</li>
-          <li>Primary nav: Learn · Jobs · Network · Chat (+ More).</li>
-          <li>Compact page heads: title + one-line sub + single CTA.</li>
-          <li>Pages-only mode: demo jobs, profiles, connections, chat in browser.</li>
+          <li>Primary nav: Home · Practice · Your question · Agentic AI (+ More).</li>
+          <li>Slim launchpads: hero → doors → collapsed catalog.</li>
+          <li>Pages-only mode: demo jobs/profiles with local fallbacks.</li>
         </ul>
       </div>
 
@@ -246,7 +240,7 @@ flowchart TB
             <tr>
               <td>Docker / Render</td>
               <td>Paid product</td>
-              <td>JWT, Stripe, OpenAI, Postgres</td>
+              <td>JWT, Stripe, OpenAI, Neon Postgres</td>
             </tr>
             <tr>
               <td>Local monorepo</td>

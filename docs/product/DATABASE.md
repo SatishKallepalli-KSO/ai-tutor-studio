@@ -13,7 +13,7 @@ Live app **https://practiceoutloud.com** (fallback https://ai-tutor-studio.onren
 
 Neon Free includes ~0.5 GB storage, 100 CU-hours/mo, scale-to-zero when idle, 6h restore history, and **1 manual snapshot**.
 
-## Schema notes (custom questions)
+## Schema notes (custom questions + scorecards)
 
 On API startup, SQLAlchemy `create_all` ensures these tables exist (no separate migration runner):
 
@@ -21,11 +21,18 @@ On API startup, SQLAlchemy `create_all` ensures these tables exist (no separate 
 |--|--|
 | `custom_questions` | Per-user prompts (`client_id` for local↔cloud sync), track/topic scope, saved flag, attempt counters |
 | `custom_question_attempts` | Attempt history for custom prompts (separate from bank/curriculum mastery) |
-| `custom_feedback_usage` | Per-user, per-track/topic count of successful custom-prompt AI feedbacks (free: 2/topic) |
+| `custom_feedback_usage` | Per-user, per-track/topic count of successful custom-prompt AI feedbacks (**free: 2/topic**) |
+| `shared_scorecards` | Public shareable mock/session scorecard snapshots (short id → `/scorecard/:id`) |
 
 Env: same as the rest of the app — set Neon pooled `DATABASE_URL` on Render (see `.env.example`). Local default remains SQLite under `apps/api/data/tutor.db`.
 
-See also: [PRODUCTION.md](./PRODUCTION.md) · [DEPLOY-FREE.md](./DEPLOY-FREE.md)
+API routes:
+
+- `GET/POST /v1/tutor/custom-questions` · `GET .../quota` · attempts under the same prefix  
+- `POST /v1/scorecards` · `GET /v1/scorecards/{id}`  
+- `POST /v1/tutor/feedback` accepts bank `question_id` **or** `custom_prompt` (+ optional `topic_id` / `custom_question_client_id`)
+
+See also: [PRODUCTION.md](./PRODUCTION.md) · [DEPLOY-FREE.md](./DEPLOY-FREE.md) · [API](./api.html)
 
 ---
 

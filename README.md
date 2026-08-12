@@ -1,10 +1,10 @@
 # Practice Out Loud
 
-**Learn → Practice → Get AI feedback → Get hired**
+**Learn, practice, get AI feedback**
 
 Built by **Kallepalli Labs** (Satish Kallepalli).
 
-Multi-track oral practice with curriculum (Learn mode), AI coaching, and a jobs board. Staff and EM interview tracks are paths in the catalog — not the whole product.
+Slim launchpad homes (Learn + Hire), oral practice with AI coaching, and a curated catalog. Flagship: **Practice your own question** — speak or type any panel prompt and get Content / Clarity / Delivery feedback.
 
 | | |
 |--|--|
@@ -13,7 +13,7 @@ Multi-track oral practice with curriculum (Learn mode), AI coaching, and a jobs 
 | **Privacy** | https://practiceoutloud.com/privacy |
 | **GitHub** | https://github.com/SatishKallepalli-KSO/practice-out-loud |
 | **Stack** | `apps/web` (Vite/React) · `apps/api` (FastAPI) · Neon Postgres · OpenAI · Render · Cloudflare DNS |
-| **Catalog** | ~120 practice questions across 12 tracks |
+| **Catalog** | ~120 practice questions across 12 tracks · role packs · custom questions |
 
 Ops docs: [PRODUCTION.md](docs/product/PRODUCTION.md) · [DATABASE.md](docs/product/DATABASE.md) · [DEPLOY-FREE.md](docs/product/DEPLOY-FREE.md) · [GO-LIVE.md](docs/product/GO-LIVE.md)
 
@@ -27,12 +27,26 @@ Ops docs: [PRODUCTION.md](docs/product/PRODUCTION.md) · [DATABASE.md](docs/prod
 
 ## Product
 
+**Nav (learner):** Home · Practice (hub / continue) · Your question · Agentic AI · More (jobs, network, etc.)
+
+**Homes:** Slim launchpads — hero → doors → collapsed catalog (Learn home and Hire / For companies).
+
 | Plan | What you get |
 |------|----------------|
-| **Free** | Learn docs · starter practice tracks · 5 AI feedbacks/day · 2 custom-question AI feedbacks/topic · jobs board |
-| **Pro ($19/mo or $149/yr)** | All 12 tracks (incl. Staff/EM & advanced) · unlimited coaching · Stripe (demo upgrade until Stripe is wired) |
+| **Free** | Learn docs · starter practice · 5 bank AI feedbacks/day · **2 custom AI feedbacks per topic** · 15-min timed mock · jobs board |
+| **Pro ($19/mo or $149/yr)** | All 12 tracks · unlimited bank + custom coaching · full role packs & timed mocks · Stripe (demo upgrade until Stripe is wired) |
 
-Also: Agentic AI & Snowflake video paths · profiles · messaging (secondary).
+### High-leverage coaching (shipped)
+
+1. **Role packs** — Staff / EM / AI engineer screen queues with rubric signals  
+2. **Timed mock loop** + end scorecard (free 15-min mock; Pro full packs)  
+3. **Weak-spot coach** — auto-queued drills from past gaps  
+4. **Before/after replay** — compare prior vs latest answer in feedback  
+5. **Shareable scorecard** — `/scorecard/:id`
+
+Also: **Practice your own question** (cloud sync when signed in; curated bank is separate) · Agentic AI path (YouTube watch resume + per-lesson progress; Practice with AI feedback after phases; **Reviewed** for learn docs) · Snowflake video path · profiles / messaging (secondary).
+
+Learn progress uses **Reviewed** / **Mark as reviewed** (manual — not auto on click).
 
 ## Docs & links
 
@@ -40,6 +54,7 @@ Also: Agentic AI & Snowflake video paths · profiles · messaging (secondary).
 - Product docs index: [docs/product/README.md](docs/product/README.md)
 - GitHub Pages (static / sales docs): https://satishkallepalli-kso.github.io/practice-out-loud/
 - Sales playbook: https://satishkallepalli-kso.github.io/practice-out-loud/product/sales-playbook.html
+- For companies: https://practiceoutloud.com/for-companies
 
 ## Quick start (local)
 

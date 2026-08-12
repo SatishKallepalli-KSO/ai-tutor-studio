@@ -8,9 +8,10 @@ Current free stack:
 
 - **Compute:** Render Free Docker web (service name may still be `ai-tutor-studio`)
 - **Database:** Neon Free Postgres (not Render Postgres — that expires in 30 days)
-- **AI:** OpenAI `gpt-4o-mini` (prepaid credits)
+- **AI:** OpenAI `gpt-4o-mini` (prepaid credits) — Content / Clarity / Delivery coaching
 - **Domain:** Cloudflare → `practiceoutloud.com` / `www`
 - **Pay:** Demo Pro upgrade (`ALLOW_DEMO_UPGRADE=true`) until Stripe
+- **Product:** Learn + Hire launchpads · Practice your own question (2 custom AI feedbacks/topic free) · role packs / mocks / scorecards
 
 ---
 

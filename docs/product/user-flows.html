@@ -35,7 +35,7 @@
     <div class="wrap">
       <nav class="nav">
         <a class="nav-brand" href="./"
-          >Practice Out Loud Docs<span>Learn · Practice · Get hired</span></a
+          >Practice Out Loud Docs<span>Learn · Practice · AI feedback</span></a
         >
         <div class="nav-links">
           <a href="./">Overview</a>
@@ -52,93 +52,89 @@
       <p class="eyebrow">Experience design</p>
       <h1>User flows</h1>
       <p class="lede">
-        Learner journey: Learn → Practice → Get AI feedback → Get hired (jobs).
-        Recruiter paths and paywall conversion sit alongside.
+        Learner journey: slim launchpad → Practice hub or Your question → AI
+        feedback (Content / Clarity / Delivery). Hire launchpad for companies is
+        secondary.
       </p>
 
-      <h2>1) Learner learning loop</h2>
+      <h2>1) Learn home launchpad</h2>
       <div class="mermaid">
 flowchart TD
-  A[Land Learn] --> B[Pick track or video path]
-  B --> C[Topic docs]
-  C --> D{Ready?}
-  D -->|Practice| E[Speak or type]
-  D -->|Keep reading| C
-  E --> F[AI / rubric feedback]
-  F --> G[Next topic / drill]
-  G --> C
+  A[Land Home] --> B[Hero]
+  B --> C[Doors]
+  C --> D[Practice hub]
+  C --> E[Your question]
+  C --> F[Agentic AI]
+  C --> G[Collapsed catalog]
+  G --> H[Topic docs]
+  H --> I[Mark as reviewed]
+  I --> J[Practice this topic]
       </div>
+      <p class="muted">
+        Learn progress is <strong>Reviewed</strong> / Mark as reviewed — not
+        auto-marked on click.
+      </p>
 
-      <h2>2) Recruiter hiring loop</h2>
+      <h2>2) Practice your own question (flagship)</h2>
       <div class="mermaid">
 flowchart TD
-  A[Switch to Recruiter] --> B[Post job]
-  B --> C[Talent browse / open-to-work]
-  C --> D[Connect request]
-  D --> E{Accepted?}
-  E -->|Yes| F[Message]
-  E -->|Pending| D
-  F --> G[Invite to practice / interview]
+  A[Your question] --> B[Paste or type prompt]
+  B --> C[Speak or type answer]
+  C --> D[AI feedback Content Clarity Delivery]
+  D --> E{Free custom quota}
+  E -->|Under 2/topic| F[Cloud sync if signed in]
+  E -->|Hit limit| G[Upgrade to Pro]
+  D --> H[Before/after replay]
       </div>
 
-      <h2>3) Registration &amp; persona</h2>
+      <h2>3) Practice hub — packs · mock · weak spots</h2>
       <div class="mermaid">
-flowchart LR
-  A[Register] --> B[Pick Learner or Recruiter]
-  B --> C[JWT + persona]
-  C --> D[Learner home /]
-  C --> E[Recruiter home /jobs]
-  D --> F[Profile Network Chat]
+flowchart TD
+  A[Practice hub] --> B[Role pack Staff EM AI engineer]
+  A --> C[Timed mock]
+  A --> D[Weak-spot coach]
+  A --> E[Bank drills]
+  B --> F[Speak answers]
+  C --> F
+  D --> F
   E --> F
+  F --> G[End scorecard]
+  G --> H[Share /scorecard/id]
       </div>
-      <ol>
-        <li>Sign up with persona picker (or switch anytime in header).</li>
-        <li>Learners land on tracks; recruiters prefer Jobs.</li>
-        <li>Same account can switch roles without a second signup.</li>
-      </ol>
+      <p class="muted">
+        Free includes a short 15-minute mock; full timed packs are Pro.
+      </p>
 
-      <h2>4) Network &amp; chat</h2>
+      <h2>4) Agentic AI path</h2>
       <div class="mermaid">
-sequenceDiagram
-  actor A as User A
-  actor B as User B
-  participant Net as /network
-  participant API
-  participant Chat as /messages
-
-  A->>Net: Discover → Connect + note
-  Net->>API: POST /v1/connections
-  B->>Net: Incoming → Accept
-  Net->>API: PATCH accepted
-  A->>Chat: Open thread
-  Chat->>API: POST /v1/messages
-  API-->>Chat: Deliver if connected
+flowchart TD
+  A[Agentic AI] --> B[YouTube watch resume]
+  B --> C[Per-lesson progress]
+  C --> D{Phase done?}
+  D -->|Yes| E[Practice with AI feedback]
+  D -->|Keep watching| B
+  E --> F[Content Clarity Delivery]
       </div>
 
-      <h2>5) Voice practice</h2>
+      <h2>5) Hire launchpad</h2>
       <div class="mermaid">
-sequenceDiagram
-  actor Candidate
-  participant UI as Practice UI
-  participant Mic as Web Speech API
-  participant Coach as Feedback
-
-  Candidate->>UI: Hear question TTS
-  Candidate->>UI: Speak answer
-  UI->>Mic: recognition
-  Mic-->>UI: transcript editable
-  UI->>Coach: input_mode=voice
-  Coach-->>UI: content + delivery_tips
+flowchart TD
+  A[Hire / Jobs] --> B[Hero doors]
+  B --> C[Jobs board]
+  B --> D[For companies]
+  B --> E[Talent / Network]
+  D --> F[Hiring teams pitch]
       </div>
+      <p class="muted">No “phase 2” naming — For companies / Hiring teams.</p>
 
       <h2>6) Paywall</h2>
       <div class="mermaid">
 flowchart TD
   A[Practice / feedback] --> B{Signed in?}
   B -->|No| C[Register]
-  B -->|Yes| D{Pro or free track?}
+  B -->|Yes| D{Pro track or pack?}
   D -->|Locked| E[Pricing]
-  D -->|Free track| F{Quota?}
+  D -->|Free track| F{Bank or custom quota?}
   F -->|Empty| E
   F -->|OK| G[Coaching]
   E --> H{Stripe?}
@@ -160,31 +156,31 @@ flowchart TD
           <tbody>
             <tr>
               <td><code>/</code></td>
-              <td>Tracks · Learn · Practice</td>
+              <td>Learn launchpad · Practice hub · catalog</td>
             </tr>
             <tr>
-              <td><code>/jobs</code></td>
-              <td>Job board · post / browse</td>
-            </tr>
-            <tr>
-              <td><code>/profile</code> · <code>/profile/:id</code></td>
-              <td>Talent card · Connect / Message</td>
-            </tr>
-            <tr>
-              <td><code>/network</code></td>
-              <td>Connections · requests · discover</td>
-            </tr>
-            <tr>
-              <td><code>/messages</code></td>
-              <td>Chat inbox</td>
+              <td><code>/?hub=practice</code> · <code>/?custom=1</code></td>
+              <td>Practice hub / Your question deep links</td>
             </tr>
             <tr>
               <td><code>/agentic-path</code> · <code>/snowflake-path</code></td>
               <td>YouTube learning curricula</td>
             </tr>
             <tr>
+              <td><code>/scorecard/:id</code></td>
+              <td>Shareable mock scorecard</td>
+            </tr>
+            <tr>
+              <td><code>/jobs</code></td>
+              <td>Hire launchpad · job board</td>
+            </tr>
+            <tr>
               <td><code>/for-companies</code> · <code>/pricing</code></td>
-              <td>Hiring studio · Free/Pro</td>
+              <td>Hiring teams · Free/Pro</td>
+            </tr>
+            <tr>
+              <td><code>/profile</code> · <code>/network</code> · <code>/messages</code></td>
+              <td>Talent card · connections · chat</td>
             </tr>
             <tr>
               <td><code>/admin</code></td>

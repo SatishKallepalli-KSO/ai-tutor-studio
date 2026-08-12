@@ -20,7 +20,7 @@
     <div class="wrap">
       <nav class="nav">
         <a class="nav-brand" href="./"
-          >Practice Out Loud Docs<span>Learn · Practice · Get hired</span></a
+          >Practice Out Loud Docs<span>Learn · Practice · AI feedback</span></a
         >
         <div class="nav-links">
           <a href="./">Overview</a>
@@ -37,9 +37,9 @@
       <p class="eyebrow">Operations</p>
       <h1>Go-live runbook</h1>
       <p class="lede">
-        Launch the talent studio (Learn · Practice · Get hired) with live AI coaching
-        and Stripe. Checklist from empty hosting to first paid Pro user — plus
-        persistent jobs, profiles, and chat.
+        Launch Practice Out Loud (Learn · Practice · AI feedback) with live AI
+        coaching and Stripe. Checklist from empty hosting to first paid Pro user
+        — plus custom questions, scorecards, and Hire for companies.
       </p>
       <div class="panel">
         <p>
@@ -74,27 +74,27 @@
             <tr>
               <td><strong>API</strong> (<code>apps/api</code>)</td>
               <td>
-                Auth, personas, plans, Stripe, AI feedback, jobs, profiles,
-                connections, chat, admin
+                Auth, plans, Stripe, AI feedback, custom questions + quota,
+                scorecards, jobs, profiles, admin
               </td>
               <td>Required</td>
             </tr>
             <tr>
               <td><strong>Web</strong> (<code>apps/web</code>)</td>
               <td>
-                Learn/Practice, Jobs, Profile, Network, Chat, paths, pricing,
-                admin
+                Learn/Hire launchpads, Practice hub, Your question, Agentic path,
+                packs/mocks, pricing, admin
               </td>
               <td>Required (bundled in Docker)</td>
             </tr>
             <tr>
               <td><strong>Postgres</strong></td>
-              <td>Users, social, jobs, usage, feature events</td>
+              <td>Users, custom Q, scorecards, jobs, usage, events</td>
               <td>Neon Free in production; SQLite local only</td>
             </tr>
             <tr>
               <td><strong>OpenAI</strong></td>
-              <td>AI coaching via <code>/v1/tutor/feedback</code> (~120 Q / 12 tracks)</td>
+              <td>AI coaching via <code>/v1/tutor/feedback</code></td>
               <td>Live (<code>gpt-4o-mini</code>); rubric fallback</td>
             </tr>
             <tr>
@@ -105,11 +105,10 @@
           </tbody>
         </table>
         <p class="muted" style="margin-top: 0.85rem">
-          Product: <strong>Learn → Practice → AI feedback → Get hired.</strong> Live shape: Render Free
-          Docker + <strong>Neon Free</strong> + OpenAI. Stripe when charging.
-          See <a href="./PRODUCTION.md">PRODUCTION.md</a>. Repo includes
-          <code>Dockerfile</code>, <code>render.yaml</code>, and
-          <code>.env.example</code>.
+          Product: <strong>Learn, practice, get AI feedback.</strong> Flagship:
+          Practice your own question (2 custom AI feedbacks/topic free). Live
+          shape: Render Free Docker + <strong>Neon Free</strong> + OpenAI.
+          See <a href="./PRODUCTION.md">PRODUCTION.md</a>.
         </p>
       </div>
 
@@ -164,24 +163,9 @@
               <td>Default <code>gpt-4o-mini</code></td>
             </tr>
             <tr>
-              <td><code>STRIPE_SECRET_KEY</code></td>
+              <td><code>STRIPE_*</code></td>
               <td>For pay</td>
-              <td><code>sk_test_…</code> then <code>sk_live_…</code></td>
-            </tr>
-            <tr>
-              <td><code>STRIPE_PRICE_MONTHLY</code></td>
-              <td>For pay</td>
-              <td>Pro monthly Price ID</td>
-            </tr>
-            <tr>
-              <td><code>STRIPE_PRICE_YEARLY</code></td>
-              <td>Recommended</td>
-              <td>Pro yearly Price ID</td>
-            </tr>
-            <tr>
-              <td><code>STRIPE_WEBHOOK_SECRET</code></td>
-              <td>For pay</td>
-              <td>From Stripe webhook endpoint</td>
+              <td>Secret, prices, webhook</td>
             </tr>
             <tr>
               <td><code>ALLOW_DEMO_UPGRADE</code></td>
@@ -195,12 +179,6 @@
             </tr>
           </tbody>
         </table>
-        <p class="muted" style="margin-top: 0.85rem">
-          If UI is hosted separately (e.g. GitHub Pages), build with
-          <code>VITE_API_BASE=https://YOUR-API</code> and matching
-          <code>VITE_BASE</code>. Docker default serves UI from the same host
-          with <code>VITE_BASE=/</code>.
-        </p>
       </div>
 
       <h2>4. Integrate AI (OpenAI)</h2>
@@ -218,9 +196,9 @@
           <span class="pill">Behavior</span>
           <strong>With / without key</strong>
           <p class="muted">
-            With key: richer coaching on
-            <code>POST /v1/tutor/feedback</code>. Without key: rubric fallback
-            still works for demos.
+            With key: richer coaching on bank + custom prompts. Without key:
+            rubric fallback still works for demos. UI shows Content / Clarity /
+            Delivery.
           </p>
         </div>
       </div>
@@ -228,11 +206,11 @@
         <h3>Smoke test</h3>
         <pre>curl -s https://YOUR_HOST/healthz
 
-# After register/login, POST feedback with Bearer JWT.
-# Confirm response "provider" reflects OpenAI when configured.</pre>
+# After register/login, POST feedback with Bearer JWT
+# (bank question_id or custom_prompt). Confirm provider=openai.</pre>
         <p class="muted">
-          Free plan already caps 5 feedbacks/day — watch OpenAI usage the first
-          week once Pro unlimited is live.
+          Free: 5 bank feedbacks/day + 2 custom AI feedbacks/topic — watch OpenAI
+          usage once Pro unlimited is live.
         </p>
       </div>
 
@@ -243,24 +221,14 @@
           ($19) and yearly ($149) prices. Copy Price IDs into env.
         </li>
         <li>
-          Developers → API keys → set <code>STRIPE_SECRET_KEY</code>.
-        </li>
-        <li>
-          Webhooks → endpoint
-          <code>https://YOUR_HOST/v1/billing/webhook</code><br />
-          Events:
+          Webhooks →
+          <code>https://YOUR_HOST/v1/billing/webhook</code> · events:
           <code>checkout.session.completed</code>,
           <code>customer.subscription.updated</code>,
-          <code>customer.subscription.deleted</code>.<br />
-          Copy signing secret → <code>STRIPE_WEBHOOK_SECRET</code>.
+          <code>customer.subscription.deleted</code>.
         </li>
         <li>
-          Enable Customer Portal (cancel / update payment). App uses
-          <code>POST /v1/billing/portal</code>.
-        </li>
-        <li>
-          Set <code>APP_URL</code> so success/cancel/portal redirects land on
-          your UI.
+          Enable Customer Portal. Set <code>APP_URL</code> for redirects.
         </li>
       </ol>
       <div class="panel">
@@ -269,126 +237,44 @@
           <li>Register → <code>/pricing</code> → Upgrade → Checkout</li>
           <li>Card <code>4242 4242 4242 4242</code></li>
           <li>Confirm webhook delivered in Stripe</li>
-          <li>App shows Pro; all tracks unlock; unlimited feedback</li>
+          <li>App shows Pro; tracks + packs unlock; unlimited bank + custom feedback</li>
           <li>Portal cancel → Free after webhook</li>
         </ol>
-        <p class="muted">
-          Then switch Stripe to <strong>Live</strong>, create live prices,
-          replace env keys + webhook secret, redeploy with
-          <code>ALLOW_DEMO_UPGRADE=false</code>.
-        </p>
       </div>
 
       <h2>6. Deploy on any cloud</h2>
-
-      <h3>Option A — Render (fastest)</h3>
       <div class="panel">
-        <ol>
-          <li>Push repo → Render → New → Blueprint (<code>render.yaml</code>)</li>
-          <li>Attach Postgres; set <code>DATABASE_URL</code></li>
-          <li>Fill env from §3</li>
-          <li>Health check path: <code>/healthz</code></li>
-          <li>Custom domain → update <code>APP_URL</code> + Stripe webhook URL</li>
-        </ol>
-      </div>
-
-      <h3>Option B — Railway / Fly / Cloud Run / Azure / AWS</h3>
-      <div class="panel">
-        <p class="muted">Same Docker image everywhere:</p>
+        <p>
+          Fastest: Render Blueprint —
+          <a
+            href="https://render.com/deploy?repo=https://github.com/SatishKallepalli-KSO/practice-out-loud"
+            >one-click deploy</a
+          >
+          + Neon <code>DATABASE_URL</code>. Details in
+          <a href="./DEPLOY-FREE.md">DEPLOY-FREE.md</a> and
+          <a href="./GO-LIVE.md">GO-LIVE.md</a>.
+        </p>
         <pre>docker build -t practice-out-loud .
-docker run --rm -p 8000:8000 \
-  -e JWT_SECRET=... \
-  -e APP_URL=https://YOUR_HOST \
-  -e DATABASE_URL=postgresql://... \
-  -e OPENAI_API_KEY=sk-... \
-  -e STRIPE_SECRET_KEY=sk_... \
-  -e STRIPE_PRICE_MONTHLY=price_... \
-  -e STRIPE_PRICE_YEARLY=price_... \
-  -e STRIPE_WEBHOOK_SECRET=whsec_... \
-  -e ALLOW_DEMO_UPGRADE=false \
-  -e ADMIN_EMAILS=you@example.com \
-  practice-out-loud</pre>
-        <ul>
-          <li><strong>Cloud Run / App Runner:</strong> port 8000; attach managed Postgres</li>
-          <li><strong>Fly.io:</strong> Dockerfile + <code>fly secrets set</code> + Fly Postgres</li>
-          <li><strong>Railway:</strong> Dockerfile + Postgres plugin + env</li>
-          <li><strong>Azure / K8s:</strong> container + managed Postgres + Ingress TLS</li>
-        </ul>
+docker run --rm -p 8000:8000 --env-file .env practice-out-loud</pre>
       </div>
 
-      <h3>Option C — GitHub Pages UI + cloud API</h3>
-      <div class="panel">
-        <pre>cd apps/web
-VITE_BASE=/practice-out-loud/ \
-VITE_API_BASE=https://YOUR-API-HOST \
-npm run build
-# publish via ./scripts/publish-pages.sh (keeps docs/product/)</pre>
-        <p class="muted">
-          Prefer one Docker host for a sellable product — simpler Stripe
-          redirects and ops. Pages-only cannot store users or charge cards.
-        </p>
-      </div>
-
-      <h2>7. Admin dashboard</h2>
-      <div class="panel">
-        <ol>
-          <li>Set <code>ADMIN_EMAILS=you@example.com</code> on the API</li>
-          <li>Register or sign in with that email</li>
-          <li>Open <code>/admin</code> — signups, Free/Pro mix, feature usage</li>
-        </ol>
-        <p class="muted">
-          If Admin is missing from the nav, sign out and back in after the env
-          change.
-        </p>
-      </div>
-
-      <h2>8. Security checklist</h2>
-      <div class="panel">
-        <ul>
-          <li><code>JWT_SECRET</code> unique and private</li>
-          <li><code>ALLOW_DEMO_UPGRADE=false</code></li>
-          <li>Never commit <code>.env</code>; live Stripe keys only on prod</li>
-          <li>HTTPS everywhere; lock down <code>ADMIN_EMAILS</code></li>
-          <li>Postgres backups / provider snapshots</li>
-          <li>Monitor OpenAI spend + Stripe disputes week one</li>
-        </ul>
-      </div>
-
-      <h2>9. Launch-day verification (30 min)</h2>
+      <h2>7. Launch-day verification (30 min)</h2>
       <div class="panel">
         <ol>
           <li><code>/healthz</code> → ok</li>
-          <li>Register → user appears in <code>/admin</code></li>
-          <li>Free practice works; Pro-only tracks locked</li>
-          <li>Feedback returns AI; Free quota increments</li>
-          <li>Checkout → webhook → Pro badge</li>
-          <li>Pro unlocks advanced tracks; unlimited feedback</li>
-          <li>Billing portal opens</li>
-          <li>Voice practice shows delivery tips</li>
-          <li>Agentic path loads; mark-complete works</li>
+          <li>Learn launchpad: hero → doors → catalog</li>
+          <li>Your question → AI feedback; custom quota increments</li>
+          <li>Role pack / 15-min mock / weak-spot / before-after / share scorecard</li>
+          <li>Checkout → webhook → Pro; unlimited feedback</li>
+          <li><code>/for-companies</code> + <code>/jobs</code> (Hire — no “phase 2”)</li>
+          <li>Agentic path: watch resume + Practice with AI feedback; learn docs use Reviewed</li>
           <li>Admin shows feature events</li>
         </ol>
       </div>
 
-      <h2>10. Fastest path to “sell tomorrow”</h2>
-      <div class="panel">
-        <ol>
-          <li>Deploy Docker to <strong>Render</strong> with Postgres</li>
-          <li>Set <code>JWT_SECRET</code>, <code>APP_URL</code>, <code>ADMIN_EMAILS</code></li>
-          <li>Add OpenAI key</li>
-          <li>Stripe <strong>test</strong> → webhook → prove Pro</li>
-          <li>Switch Stripe to <strong>live</strong></li>
-          <li>Custom domain → share <code>/pricing</code></li>
-        </ol>
-        <p class="muted">
-          You do not need GitHub Pages for monetization — the Docker image
-          already serves the full product.
-        </p>
-      </div>
-
       <h2>Related</h2>
       <div class="panel toc">
-        <a href="./GO-LIVE.md"><strong>GO-LIVE.md</strong> — full markdown runbook (print / share)</a>
+        <a href="./GO-LIVE.md"><strong>GO-LIVE.md</strong> — full markdown runbook</a>
         <a href="./architecture.html"><strong>Architecture</strong> — system design</a>
         <a href="./monetization.html"><strong>Monetization</strong> — Free vs Pro</a>
         <a href="./api.html"><strong>API</strong> — endpoints</a>

@@ -2,7 +2,7 @@
 
 **Audience:** you (founder / operator) launching the product on any cloud with live AI coaching and Stripe payments.
 
-**Outcome:** a public URL where users can register, practice, get AI feedback, upgrade to Pro, and where you can open `/admin` for product metrics.
+**Outcome:** a public URL where users can register, practice (bank + own questions), get AI feedback (Content / Clarity / Delivery), use role packs / mocks / scorecards, upgrade to Pro, and open `/admin` for product metrics.
 
 > **Already live:** https://practiceoutloud.com (fallback https://ai-tutor-studio.onrender.com) — Render Free + Neon Free + OpenAI + Cloudflare.  
 > See **[PRODUCTION.md](PRODUCTION.md)** for current status. Use this runbook for Stripe / domains / rebuilding elsewhere.
@@ -13,14 +13,14 @@
 
 | Piece | Role | Required for go-live? |
 |-------|------|------------------------|
-| **API** (`apps/api`) | Auth + personas, Free/Pro, Stripe, AI feedback, jobs, profiles, connections, chat, admin metrics | **Yes** |
-| **Web** (`apps/web`) | Learn/Practice, Jobs, Profile, Network, Chat, paths, pricing, admin | **Yes** (bundled into API Docker image, or hosted separately) |
-| **Postgres** | Persistent users + social + jobs + events (**Neon Free** in production; SQLite OK for local demos only) | **Yes for production** |
+| **API** (`apps/api`) | Auth + personas, Free/Pro, Stripe, AI feedback, custom questions + quota, scorecards, jobs, profiles, connections, chat, admin metrics | **Yes** |
+| **Web** (`apps/web`) | Learn/Hire launchpads, Practice hub, Your question, Agentic path, Jobs, Profile, Network, Chat, pricing, admin | **Yes** (bundled into API Docker image, or hosted separately) |
+| **Postgres** | Persistent users + custom questions + scorecards + social + jobs + events (**Neon Free** in production; SQLite OK for local demos only) | **Yes for production** |
 | **OpenAI** | Richer coaching feedback (`provider: openai`) | **Yes in production** (rubric fallback if unset) |
 | **Stripe** | Real subscriptions | **Yes for monetization** |
 | **GitHub Pages** | Optional static marketing/UI mirror | Optional |
 
-**Product positioning:** Learn → Practice → Get AI feedback → Get hired. Multi-track oral practice (~120 questions / 12 tracks); Staff/EM are catalog paths, not the whole pitch. Jobs board + privacy at `/privacy`.
+**Product positioning:** Learn, practice, get AI feedback. Slim Learn + Hire launchpads. Flagship: **Practice your own question** (free = 2 custom AI feedbacks/topic). High-leverage: role packs, timed mock + scorecard, weak-spot coach, before/after replay, shareable `/scorecard/:id`. Nav: Home · Practice · Your question · Agentic AI. Learn progress = **Reviewed** (manual). Hire = For companies / Hiring teams. Privacy at `/privacy`.
 
 **Recommended production shape:** one Docker web service (API serves built UI from `/static`) + managed Postgres + Stripe + OpenAI.
 
@@ -100,7 +100,7 @@ Set these on the **API / Docker** service:
 ### 4.3 Cost control tips
 
 - Start with `gpt-4o-mini`.
-- Free plan already caps **5 feedbacks/day**; Pro is unlimited — watch OpenAI usage dashboard the first week.
+- Free plan caps **5 bank feedbacks/day** and **2 custom-question AI feedbacks per topic**; Pro is unlimited on both — watch OpenAI usage the first week.
 - Later: add rate limits per IP / user if needed.
 
 ### 4.4 Smoke test
@@ -163,7 +163,7 @@ Set `APP_URL` to the public UI origin. The API builds:
 2. Open `/pricing` → Upgrade (should open Stripe Checkout).
 3. Pay with test card `4242 4242 4242 4242`.
 4. Confirm webhook delivered (Stripe dashboard → webhook attempts).
-5. Refresh app — user shows **Pro**; all tracks unlock (incl. Staff/EM); feedback unlimited.
+5. Refresh app — user shows **Pro**; all tracks + role packs unlock; bank + custom feedback unlimited.
 6. Open billing portal → cancel → confirm plan returns to Free after webhook.
 
 ### 5.6 Go live with Stripe
@@ -299,16 +299,17 @@ If you don’t see Admin in the nav, sign out and back in after setting the env 
 
 1. `/healthz` → `ok`
 2. Register new user → appears in `/admin`
-3. Free practice on starter tracks works; Pro-only tracks locked
-4. Submit feedback → AI response; Free quota increments
-5. Checkout test/live → webhook → Pro badge
-6. Pro unlocks all tracks (incl. Staff/EM); unlimited feedback
-6b. `/privacy` and `/jobs` load
-7. Billing portal opens
-8. Voice practice (Chrome) → delivery tips present
-9. `/agentic-path` loads; mark complete still works
-10. `/snowflake-path` loads; mark complete still works (separate localStorage key)
-11. `/admin` shows feature events (track opens, feedback, pricing)
+3. Learn home launchpad: hero → doors → collapsed catalog
+4. Free practice on starter tracks works; Pro-only tracks / full packs locked
+5. **Your question** → AI feedback; free custom quota increments (2/topic); Content / Clarity / Delivery shown
+6. Checkout test/live → webhook → Pro badge; unlimited bank + custom feedback
+7. Role pack · timed mock (15-min free) · weak-spot coach · before/after replay · share `/scorecard/:id`
+8. `/privacy`, `/jobs`, `/for-companies` load (Hire launchpad — no “phase 2” naming)
+9. Billing portal opens
+10. Voice practice (Chrome) → delivery tips present
+11. `/agentic-path` — watch resume + per-lesson progress; Practice with AI feedback after phases; learn docs use **Reviewed**
+12. `/snowflake-path` loads; mark complete still works (separate localStorage key)
+13. `/admin` shows feature events (track opens, feedback, pricing)
 
 ---
 
@@ -354,7 +355,7 @@ You do **not** need GitHub Pages for monetization — the Docker image already s
 
 ---
 
-*Last updated for Practice Out Loud API v0.3 (auth, Stripe, OpenAI, admin analytics, ~120 questions / 12 tracks).*
+*Last updated for Practice Out Loud (auth, Stripe-ready, OpenAI, custom questions + quota, scorecards, role packs / mocks / weak-spot / replay, ~120 questions / 12 tracks).*
 
 ---
 
