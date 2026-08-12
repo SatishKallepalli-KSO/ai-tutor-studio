@@ -102,7 +102,7 @@ export function AgenticPathSidebar({
                   <span className="path-video-idx">
                     {done.has(video.id) ? '✓' : `${phase.step}.${i + 1}`}
                   </span>
-                  <span className="path-video-meta">
+                  <div className="path-video-meta">
                     <strong>{video.title}</strong>
                     <em>
                       {video.channel} · {video.duration}
@@ -111,13 +111,13 @@ export function AgenticPathSidebar({
                         : ''}
                       {done.has(video.id) ? ' · Complete' : ''}
                     </em>
-                    <span
+                    <div
                       className="progress-bar path-video-bar"
                       aria-hidden="true"
                     >
                       <span style={{ width: `${lessonPct}%` }} />
-                    </span>
-                  </span>
+                    </div>
+                  </div>
                 </button>
               )
             })}
