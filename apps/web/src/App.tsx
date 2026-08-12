@@ -38,6 +38,19 @@ import {
   recordAttempt,
   unmarkTopicStudied,
 } from './learnProgress'
+import { MockScorecard } from './MockScorecard'
+import {
+  createActiveMock,
+  deriveDims,
+  finishMock,
+  formatCountdown,
+  FREE_SHORT_MOCK,
+  readActiveMock,
+  writeActiveMock,
+  type ActiveMock,
+  type MockQuestionResult,
+  type MockSessionSummary,
+} from './mockSession'
 import {
   filterQuestionsForPack,
   getPack,
@@ -88,6 +101,14 @@ export default function App() {
   const [renameId, setRenameId] = useState<string | null>(null)
   const [renameDraft, setRenameDraft] = useState('')
   const loadingTrackRef = useRef<string | null>(null)
+  const [activeMock, setActiveMock] = useState<ActiveMock | null>(() =>
+    readActiveMock(),
+  )
+  const [mockSummary, setMockSummary] = useState<MockSessionSummary | null>(
+    null,
+  )
+  const [nowMs, setNowMs] = useState(() => Date.now())
+  const mockForceRef = useRef<string | null>(null)
 
   const customRemaining =
     user?.is_pro || customQuota?.remaining === 'unlimited'
@@ -109,6 +130,7 @@ export default function App() {
     custom?: boolean
     cq?: string | null
     pack?: string | null
+    mock?: boolean | null
     replace?: boolean
   }) {
     const sp = new URLSearchParams()
@@ -121,6 +143,11 @@ export default function App() {
       const packId =
         next.pack === undefined ? params.get('pack') : next.pack
       if (packId && !next.custom) sp.set('pack', packId)
+      const mockOn =
+        next.mock === undefined
+          ? params.get('mock') === '1'
+          : !!next.mock
+      if (mockOn && !next.custom) sp.set('mock', '1')
       if (next.custom) {
         sp.set('custom', '1')
         if (next.cq) sp.set('cq', next.cq)
@@ -155,6 +182,8 @@ export default function App() {
   }
 
   const practiceHubFocused = params.get('hub') === 'practice' && !params.get('path')
+  const mockMode =
+    !!activeMock && params.get('mock') === '1' && step === 'practice'
 
   const speech = useSpeechAnswer({
     onTranscript: (finalChunk, liveInterim) => {
@@ -185,16 +214,24 @@ export default function App() {
     () => (topicId ? getTopic(topicId) ?? null : null),
     [topicId],
   )
-  /** Bank questions, optionally scoped to a curated role pack. */
-  const bankQuestions = useMemo(
-    () => filterQuestionsForPack(questions, activePack),
-    [questions, activePack],
-  )
+  /** Bank questions, optionally scoped to a curated role pack or timed mock. */
+  const bankQuestions = useMemo(() => {
+    if (activeMock && params.get('mock') === '1') {
+      const order = new Map(
+        activeMock.questionIds.map((id, i) => [id, i] as const),
+      )
+      return questions
+        .filter((q) => order.has(q.id))
+        .sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0))
+    }
+    return filterQuestionsForPack(questions, activePack)
+  }, [questions, activePack, activeMock, params])
   const topicQuestions = useMemo(() => {
+    if (activeMock && params.get('mock') === '1') return bankQuestions
     if (activePack) return bankQuestions
     if (!topicId) return bankQuestions
     return bankQuestions.filter((q) => q.topic_id === topicId)
-  }, [bankQuestions, topicId, activePack])
+  }, [bankQuestions, topicId, activePack, activeMock, params])
   const question = useMemo(
     () => bankQuestions.find((q) => q.id === questionId) ?? null,
     [questionId, bankQuestions],
@@ -517,6 +554,11 @@ export default function App() {
   }
 
   function goNextQuestion() {
+    if (activeMock && params.get('mock') === '1' && questionId) {
+      const idx = activeMock.questionIds.indexOf(questionId)
+      advanceMockTo(idx + 1, activeMock.results)
+      return
+    }
     const list = topicQuestions.length ? topicQuestions : bankQuestions
     if (!list.length) return
     const idx = list.findIndex((q) => q.id === questionId)
@@ -583,6 +625,9 @@ export default function App() {
     setInputMode('text')
     speech.stop()
     stopSpeaking()
+    setActiveMock(null)
+    writeActiveMock(null)
+    setMockSummary(null)
     if (!user) {
       setPaywall('Sign in to practice a role pack and get AI feedback.')
       trackEvent('pack_gate', {
@@ -610,6 +655,7 @@ export default function App() {
       topic: firstQ?.topic_id ?? null,
       q: firstQ?.id ?? firstId ?? null,
       pack: pack.id,
+      mock: false,
     })
     trackEvent('pack_open', {
       path: '/',
@@ -617,6 +663,174 @@ export default function App() {
         pack_id: pack.id,
         track_id: pack.trackId,
         questions: pack.questionIds.length,
+      },
+    })
+  }
+
+  function completeTimedMock(results?: MockQuestionResult[]) {
+    if (!activeMock) return
+    const byId = new Map(
+      (results ?? activeMock.results).map((r) => [r.questionId, r]),
+    )
+    const filled: MockQuestionResult[] = activeMock.questionIds.map((id) => {
+      const existing = byId.get(id)
+      if (existing) return existing
+      const q =
+        questions.find((item) => item.id === id) ||
+        localQuestions(activeMock.trackId).find((item) => item.id === id)
+      return {
+        questionId: id,
+        prompt: q?.prompt ?? id,
+        category: q?.category ?? '',
+        score: null,
+        dims: null,
+        skipped: true,
+        at: new Date().toISOString(),
+      }
+    })
+    const summary = finishMock(activeMock, filled)
+    setMockSummary(summary)
+    setActiveMock(null)
+    writeActiveMock(null)
+    setFeedback(null)
+    setAnswer('')
+    speech.stop()
+    stopSpeaking()
+    openPracticeHub({ replace: true })
+    trackEvent('mock_complete', {
+      path: '/',
+      properties: {
+        mock_id: summary.id,
+        pack_id: summary.packId,
+        overall: summary.averages.overall,
+        answered: filled.filter((r) => !r.skipped).length,
+      },
+    })
+  }
+
+  function advanceMockTo(questionIndex: number, results: MockQuestionResult[]) {
+    if (!activeMock) return
+    if (questionIndex >= activeMock.questionIds.length) {
+      completeTimedMock(results)
+      return
+    }
+    const nextId = activeMock.questionIds[questionIndex]
+    const nextQ =
+      questions.find((q) => q.id === nextId) ||
+      localQuestions(activeMock.trackId).find((q) => q.id === nextId)
+    const updated: ActiveMock = {
+      ...activeMock,
+      results,
+      questionStartedAt: Date.now(),
+    }
+    setActiveMock(updated)
+    writeActiveMock(updated)
+    setFeedback(null)
+    setAnswer('')
+    setInterim('')
+    setInputMode('text')
+    speech.stop()
+    stopSpeaking()
+    mockForceRef.current = null
+    writeLearnUrl({
+      path: activeMock.trackId,
+      mode: 'practice',
+      topic: nextQ?.topic_id ?? null,
+      q: nextId,
+      pack:
+        activeMock.packId && activeMock.packId !== FREE_SHORT_MOCK.id
+          ? activeMock.packId
+          : null,
+      mock: true,
+      replace: true,
+    })
+  }
+
+  function recordMockResult(
+    result: Feedback,
+    qid: string,
+    prompt: string,
+    category: string,
+  ) {
+    if (!activeMock) return
+    const dims = deriveDims(result)
+    const entry: MockQuestionResult = {
+      questionId: qid,
+      prompt,
+      category,
+      score: result.score,
+      dims,
+      skipped: false,
+      at: new Date().toISOString(),
+    }
+    const results = [
+      ...activeMock.results.filter((r) => r.questionId !== qid),
+      entry,
+    ]
+    const idx = activeMock.questionIds.indexOf(qid)
+    const updated: ActiveMock = {
+      ...activeMock,
+      results,
+      questionStartedAt: Date.now(),
+    }
+    setActiveMock(updated)
+    writeActiveMock(updated)
+    // Auto-advance after a short beat so the score is visible.
+    window.setTimeout(() => {
+      advanceMockTo(idx + 1, results)
+    }, 1600)
+  }
+
+  function startTimedMock(pack: RolePack) {
+    setError(null)
+    setPaywall(null)
+    setFeedback(null)
+    setAnswer('')
+    setInterim('')
+    setInputMode('text')
+    setMockSummary(null)
+    speech.stop()
+    stopSpeaking()
+    if (!user) {
+      setPaywall('Sign in to run a timed mock and get AI feedback.')
+      trackEvent('mock_gate', {
+        path: '/',
+        properties: { pack_id: pack.id, reason: 'auth' },
+      })
+      return
+    }
+    if (pack.proPractice && !user.is_pro) {
+      setPaywall(
+        'Full timed mocks on role packs are Pro. Free includes a short 15-minute mock — start that below.',
+      )
+      trackEvent('mock_gate', {
+        path: '/',
+        properties: { pack_id: pack.id, reason: 'pro' },
+      })
+      return
+    }
+    const mock = createActiveMock(pack)
+    setActiveMock(mock)
+    writeActiveMock(mock)
+    mockForceRef.current = null
+    const firstId = mock.questionIds[0]
+    const firstQ = localQuestions(pack.trackId).find((q) => q.id === firstId)
+    writeLearnUrl({
+      path: pack.trackId,
+      mode: 'practice',
+      topic: firstQ?.topic_id ?? null,
+      q: firstId ?? null,
+      pack: pack.id === FREE_SHORT_MOCK.id ? null : pack.id,
+      mock: true,
+    })
+    trackEvent('mock_start', {
+      path: '/',
+      properties: {
+        mock_id: mock.id,
+        pack_id: pack.id,
+        track_id: pack.trackId,
+        questions: mock.questionIds.length,
+        duration_min: pack.durationMin,
       },
     })
   }
@@ -947,6 +1161,14 @@ export default function App() {
       } else if (questionId) {
         recordAttempt(trackId, questionId, result.score, result.provider)
         setProgressTick((n) => n + 1)
+        if (activeMock && params.get('mock') === '1') {
+          recordMockResult(
+            result,
+            questionId,
+            question?.prompt ?? questionId,
+            question?.category ?? '',
+          )
+        }
       }
       await refresh()
     } catch (err) {
@@ -995,6 +1217,14 @@ export default function App() {
           } else if (questionId) {
             recordAttempt(trackId, questionId, result.score, result.provider)
             setProgressTick((n) => n + 1)
+            if (activeMock && params.get('mock') === '1') {
+              recordMockResult(
+                result,
+                questionId,
+                question?.prompt ?? questionId,
+                question?.category ?? '',
+              )
+            }
           }
           if (!user.is_pro) localStorage.setItem(key, String(used + 1))
         }
@@ -1005,6 +1235,54 @@ export default function App() {
       setLoading(false)
     }
   }
+
+  // Timed mock: tick clock + forced advance / end.
+  useEffect(() => {
+    if (!mockMode || !activeMock) return
+    const id = window.setInterval(() => setNowMs(Date.now()), 500)
+    return () => window.clearInterval(id)
+  }, [mockMode, activeMock])
+
+  useEffect(() => {
+    if (!mockMode || !activeMock || loading) return
+    if (nowMs >= activeMock.endsAt) {
+      if (mockForceRef.current === 'end') return
+      mockForceRef.current = 'end'
+      completeTimedMock()
+      return
+    }
+    if (!questionId || feedback) return
+    const qDeadline =
+      activeMock.questionStartedAt + activeMock.perQuestionSec * 1000
+    if (nowMs < qDeadline) return
+    const key = `q:${questionId}`
+    if (mockForceRef.current === key) return
+    mockForceRef.current = key
+    const spoken = liveAnswer.trim()
+    if (spoken.length >= 12) {
+      void submitAnswer()
+      return
+    }
+    const idx = activeMock.questionIds.indexOf(questionId)
+    const q =
+      questions.find((item) => item.id === questionId) ||
+      localQuestions(activeMock.trackId).find((item) => item.id === questionId)
+    const skip: MockQuestionResult = {
+      questionId,
+      prompt: q?.prompt ?? questionId,
+      category: q?.category ?? '',
+      score: null,
+      dims: null,
+      skipped: true,
+      at: new Date().toISOString(),
+    }
+    const results = [
+      ...activeMock.results.filter((r) => r.questionId !== questionId),
+      skip,
+    ]
+    advanceMockTo(idx + 1, results)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- timer-driven mock advance
+  }, [nowMs, mockMode, activeMock, loading, questionId, feedback])
 
   return (
     <Shell wide={step !== 'tracks'}>
@@ -1207,12 +1485,9 @@ export default function App() {
                   {ROLE_PACKS.map((pack) => {
                     const locked = pack.proPractice && !user?.is_pro
                     return (
-                      <button
+                      <div
                         key={pack.id}
-                        type="button"
-                        className={`practice-hub-card pack${locked ? ' locked' : ''}`}
-                        disabled={loading}
-                        onClick={() => startPack(pack)}
+                        className={`practice-hub-card pack pack-with-actions${locked ? ' locked' : ''}`}
                       >
                         <span className="eyebrow">{pack.eyebrow}</span>
                         <strong>{pack.title}</strong>
@@ -1220,13 +1495,74 @@ export default function App() {
                         <span className="meta">
                           {pack.questionIds.length} drills · ~{pack.durationMin}{' '}
                           min
-                          {locked ? ' · Pro' : ''} →
+                          {locked ? ' · Pro' : ''}
                         </span>
-                      </button>
+                        <div className="pack-actions">
+                          <button
+                            type="button"
+                            className="btn ghost sm"
+                            disabled={loading}
+                            onClick={() => startPack(pack)}
+                          >
+                            Practice
+                          </button>
+                          <button
+                            type="button"
+                            className="btn primary sm"
+                            disabled={loading}
+                            onClick={() => startTimedMock(pack)}
+                          >
+                            Timed mock
+                          </button>
+                        </div>
+                      </div>
                     )
                   })}
                 </div>
+                <div className="timed-mock-strip">
+                  <div>
+                    <strong>Timed mock loop</strong>
+                    <p className="muted">
+                      Countdown, forced advance, end scorecard — Content /
+                      Clarity / Delivery.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn primary"
+                    disabled={loading}
+                    onClick={() =>
+                      startTimedMock(
+                        user?.is_pro
+                          ? (ROLE_PACKS[0] ?? FREE_SHORT_MOCK)
+                          : FREE_SHORT_MOCK,
+                      )
+                    }
+                  >
+                    {user?.is_pro
+                      ? 'Start 40-min Staff mock'
+                      : 'Start free 15-min mock'}
+                  </button>
+                </div>
               </div>
+
+              {mockSummary ? (
+                <MockScorecard
+                  summary={mockSummary}
+                  onClose={() => {
+                    setMockSummary(null)
+                    openPracticeHub()
+                  }}
+                  onRetry={() => {
+                    const pack =
+                      mockSummary.packId === FREE_SHORT_MOCK.id
+                        ? FREE_SHORT_MOCK
+                        : getPack(mockSummary.packId) ||
+                          (user?.is_pro ? ROLE_PACKS[0] : FREE_SHORT_MOCK)
+                    if (pack) startTimedMock(pack)
+                  }}
+                />
+              ) : null}
             </section>
           )}
 
@@ -1904,32 +2240,85 @@ export default function App() {
               </aside>
 
               <div className="panel practice-main">
-                <div
-                  className="practice-source-switch"
-                  role="tablist"
-                  aria-label="Practice source"
-                >
-                  <button
-                    type="button"
-                    role="tab"
-                    aria-selected={!customMode}
-                    className={!customMode ? 'source-tab active' : 'source-tab'}
-                    onClick={exitCustomMode}
+                {mockMode && activeMock ? (
+                  <div className="mock-timer-bar" role="status">
+                    <div className="mock-timer-meta">
+                      <strong>Timed mock · {activeMock.title}</strong>
+                      <span>
+                        Q{' '}
+                        {Math.max(
+                          1,
+                          activeMock.questionIds.indexOf(questionId ?? '') + 1,
+                        )}
+                        /{activeMock.questionIds.length}
+                      </span>
+                    </div>
+                    <div className="mock-timer-clocks">
+                      <span
+                        className={
+                          activeMock.endsAt - nowMs < 60_000 ? 'urgent' : ''
+                        }
+                      >
+                        Overall {formatCountdown(activeMock.endsAt - nowMs)}
+                      </span>
+                      <span
+                        className={
+                          activeMock.questionStartedAt +
+                            activeMock.perQuestionSec * 1000 -
+                            nowMs <
+                          30_000
+                            ? 'urgent'
+                            : ''
+                        }
+                      >
+                        This Q{' '}
+                        {formatCountdown(
+                          activeMock.questionStartedAt +
+                            activeMock.perQuestionSec * 1000 -
+                            nowMs,
+                        )}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      className="btn ghost sm"
+                      onClick={() => completeTimedMock()}
+                    >
+                      End mock · scorecard
+                    </button>
+                  </div>
+                ) : (
+                  <div
+                    className="practice-source-switch"
+                    role="tablist"
+                    aria-label="Practice source"
                   >
-                    Curated bank
-                  </button>
-                  <button
-                    type="button"
-                    role="tab"
-                    aria-selected={customMode}
-                    className={customMode ? 'source-tab active' : 'source-tab'}
-                    onClick={enterCustomMode}
-                  >
-                    Your own question
-                  </button>
-                </div>
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={!customMode}
+                      className={
+                        !customMode ? 'source-tab active' : 'source-tab'
+                      }
+                      onClick={exitCustomMode}
+                    >
+                      Curated bank
+                    </button>
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={customMode}
+                      className={
+                        customMode ? 'source-tab active' : 'source-tab'
+                      }
+                      onClick={enterCustomMode}
+                    >
+                      Your own question
+                    </button>
+                  </div>
+                )}
 
-                {!customMode && (
+                {!customMode && !mockMode && (
                   <div className="session-progress">
                     <div className="session-progress-meta">
                       <span>
