@@ -4,6 +4,11 @@ export type QuestionAttempt = {
   score: number
   at: string
   provider?: string
+  /** How many times this question was submitted (for weak-spot readiness). */
+  attemptCount?: number
+  category?: string
+  /** Latest coach gaps — used by weak-spot coach. */
+  gaps?: string[]
 }
 
 export type TrackProgress = {
@@ -115,11 +120,12 @@ export function recordAttempt(
   questionId: string,
   score: number,
   provider?: string,
+  meta?: { category?: string; gaps?: string[] },
 ) {
   const all = readAll()
   const cur = getTrackProgress(trackId)
   const prev = cur.attempts[questionId]
-  // Keep best score, always refresh timestamp
+  // Keep best score, always refresh timestamp + latest gaps for coaching.
   const best = prev ? Math.max(prev.score, score) : score
   cur.attempts = {
     ...cur.attempts,
@@ -127,6 +133,9 @@ export function recordAttempt(
       score: best,
       at: new Date().toISOString(),
       provider: provider ?? prev?.provider,
+      attemptCount: (prev?.attemptCount ?? 0) + 1,
+      category: meta?.category ?? prev?.category,
+      gaps: meta?.gaps?.length ? meta.gaps.slice(0, 4) : prev?.gaps,
     },
   }
   cur.lastQuestionId = questionId

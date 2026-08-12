@@ -60,6 +60,7 @@ import {
 import { usePersona } from './persona'
 import { Shell, TRACK_GROUPS } from './Shell'
 import { speakText, stopSpeaking, useSpeechAnswer } from './useSpeechAnswer'
+import { analyzeWeakSpots, type WeakSpot } from './weakSpotCoach'
 import './App.css'
 
 type Step = 'tracks' | 'learn' | 'practice'
@@ -131,6 +132,7 @@ export default function App() {
     cq?: string | null
     pack?: string | null
     mock?: boolean | null
+    coach?: 'weak' | null
     replace?: boolean
   }) {
     const sp = new URLSearchParams()
@@ -148,6 +150,11 @@ export default function App() {
           ? params.get('mock') === '1'
           : !!next.mock
       if (mockOn && !next.custom) sp.set('mock', '1')
+      const coach =
+        next.coach === undefined
+          ? params.get('coach')
+          : next.coach
+      if (coach === 'weak' && !next.custom && !mockOn) sp.set('coach', 'weak')
       if (next.custom) {
         sp.set('custom', '1')
         if (next.cq) sp.set('cq', next.cq)
@@ -214,7 +221,14 @@ export default function App() {
     () => (topicId ? getTopic(topicId) ?? null : null),
     [topicId],
   )
-  /** Bank questions, optionally scoped to a curated role pack or timed mock. */
+  const weakPlan = useMemo(() => {
+    void progressTick
+    return analyzeWeakSpots()
+  }, [progressTick])
+
+  const coachMode = params.get('coach') === 'weak'
+
+  /** Bank questions — pack, timed mock, or weak-spot coach queue. */
   const bankQuestions = useMemo(() => {
     if (activeMock && params.get('mock') === '1') {
       const order = new Map(
@@ -224,14 +238,34 @@ export default function App() {
         .filter((q) => order.has(q.id))
         .sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0))
     }
+    if (coachMode && weakPlan.drillQueue.length) {
+      const ids = weakPlan.drillQueue
+        .filter((d) => d.trackId === (trackId ?? params.get('path')))
+        .map((d) => d.questionId)
+      if (ids.length) {
+        const order = new Map(ids.map((id, i) => [id, i] as const))
+        return questions
+          .filter((q) => order.has(q.id))
+          .sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0))
+      }
+    }
     return filterQuestionsForPack(questions, activePack)
-  }, [questions, activePack, activeMock, params])
+  }, [
+    questions,
+    activePack,
+    activeMock,
+    params,
+    coachMode,
+    weakPlan.drillQueue,
+    trackId,
+  ])
   const topicQuestions = useMemo(() => {
     if (activeMock && params.get('mock') === '1') return bankQuestions
+    if (coachMode) return bankQuestions
     if (activePack) return bankQuestions
     if (!topicId) return bankQuestions
     return bankQuestions.filter((q) => q.topic_id === topicId)
-  }, [bankQuestions, topicId, activePack, activeMock, params])
+  }, [bankQuestions, topicId, activePack, activeMock, params, coachMode])
   const question = useMemo(
     () => bankQuestions.find((q) => q.id === questionId) ?? null,
     [questionId, bankQuestions],
@@ -257,12 +291,23 @@ export default function App() {
   const learnStats = useMemo(() => {
     void progressTick
     if (!trackId) return null
-    const qids = (activePack ? bankQuestions : questions).map((q) => q.id)
-    const topicIds = activePack
-      ? [...new Set(bankQuestions.map((q) => q.topic_id))]
-      : topics.map((t) => t.id)
+    const qids = (activePack || coachMode ? bankQuestions : questions).map(
+      (q) => q.id,
+    )
+    const topicIds =
+      activePack || coachMode
+        ? [...new Set(bankQuestions.map((q) => q.topic_id))]
+        : topics.map((t) => t.id)
     return pathStats(trackId, topicIds, qids)
-  }, [trackId, topics, questions, bankQuestions, activePack, progressTick])
+  }, [
+    trackId,
+    topics,
+    questions,
+    bankQuestions,
+    activePack,
+    coachMode,
+    progressTick,
+  ])
 
   const trackProgress = useMemo(() => {
     void progressTick
@@ -781,6 +826,50 @@ export default function App() {
     }, 1600)
   }
 
+  function startWeakSpotDrill(spot?: WeakSpot) {
+    const plan = spot
+      ? {
+          ...weakPlan,
+          drillQueue: spot.questionIds.map((id) => {
+            const q = localQuestions(spot.trackId).find((item) => item.id === id)
+            return {
+              trackId: spot.trackId,
+              questionId: id,
+              prompt: q?.prompt ?? id,
+            }
+          }),
+        }
+      : weakPlan
+    const first = plan.drillQueue[0]
+    if (!first) return
+    setError(null)
+    setPaywall(null)
+    setFeedback(null)
+    setAnswer('')
+    setActiveMock(null)
+    writeActiveMock(null)
+    const q = localQuestions(first.trackId).find(
+      (item) => item.id === first.questionId,
+    )
+    writeLearnUrl({
+      path: first.trackId,
+      mode: 'practice',
+      topic: q?.topic_id ?? null,
+      q: first.questionId,
+      pack: null,
+      mock: false,
+      coach: 'weak',
+    })
+    trackEvent('weak_spot_open', {
+      path: '/',
+      properties: {
+        track_id: first.trackId,
+        category: spot?.category,
+        drills: plan.drillQueue.length,
+      },
+    })
+  }
+
   function startTimedMock(pack: RolePack) {
     setError(null)
     setPaywall(null)
@@ -1159,7 +1248,10 @@ export default function App() {
           },
         })
       } else if (questionId) {
-        recordAttempt(trackId, questionId, result.score, result.provider)
+        recordAttempt(trackId, questionId, result.score, result.provider, {
+          category: question?.category,
+          gaps: result.gaps,
+        })
         setProgressTick((n) => n + 1)
         if (activeMock && params.get('mock') === '1') {
           recordMockResult(
@@ -1215,7 +1307,10 @@ export default function App() {
             }
             setCustomTick((n) => n + 1)
           } else if (questionId) {
-            recordAttempt(trackId, questionId, result.score, result.provider)
+            recordAttempt(trackId, questionId, result.score, result.provider, {
+              category: question?.category,
+              gaps: result.gaps,
+            })
             setProgressTick((n) => n + 1)
             if (activeMock && params.get('mock') === '1') {
               recordMockResult(
@@ -1405,6 +1500,33 @@ export default function App() {
                 onClick={continueWhereLeftOff}
               >
                 {BRAND.ctaContinue}
+              </button>
+            </section>
+          )}
+
+          {!isRecruiter && weakPlan.ready && weakPlan.spots.length > 0 && (
+            <section
+              className="continue-strip weak-spot-strip reveal"
+              aria-label="Weak-spot coach"
+            >
+              <div className="continue-strip-copy">
+                <p className="eyebrow">Weak-spot coach</p>
+                <strong>{weakPlan.headline}</strong>
+                <p>
+                  {weakPlan.totalAttempts} attempts analyzed ·{' '}
+                  {weakPlan.drillQueue.length} drills queued
+                  {weakPlan.spots[0]
+                    ? ` · avg ${weakPlan.spots[0].avgScore}/5 on ${weakPlan.spots[0].category}`
+                    : ''}
+                </p>
+              </div>
+              <button
+                type="button"
+                className="btn primary sm"
+                disabled={loading}
+                onClick={() => startWeakSpotDrill(weakPlan.spots[0])}
+              >
+                Drill weak spots
               </button>
             </section>
           )}
@@ -2068,6 +2190,31 @@ export default function App() {
                   </span>
                 </button>
 
+                {weakPlan.ready && weakPlan.spots.length > 0 && !mockMode && (
+                  <div className="weak-spot-sidebar">
+                    <h3>Weak-spot coach</h3>
+                    {weakPlan.spots.slice(0, 2).map((spot) => (
+                      <button
+                        key={spot.id}
+                        type="button"
+                        className={
+                          coachMode &&
+                          weakPlan.spots[0]?.id === spot.id
+                            ? 'topic-item active'
+                            : 'topic-item'
+                        }
+                        onClick={() => startWeakSpotDrill(spot)}
+                      >
+                        <strong>{spot.label}</strong>
+                        <span>
+                          avg {spot.avgScore}/5 · {spot.questionIds.length}{' '}
+                          drills
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
                 <AdSlot
                   id="practice-sidebar"
                   variant="sidebar"
@@ -2201,7 +2348,13 @@ export default function App() {
                   </>
                 ) : (
                   <>
-                    <h3>{activePack ? 'Pack queue' : 'Queue'}</h3>
+                    <h3>
+                      {coachMode
+                        ? 'Coach queue'
+                        : activePack
+                          ? 'Pack queue'
+                          : 'Queue'}
+                    </h3>
                     {topicQuestions.map((q, idx) => (
                       <button
                         key={q.id}

@@ -5018,6 +5018,19 @@ textarea {
   color: #fff;
 }
 
+.weak-spot-strip {
+  border-color: rgba(180, 83, 9, 0.28);
+  background: rgba(180, 83, 9, 0.05);
+}
+
+.weak-spot-sidebar {
+  margin: 0 0 1rem;
+}
+
+.weak-spot-sidebar h3 {
+  margin: 0 0 0.45rem;
+}
+
 .continue-strip {
   display: flex;
   align-items: center;
@@ -5032,6 +5045,24 @@ textarea {
   display: grid;
   gap: 0.2rem;
   min-width: 0;
+}
+
+.weak-spot-strip {
+  border-bottom-color: rgba(180, 83, 9, 0.28);
+  background: rgba(180, 83, 9, 0.05);
+  padding-left: 0.85rem;
+  padding-right: 0.85rem;
+  border-radius: 12px;
+  border: 1px solid rgba(180, 83, 9, 0.22);
+  border-bottom-width: 1px;
+}
+
+.weak-spot-sidebar {
+  margin: 0 0 1rem;
+}
+
+.weak-spot-sidebar h3 {
+  margin: 0 0 0.45rem;
 }
 
 .continue-strip-copy .eyebrow {
