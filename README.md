@@ -29,7 +29,7 @@ Ops docs: [PRODUCTION.md](docs/product/PRODUCTION.md) · [DATABASE.md](docs/prod
 
 | Plan | What you get |
 |------|----------------|
-| **Free** | Learn docs · starter practice tracks · 5 AI feedbacks/day · jobs board |
+| **Free** | Learn docs · starter practice tracks · 5 AI feedbacks/day · 2 custom-question AI feedbacks/topic · jobs board |
 | **Pro ($19/mo or $149/yr)** | All 12 tracks (incl. Staff/EM & advanced) · unlimited coaching · Stripe (demo upgrade until Stripe is wired) |
 
 Also: Agentic AI & Snowflake video paths · profiles · messaging (secondary).

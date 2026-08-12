@@ -10,6 +10,8 @@ FREE_PRACTICE_TRACKS = frozenset(
 )
 
 FREE_FEEDBACK_PER_DAY = 5
+# Custom prompts burn OpenAI tokens — free gets a small taste per topic.
+FREE_CUSTOM_FEEDBACK_PER_TOPIC = 2
 
 PRO_MONTHLY_PRICE_DISPLAY = "$19"
 PRO_YEARLY_PRICE_DISPLAY = "$149"
@@ -36,10 +38,12 @@ PLANS: dict[str, PlanInfo] = {
             "Practice on HTML, CSS, JavaScript, Python",
             "Java → Python transition track",
             f"{FREE_FEEDBACK_PER_DAY} feedback reviews per day",
+            f"{FREE_CUSTOM_FEEDBACK_PER_TOPIC} AI feedbacks on your own questions per topic",
             "Local rubric coaching",
         ],
         limits={
             "feedback_per_day": FREE_FEEDBACK_PER_DAY,
+            "custom_feedback_per_topic": FREE_CUSTOM_FEEDBACK_PER_TOPIC,
             "practice_tracks": len(FREE_PRACTICE_TRACKS),
         },
     ),
@@ -52,10 +56,15 @@ PLANS: dict[str, PlanInfo] = {
             "Everything in Free",
             "All tracks: Staff, EM, Java→AI, Java, TS, React, Node",
             "Unlimited practice + AI feedback",
+            "Unlimited AI feedback on your own questions",
             "Priority coaching when OpenAI is configured",
             "Billing portal to manage subscription",
         ],
-        limits={"feedback_per_day": "unlimited", "practice_tracks": "all"},
+        limits={
+            "feedback_per_day": "unlimited",
+            "custom_feedback_per_topic": "unlimited",
+            "practice_tracks": "all",
+        },
     ),
 }
 

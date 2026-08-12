@@ -101,6 +101,18 @@ export type PlanCard = {
   limits: Record<string, string | number>
 }
 
+/** Free AI feedbacks on custom questions per topic (must match server plans.py). */
+export const FREE_CUSTOM_FEEDBACK_PER_TOPIC = 2
+
+export type CustomFeedbackQuota = {
+  track_id: string
+  topic_id: string
+  used: number
+  limit: number | string
+  remaining: number | string
+  is_pro: boolean
+}
+
 export type BillingPlans = {
   plans: PlanCard[]
   stripe_enabled: boolean
@@ -227,6 +239,16 @@ export const api = {
     if (params?.topic_id) sp.set('topic_id', params.topic_id)
     const qs = sp.toString()
     return request(`/v1/tutor/custom-questions${qs ? `?${qs}` : ''}`)
+  },
+
+  async customFeedbackQuota(params: {
+    track_id: string
+    topic_id?: string | null
+  }): Promise<CustomFeedbackQuota> {
+    const sp = new URLSearchParams()
+    sp.set('track_id', params.track_id)
+    if (params.topic_id) sp.set('topic_id', params.topic_id)
+    return request(`/v1/tutor/custom-questions/quota?${sp.toString()}`)
   },
 
   async upsertCustomQuestion(input: {

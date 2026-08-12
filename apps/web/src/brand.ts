@@ -17,9 +17,9 @@ export const BRAND = {
   ctaExploreAgentic: 'Explore Agentic AI',
   customFeatureTitle: 'Bring any interview question',
   customFeatureBlurb:
-    'Paste a real panel prompt, speak or type your answer, and get AI coaching on content, clarity, and delivery — same coach as the curated bank.',
+    'Paste a real panel prompt, speak or type your answer, and get AI coaching on content, clarity, and delivery — same coach as the curated bank. Free includes 2 AI feedbacks on your own questions per topic; Pro unlocks unlimited custom practice.',
   oneLiner:
-    'Practice Out Loud helps you learn AI engineering, practice out loud, and get AI feedback — including your own interview questions, Agentic paths, and stack depth. Free to start, Pro for full access.',
+    'Practice Out Loud helps you learn AI engineering, practice out loud, and get AI feedback — including your own interview questions, Agentic paths, and stack depth. Free to start (2 custom AI feedbacks per topic), Pro for full access.',
   copyright: '© 2026 Practice Out Loud · Kallepalli Labs. All rights reserved.',
   contactEmail: 'hello@practiceoutloud.com',
 } as const
@@ -76,7 +76,7 @@ export const AI_ENGINEER_JOURNEY = [
     step: '03',
     title: 'Get AI feedback',
     blurb:
-      'Coaching on content, clarity, and delivery for bank drills and your own prompts.',
+      'Coaching on content, clarity, and delivery for bank drills and your own prompts (2 free custom feedbacks per topic).',
   },
   {
     step: '04',

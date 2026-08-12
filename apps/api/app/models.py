@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import date, datetime, timezone
 from typing import Optional
 
-from sqlalchemy import Boolean, Date, DateTime, Integer, String, Text
+from sqlalchemy import Boolean, Date, DateTime, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db import Base
@@ -157,3 +157,21 @@ class CustomQuestionAttempt(Base):
     provider: Mapped[str] = mapped_column(String(40), default="")
     input_mode: Mapped[str] = mapped_column(String(16), default="text")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+
+
+class CustomFeedbackUsage(Base):
+    """Per-user, per-topic count of successful custom-prompt AI feedbacks (freemium gate)."""
+
+    __tablename__ = "custom_feedback_usage"
+    __table_args__ = (
+        UniqueConstraint(
+            "user_id", "track_id", "topic_id", name="uq_custom_feedback_user_track_topic"
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(Integer, index=True)
+    track_id: Mapped[str] = mapped_column(String(64), index=True)
+    topic_id: Mapped[str] = mapped_column(String(120), default="", index=True)
+    feedback_count: Mapped[int] = mapped_column(Integer, default=0)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

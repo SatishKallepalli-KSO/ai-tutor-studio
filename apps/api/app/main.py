@@ -13,9 +13,11 @@ from sqlalchemy.orm import Session
 
 from app.admin import router as admin_router, sync_admin_emails
 from app.auth import (
+    assert_can_custom_feedback,
     assert_can_get_feedback,
     get_current_user,
     get_optional_user,
+    record_custom_feedback_usage,
     record_feedback_usage,
     router as auth_router,
 )
@@ -157,12 +159,16 @@ def tutor_feedback(
     db: Session = Depends(get_db),
 ) -> FeedbackResponse:
     assert_can_get_feedback(db, user, body.track_id)
+    is_custom = bool((body.custom_prompt or "").strip())
+    if is_custom:
+        assert_can_custom_feedback(db, user, body.track_id, body.topic_id)
     try:
         result = generate_feedback(body)
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+    if is_custom:
+        record_custom_feedback_usage(db, user, body.track_id, body.topic_id)
     record_feedback_usage(db, user)
-    is_custom = bool((body.custom_prompt or "").strip())
     record_event(
         db,
         event_name="feedback_submit",

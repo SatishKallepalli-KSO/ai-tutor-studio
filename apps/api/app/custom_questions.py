@@ -9,9 +9,10 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
-from app.auth import get_current_user
+from app.auth import custom_feedback_usage, get_current_user, normalize_topic_id
 from app.db import get_db
 from app.models import CustomQuestion, CustomQuestionAttempt, User, utcnow
+from app.plans import FREE_CUSTOM_FEEDBACK_PER_TOPIC, is_pro
 from app.tutor import get_track
 
 router = APIRouter(prefix="/v1/tutor/custom-questions", tags=["custom-questions"])
@@ -62,6 +63,15 @@ class CustomAttemptIn(BaseModel):
     input_mode: str = Field(default="text", pattern="^(text|voice)$")
 
 
+class CustomQuotaOut(BaseModel):
+    track_id: str
+    topic_id: str
+    used: int
+    limit: int | str
+    remaining: int | str
+    is_pro: bool
+
+
 def _to_out(row: CustomQuestion) -> CustomQuestionOut:
     return CustomQuestionOut(
         id=row.id,
@@ -82,6 +92,38 @@ def _to_out(row: CustomQuestion) -> CustomQuestionOut:
 def _require_track(track_id: str) -> None:
     if not get_track(track_id):
         raise HTTPException(status_code=404, detail="Track not found")
+
+
+@router.get("/quota", response_model=CustomQuotaOut)
+def custom_feedback_quota(
+    track_id: str = Query(min_length=1, max_length=64),
+    topic_id: str | None = Query(default=None),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> CustomQuotaOut:
+    """Remaining free AI feedbacks on custom questions for this track/topic."""
+    _require_track(track_id)
+    tid = normalize_topic_id(topic_id)
+    pro = is_pro(user.plan, user.subscription_status)
+    used = custom_feedback_usage(db, user.id, track_id, tid)
+    if pro:
+        return CustomQuotaOut(
+            track_id=track_id,
+            topic_id=tid,
+            used=used,
+            limit="unlimited",
+            remaining="unlimited",
+            is_pro=True,
+        )
+    remaining = max(0, FREE_CUSTOM_FEEDBACK_PER_TOPIC - used)
+    return CustomQuotaOut(
+        track_id=track_id,
+        topic_id=tid,
+        used=used,
+        limit=FREE_CUSTOM_FEEDBACK_PER_TOPIC,
+        remaining=remaining,
+        is_pro=False,
+    )
 
 
 @router.get("", response_model=list[CustomQuestionOut])

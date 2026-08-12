@@ -13,8 +13,14 @@ from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy.orm import Session
 
 from app.db import get_db
-from app.models import UsageCounter, User
-from app.plans import FREE_FEEDBACK_PER_DAY, FREE_PRACTICE_TRACKS, can_practice_track, is_pro
+from app.models import CustomFeedbackUsage, UsageCounter, User, utcnow
+from app.plans import (
+    FREE_CUSTOM_FEEDBACK_PER_TOPIC,
+    FREE_FEEDBACK_PER_DAY,
+    FREE_PRACTICE_TRACKS,
+    can_practice_track,
+    is_pro,
+)
 
 router = APIRouter(prefix="/v1/auth", tags=["auth"])
 security = HTTPBearer(auto_error=False)
@@ -228,6 +234,77 @@ def assert_can_get_feedback(db: Session, user: User, track_id: str) -> None:
                 "code": "quota_exceeded",
                 "message": f"Free plan includes {FREE_FEEDBACK_PER_DAY} feedback reviews per day. Upgrade to Pro for unlimited coaching.",
             },
+        )
+
+
+def normalize_topic_id(topic_id: str | None) -> str:
+    return (topic_id or "").strip()
+
+
+def custom_feedback_usage(
+    db: Session, user_id: int, track_id: str, topic_id: str | None
+) -> int:
+    tid = normalize_topic_id(topic_id)
+    row = (
+        db.query(CustomFeedbackUsage)
+        .filter(
+            CustomFeedbackUsage.user_id == user_id,
+            CustomFeedbackUsage.track_id == track_id,
+            CustomFeedbackUsage.topic_id == tid,
+        )
+        .first()
+    )
+    return int(row.feedback_count) if row else 0
+
+
+def assert_can_custom_feedback(
+    db: Session, user: User, track_id: str, topic_id: str | None
+) -> None:
+    """Free users get FREE_CUSTOM_FEEDBACK_PER_TOPIC AI feedbacks per topic on custom prompts."""
+    if is_pro(user.plan, user.subscription_status):
+        return
+    used = custom_feedback_usage(db, user.id, track_id, topic_id)
+    if used >= FREE_CUSTOM_FEEDBACK_PER_TOPIC:
+        raise HTTPException(
+            status_code=402,
+            detail={
+                "code": "custom_quota_exceeded",
+                "message": (
+                    f"Free plan includes {FREE_CUSTOM_FEEDBACK_PER_TOPIC} AI feedbacks "
+                    "on your own questions per topic. Upgrade to Pro for unlimited custom practice."
+                ),
+            },
+        )
+
+
+def record_custom_feedback_usage(
+    db: Session, user: User, track_id: str, topic_id: str | None
+) -> None:
+    if is_pro(user.plan, user.subscription_status):
+        return
+    tid = normalize_topic_id(topic_id)
+    now = utcnow()
+    row = (
+        db.query(CustomFeedbackUsage)
+        .filter(
+            CustomFeedbackUsage.user_id == user.id,
+            CustomFeedbackUsage.track_id == track_id,
+            CustomFeedbackUsage.topic_id == tid,
+        )
+        .first()
+    )
+    if row:
+        row.feedback_count = int(row.feedback_count or 0) + 1
+        row.updated_at = now
+    else:
+        db.add(
+            CustomFeedbackUsage(
+                user_id=user.id,
+                track_id=track_id,
+                topic_id=tid,
+                feedback_count=1,
+                updated_at=now,
+            )
         )
 
 

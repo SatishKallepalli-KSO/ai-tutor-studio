@@ -3,7 +3,9 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import {
   ApiError,
   api,
+  FREE_CUSTOM_FEEDBACK_PER_TOPIC,
   FREE_PRACTICE_TRACKS,
+  type CustomFeedbackQuota,
   type Feedback,
   type Track,
   type TutorQuestion,
@@ -74,9 +76,23 @@ export default function App() {
   const [customPrompt, setCustomPrompt] = useState('')
   const [customQuestionId, setCustomQuestionId] = useState<string | null>(null)
   const [customTick, setCustomTick] = useState(0)
+  const [customQuota, setCustomQuota] = useState<CustomFeedbackQuota | null>(
+    null,
+  )
   const [renameId, setRenameId] = useState<string | null>(null)
   const [renameDraft, setRenameDraft] = useState('')
   const loadingTrackRef = useRef<string | null>(null)
+
+  const customRemaining =
+    user?.is_pro || customQuota?.remaining === 'unlimited'
+      ? null
+      : typeof customQuota?.remaining === 'number'
+        ? customQuota.remaining
+        : user
+          ? FREE_CUSTOM_FEEDBACK_PER_TOPIC
+          : null
+  const customQuotaExhausted =
+    !!user && !user.is_pro && customRemaining !== null && customRemaining <= 0
 
   /** Keep learn/practice in the URL so browser Back works. */
   function writeLearnUrl(next: {
@@ -377,6 +393,48 @@ export default function App() {
       cancelled = true
     }
   }, [user, trackId, step])
+
+  // Server-backed free custom AI feedback quota (per topic).
+  useEffect(() => {
+    if (!user || !trackId || step !== 'practice' || !customMode) {
+      setCustomQuota(null)
+      return
+    }
+    if (user.is_pro) {
+      setCustomQuota({
+        track_id: trackId,
+        topic_id: topicId ?? '',
+        used: 0,
+        limit: 'unlimited',
+        remaining: 'unlimited',
+        is_pro: true,
+      })
+      return
+    }
+    let cancelled = false
+    void api
+      .customFeedbackQuota({ track_id: trackId, topic_id: topicId })
+      .then((q) => {
+        if (!cancelled) setCustomQuota(q)
+      })
+      .catch(() => {
+        if (cancelled) return
+        const key = `ats_custom_fb_${user.id}_${trackId}_${topicId ?? ''}`
+        const used = Number(localStorage.getItem(key) || '0')
+        const remaining = Math.max(0, FREE_CUSTOM_FEEDBACK_PER_TOPIC - used)
+        setCustomQuota({
+          track_id: trackId,
+          topic_id: topicId ?? '',
+          used,
+          limit: FREE_CUSTOM_FEEDBACK_PER_TOPIC,
+          remaining,
+          is_pro: false,
+        })
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [user, trackId, topicId, step, customMode, customTick])
 
   async function selectTrack(id: string) {
     setError(null)
@@ -741,6 +799,12 @@ export default function App() {
       setPaywall('Sign in to get feedback.')
       return
     }
+    if (customMode && customQuotaExhausted) {
+      setPaywall(
+        `Free plan includes ${FREE_CUSTOM_FEEDBACK_PER_TOPIC} AI feedbacks on your own questions per topic. Upgrade to Pro for unlimited custom practice.`,
+      )
+      return
+    }
     speech.stop()
     setInterim('')
     setAnswer(spokenOrTyped)
@@ -820,6 +884,8 @@ export default function App() {
       } else if (!api.apiBase && user) {
         const key = `ats_fb_${new Date().toISOString().slice(0, 10)}`
         const used = Number(localStorage.getItem(key) || '0')
+        const customKey = `ats_custom_fb_${user.id}_${trackId}_${topicId ?? ''}`
+        const customUsed = Number(localStorage.getItem(customKey) || '0')
         if (!user.is_pro && used >= 5) {
           setPaywall(
             'Free daily coaching limit reached. Go Pro for unlimited feedback.',
@@ -830,6 +896,14 @@ export default function App() {
           !FREE_PRACTICE_TRACKS.has(trackId)
         ) {
           setPaywall('This path is Pro-only. Go Pro to unlock full access.')
+        } else if (
+          customMode &&
+          !user.is_pro &&
+          customUsed >= FREE_CUSTOM_FEEDBACK_PER_TOPIC
+        ) {
+          setPaywall(
+            `Free plan includes ${FREE_CUSTOM_FEEDBACK_PER_TOPIC} AI feedbacks on your own questions per topic. Upgrade to Pro for unlimited custom practice.`,
+          )
         } else {
           const result = api.localFeedback({
             track_id: trackId as Track['id'],
@@ -841,6 +915,9 @@ export default function App() {
           setFeedback(result)
           if (customMode && activeCustom) {
             recordCustomAttemptLocal(activeCustom.id, result.score)
+            if (!user.is_pro) {
+              localStorage.setItem(customKey, String(customUsed + 1))
+            }
             setCustomTick((n) => n + 1)
           } else if (questionId) {
             recordAttempt(trackId, questionId, result.score, result.provider)
@@ -1703,7 +1780,13 @@ export default function App() {
                   onClick={enterCustomMode}
                 >
                   <strong>Practice your own question</strong>
-                  <span>Bring any interview prompt · AI coach</span>
+                  <span>
+                    {user?.is_pro
+                      ? 'Unlimited custom AI feedback'
+                      : user
+                        ? `${FREE_CUSTOM_FEEDBACK_PER_TOPIC} free AI feedbacks / topic`
+                        : 'Bring any interview prompt · AI coach'}
+                  </span>
                 </button>
 
                 <AdSlot
@@ -1969,7 +2052,35 @@ export default function App() {
                       Scoped to this path
                       {topic ? ` · ${topic.title}` : ''}. Custom tries do not
                       inflate bank mastery scores.
+                      {user?.is_pro
+                        ? ' Pro: unlimited AI feedback on your own questions.'
+                        : user
+                          ? ` Free: ${FREE_CUSTOM_FEEDBACK_PER_TOPIC} AI feedbacks on your own questions per topic.`
+                          : ' Sign in for AI feedback on your own questions.'}
                     </p>
+                    {user && !user.is_pro && customRemaining !== null && (
+                      <p
+                        className={
+                          customQuotaExhausted
+                            ? 'custom-quota-banner exhausted'
+                            : 'custom-quota-banner'
+                        }
+                        role="status"
+                      >
+                        {customQuotaExhausted ? (
+                          <>
+                            No free custom AI feedbacks left on this topic.{' '}
+                            <Link to="/pricing">Upgrade to Pro</Link> for
+                            unlimited practice on your own questions.
+                          </>
+                        ) : (
+                          <>
+                            {customRemaining} free left on this topic — then Pro
+                            unlocks the rest.
+                          </>
+                        )}
+                      </p>
+                    )}
                   </>
                 ) : (
                   question && (
@@ -2053,11 +2164,21 @@ export default function App() {
                           disabled={
                             loading ||
                             !liveAnswer.trim() ||
-                            (customMode && customPrompt.trim().length < 8)
+                            (customMode && customPrompt.trim().length < 8) ||
+                            (customMode && customQuotaExhausted)
                           }
                         >
-                          {loading ? 'Coaching…' : 'Submit'}
+                          {loading
+                            ? 'Coaching…'
+                            : customMode && customQuotaExhausted
+                              ? 'Upgrade for more'
+                              : 'Submit'}
                         </button>
+                        {customMode && customQuotaExhausted && (
+                          <Link className="btn ghost" to="/pricing">
+                            See Pro plans
+                          </Link>
+                        )}
                         {!customMode && (
                           <button
                             type="button"

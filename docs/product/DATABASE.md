@@ -21,6 +21,7 @@ On API startup, SQLAlchemy `create_all` ensures these tables exist (no separate 
 |--|--|
 | `custom_questions` | Per-user prompts (`client_id` for local↔cloud sync), track/topic scope, saved flag, attempt counters |
 | `custom_question_attempts` | Attempt history for custom prompts (separate from bank/curriculum mastery) |
+| `custom_feedback_usage` | Per-user, per-track/topic count of successful custom-prompt AI feedbacks (free: 2/topic) |
 
 Env: same as the rest of the app — set Neon pooled `DATABASE_URL` on Render (see `.env.example`). Local default remains SQLite under `apps/api/data/tutor.db`.
 
