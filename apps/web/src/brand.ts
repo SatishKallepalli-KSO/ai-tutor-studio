@@ -23,6 +23,14 @@ export const BRAND = {
   /** Learner home chooser (3–4 doors). */
   launchpadTitle: 'Where to go',
   launchpadBlurb: 'Pick one — nothing starts until you choose.',
+  /** Hire home — brand-first magnet under the product name. */
+  hireMagnet: 'Evaluate candidates who practiced out loud',
+  hireMagnetSub:
+    'See the paths talent trains on, post roles on the jobs board, or talk pricing — one clear next step.',
+  hireCtaDemo: 'See demo path',
+  hireCtaJobs: 'Jobs board',
+  hireLaunchpadTitle: 'Where to go',
+  hireLaunchpadBlurb: 'Four doors — pick one action.',
   copyright: '© 2026 Practice Out Loud · Kallepalli Labs. All rights reserved.',
   contactEmail: 'hello@practiceoutloud.com',
 } as const

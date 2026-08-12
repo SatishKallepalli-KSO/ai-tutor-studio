@@ -13,7 +13,7 @@ import {
 import { AdSlot } from './AdSlot'
 import { track as trackEvent } from './analytics'
 import { useAuth } from './auth'
-import { AUDIENCES, BRAND } from './brand'
+import { BRAND } from './brand'
 import { getTopic, topicsForTrack, type Topic } from './curriculum'
 import { localQuestions } from './data'
 import {
@@ -919,24 +919,20 @@ export default function App() {
           <section className="hero reveal">
             <p className="eyebrow">practiceoutloud.com</p>
             <h1 className="brand-hero">
-              {isRecruiter ? 'Hire practice-ready talent' : BRAND.product}
-              <span>
-                {isRecruiter
-                  ? 'Secondary surface — post jobs after candidates train here.'
-                  : BRAND.magnet}
-              </span>
+              {BRAND.product}
+              <span>{isRecruiter ? BRAND.hireMagnet : BRAND.magnet}</span>
             </h1>
             <p className="hero-lede">
-              {isRecruiter ? AUDIENCES.companies.blurb : BRAND.magnetSub}
+              {isRecruiter ? BRAND.hireMagnetSub : BRAND.magnetSub}
             </p>
             <div className="hero-cta">
               {isRecruiter ? (
                 <>
-                  <Link className="btn primary" to="/jobs">
-                    Browse &amp; post jobs
+                  <Link className="btn primary" to="/agentic-path">
+                    {BRAND.hireCtaDemo}
                   </Link>
-                  <Link className="btn ghost" to="/">
-                    See learner product
+                  <Link className="btn ghost" to="/jobs">
+                    {BRAND.hireCtaJobs}
                   </Link>
                 </>
               ) : (
@@ -980,11 +976,11 @@ export default function App() {
               <div className="hero-panel">
                 <span className="pulse-dot" />
                 {isRecruiter
-                  ? 'Hiring · phase 2'
+                  ? 'Hire · oral practice signal'
                   : 'Bank drills · your questions · AI feedback'}
                 <em>
                   {isRecruiter
-                    ? '“Reach candidates who already practiced out loud.”'
+                    ? '“See who already drilled the loop — then post the role.”'
                     : '“Speak the answer. Get coached on what to fix.”'}
                 </em>
               </div>
@@ -1085,284 +1081,164 @@ export default function App() {
           )}
 
           {isRecruiter && (
-            <section className="dual-audience reveal" aria-label="Who it’s for">
-              <div className="dual-card">
-                <p className="eyebrow">{AUDIENCES.talent.label}</p>
-                <h3>{AUDIENCES.talent.title}</h3>
-                <p>{AUDIENCES.talent.blurb}</p>
-                <Link className="btn ghost sm" to="/">
-                  Learner product
-                </Link>
-              </div>
-              <div className="dual-card dual-card-accent">
-                <p className="eyebrow">{AUDIENCES.companies.label}</p>
-                <h3>{AUDIENCES.companies.title}</h3>
-                <p>{AUDIENCES.companies.blurb}</p>
-                <Link className="btn primary sm" to="/jobs">
-                  Post a job
-                </Link>
-              </div>
-            </section>
-          )}
-
-          {isRecruiter && (
-            <section className="diff-row reveal">
-              <div>
-                <strong>Practice-ready talent</strong>
-                <p>Candidates who train voice loops before they apply.</p>
-              </div>
-              <div>
-                <strong>Job board</strong>
-                <p>Post roles where learners already practice.</p>
-              </div>
-              <div>
-                <strong>Network</strong>
-                <p>Connect and message — phase-2 hire surface.</p>
-              </div>
-            </section>
-          )}
-
-          {isRecruiter && (
-            <section className="compare reveal">
+            <section
+              className="practice-hub launchpad-doors reveal"
+              aria-label="Where to go"
+            >
               <div className="section-title">
-                <h2>Why teams look here later</h2>
-                <Link className="linkish" to="/compare">
-                  Full comparison →
-                </Link>
+                <h2>{BRAND.hireLaunchpadTitle}</h2>
+                <p className="muted">{BRAND.hireLaunchpadBlurb}</p>
               </div>
-              <div className="compare-table-wrap">
-                <table className="compare-table">
-                  <thead>
-                    <tr>
-                      <th></th>
-                      <th>Practice Out Loud</th>
-                      <th>Coding platforms</th>
-                      <th>Generic ChatGPT</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>Spoken interview practice</td>
-                      <td className="yes">Yes + delivery tips</td>
-                      <td>Rare</td>
-                      <td>DIY prompts</td>
-                    </tr>
-                    <tr>
-                      <td>Structured topic docs</td>
-                      <td className="yes">Per-path curriculum</td>
-                      <td>Problems only</td>
-                      <td>No curriculum</td>
-                    </tr>
-                    <tr>
-                      <td>Staff / EM loops</td>
-                      <td className="yes">Native paths</td>
-                      <td>Limited</td>
-                      <td>Unstructured</td>
-                    </tr>
-                    <tr>
-                      <td>Free → Pro path</td>
-                      <td className="yes">Stripe-ready</td>
-                      <td>Yes</td>
-                      <td>No product</td>
-                    </tr>
-                  </tbody>
-                </table>
+
+              <div className="practice-hub-grid doors-4">
+                <button
+                  type="button"
+                  className="practice-hub-card"
+                  onClick={() => {
+                    const el = document.getElementById(
+                      'paths-catalog',
+                    ) as HTMLDetailsElement | null
+                    if (!el) return
+                    el.open = true
+                    el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                  }}
+                >
+                  <span className="eyebrow">Paths</span>
+                  <strong>Candidate-ready paths</strong>
+                  <p>Browse what talent studies before they apply.</p>
+                  <span className="meta">Browse paths →</span>
+                </button>
+
+                <Link to="/jobs" className="practice-hub-card">
+                  <span className="eyebrow">Jobs</span>
+                  <strong>Jobs board</strong>
+                  <p>Post roles where learners already practice out loud.</p>
+                  <span className="meta">Open jobs →</span>
+                </Link>
+
+                <Link to="/pricing" className="practice-hub-card">
+                  <span className="eyebrow">Plans</span>
+                  <strong>Pricing</strong>
+                  <p>Free practice path and Pro — clear for hiring pilots.</p>
+                  <span className="meta">See pricing →</span>
+                </Link>
+
+                <Link to="/for-companies" className="practice-hub-card">
+                  <span className="eyebrow">Product</span>
+                  <strong>How it works</strong>
+                  <p>Hiring kits, voice signals, and partner early access.</p>
+                  <span className="meta">For companies →</span>
+                </Link>
               </div>
             </section>
           )}
 
           <section className="section paths-layout" id="paths">
-            {isRecruiter ? (
-              <>
-                <div className="section-title">
-                  <h2>Paths talent trains on</h2>
-                  <p className="muted">
-                    {tracks.length} paths learners use before they apply
-                  </p>
-                </div>
-                <div className="paths-with-ad">
-                  <div className="paths-main">
-                    {TRACK_GROUPS.map((group) => {
-                      const items = group.trackIds
-                        .map((id) => tracks.find((t) => t.id === id))
-                        .filter(Boolean) as Track[]
-                      if (!items.length) return null
-                      return (
-                        <div key={group.id} className="track-group reveal">
-                          <div className="track-group-head">
-                            <h3>{group.title}</h3>
-                            <p>{group.blurb}</p>
-                          </div>
-                          {group.id === 'career' && (
-                            <>
-                              <Link to="/agentic-path" className="path-banner">
-                                <strong>Full Agentic AI video curriculum</strong>
-                                <span>
-                                  Watch → mark done → practice with AI feedback →
-                                </span>
-                              </Link>
-                              <Link to="/snowflake-path" className="path-banner">
-                                <strong>
-                                  Data Engineer → Snowflake + Agentic AI
-                                </strong>
-                                <span>
-                                  Validated YouTube library: core → Cortex →
-                                  agents → interview prep →
-                                </span>
-                              </Link>
-                            </>
-                          )}
-                          <div className="track-grid">
-                            {items.map((item) => {
-                              const count = topicsForTrack(item.id).length
-                              const locked =
-                                !FREE_PRACTICE_TRACKS.has(item.id) &&
-                                !(user?.is_pro)
-                              return (
-                                <button
-                                  key={item.id}
-                                  className={`track-card ${locked ? 'locked' : ''}`}
-                                  onClick={() => selectTrack(item.id)}
-                                  disabled={loading}
-                                >
-                                  <span
-                                    className="course-cover"
-                                    aria-hidden="true"
-                                  />
-                                  <span className="course-body">
-                                    <span className="pill-row">
-                                      <span className="pill">{item.audience}</span>
-                                      {locked ? (
-                                        <span className="pill lock">Pro</span>
-                                      ) : (
-                                        <span className="pill free">
-                                          Free practice
-                                        </span>
-                                      )}
-                                    </span>
-                                    <strong>{item.title}</strong>
-                                    <p>{item.summary}</p>
-                                    <span className="meta">
-                                      {count} topics · Study free · Practice{' '}
-                                      {locked ? 'Pro' : 'included'}
-                                    </span>
-                                    <span className="track-go">Open path →</span>
-                                  </span>
-                                </button>
-                              )
-                            })}
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                  <AdSlot
-                    id="home-paths-sidebar"
-                    variant="sidebar"
-                    className="paths-ad"
-                    headline="Career switch partners"
-                    detail="Sidebar placement for bootcamps, certs, and hiring tools."
-                  />
-                </div>
-              </>
-            ) : (
-              <details id="paths-catalog" className="paths-catalog-details reveal">
-                <summary className="paths-catalog-summary">
-                  <span>
-                    <strong>Browse all paths</strong>
-                    <span className="muted">
-                      {' '}
-                      · Career · Interview · Languages
-                    </span>
+            <details id="paths-catalog" className="paths-catalog-details reveal">
+              <summary className="paths-catalog-summary">
+                <span>
+                  <strong>
+                    {isRecruiter
+                      ? 'Paths talent trains on'
+                      : 'Browse all paths'}
+                  </strong>
+                  <span className="muted">
+                    {' '}
+                    · Career · Interview · Languages
+                    {isRecruiter ? ` · ${tracks.length} paths` : ''}
                   </span>
-                  <span className="paths-catalog-chevron" aria-hidden="true">
-                    ▾
-                  </span>
-                </summary>
-                <div className="paths-catalog-body">
-                  <p className="muted paths-catalog-lede">
-                    Study free, practice when ready — same speak → coach loop.
-                  </p>
-                  {TRACK_GROUPS.map((group) => {
-                    const items = group.trackIds
-                      .map((id) => tracks.find((t) => t.id === id))
-                      .filter(Boolean) as Track[]
-                    if (!items.length) return null
-                    return (
-                      <div key={group.id} className="track-group">
-                        <div className="track-group-head">
-                          <h3>{group.title}</h3>
-                          <p>{group.blurb}</p>
-                        </div>
-                        {group.id === 'career' && (
-                          <>
-                            <Link to="/agentic-path" className="path-banner">
-                              <strong>Full Agentic AI video curriculum</strong>
-                              <span>
-                                Watch → mark done → practice with AI feedback →
-                              </span>
-                            </Link>
-                            <Link to="/snowflake-path" className="path-banner">
-                              <strong>
-                                Data Engineer → Snowflake + Agentic AI
-                              </strong>
-                              <span>
-                                Core → Cortex → agents → interview prep →
-                              </span>
-                            </Link>
-                          </>
-                        )}
-                        <div className="track-grid">
-                          {items.map((item) => {
-                            const count = topicsForTrack(item.id).length
-                            const locked =
-                              !FREE_PRACTICE_TRACKS.has(item.id) &&
-                              !(user?.is_pro)
-                            return (
-                              <button
-                                key={item.id}
-                                className={`track-card ${locked ? 'locked' : ''}`}
-                                onClick={() => selectTrack(item.id)}
-                                disabled={loading}
-                              >
-                                <span
-                                  className="course-cover"
-                                  aria-hidden="true"
-                                />
-                                <span className="course-body">
-                                  <span className="pill-row">
-                                    <span className="pill">{item.audience}</span>
-                                    {locked ? (
-                                      <span className="pill lock">Pro</span>
-                                    ) : (
-                                      <span className="pill free">
-                                        Free practice
-                                      </span>
-                                    )}
-                                  </span>
-                                  <strong>{item.title}</strong>
-                                  <p>{item.summary}</p>
-                                  <span className="meta">
-                                    {count} topics · Study free · Practice{' '}
-                                    {locked ? 'Pro' : 'included'}
-                                  </span>
-                                  <span className="track-go">Open path →</span>
-                                </span>
-                              </button>
-                            )
-                          })}
-                        </div>
+                </span>
+                <span className="paths-catalog-chevron" aria-hidden="true">
+                  ▾
+                </span>
+              </summary>
+              <div className="paths-catalog-body">
+                <p className="muted paths-catalog-lede">
+                  {isRecruiter
+                    ? 'Same curriculum candidates use — open a path to evaluate the practice loop.'
+                    : 'Study free, practice when ready — same speak → coach loop.'}
+                </p>
+                {TRACK_GROUPS.map((group) => {
+                  const items = group.trackIds
+                    .map((id) => tracks.find((t) => t.id === id))
+                    .filter(Boolean) as Track[]
+                  if (!items.length) return null
+                  return (
+                    <div key={group.id} className="track-group">
+                      <div className="track-group-head">
+                        <h3>{group.title}</h3>
+                        <p>{group.blurb}</p>
                       </div>
-                    )
-                  })}
-                  <p className="launchpad-jobs-link">
-                    <Link className="linkish" to="/jobs">
-                      When you&apos;re ready — browse open jobs →
-                    </Link>
-                  </p>
-                </div>
-              </details>
-            )}
+                      {group.id === 'career' && (
+                        <>
+                          <Link to="/agentic-path" className="path-banner">
+                            <strong>Full Agentic AI video curriculum</strong>
+                            <span>
+                              Watch → mark done → practice with AI feedback →
+                            </span>
+                          </Link>
+                          <Link to="/snowflake-path" className="path-banner">
+                            <strong>
+                              Data Engineer → Snowflake + Agentic AI
+                            </strong>
+                            <span>
+                              Core → Cortex → agents → interview prep →
+                            </span>
+                          </Link>
+                        </>
+                      )}
+                      <div className="track-grid">
+                        {items.map((item) => {
+                          const count = topicsForTrack(item.id).length
+                          const locked =
+                            !FREE_PRACTICE_TRACKS.has(item.id) &&
+                            !(user?.is_pro)
+                          return (
+                            <button
+                              key={item.id}
+                              className={`track-card ${locked ? 'locked' : ''}`}
+                              onClick={() => selectTrack(item.id)}
+                              disabled={loading}
+                            >
+                              <span
+                                className="course-cover"
+                                aria-hidden="true"
+                              />
+                              <span className="course-body">
+                                <span className="pill-row">
+                                  <span className="pill">{item.audience}</span>
+                                  {locked ? (
+                                    <span className="pill lock">Pro</span>
+                                  ) : (
+                                    <span className="pill free">
+                                      Free practice
+                                    </span>
+                                  )}
+                                </span>
+                                <strong>{item.title}</strong>
+                                <p>{item.summary}</p>
+                                <span className="meta">
+                                  {count} topics · Study free · Practice{' '}
+                                  {locked ? 'Pro' : 'included'}
+                                </span>
+                                <span className="track-go">Open path →</span>
+                              </span>
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )
+                })}
+                <p className="launchpad-jobs-link">
+                  <Link className="linkish" to="/jobs">
+                    {isRecruiter
+                      ? 'Post or browse open roles →'
+                      : "When you're ready — browse open jobs →"}
+                  </Link>
+                </p>
+              </div>
+            </details>
           </section>
         </>
       )}
