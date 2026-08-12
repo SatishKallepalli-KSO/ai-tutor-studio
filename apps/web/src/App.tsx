@@ -38,6 +38,12 @@ import {
   recordAttempt,
   unmarkTopicStudied,
 } from './learnProgress'
+import {
+  filterQuestionsForPack,
+  getPack,
+  ROLE_PACKS,
+  type RolePack,
+} from './packs'
 import { usePersona } from './persona'
 import { Shell, TRACK_GROUPS } from './Shell'
 import { speakText, stopSpeaking, useSpeechAnswer } from './useSpeechAnswer'
@@ -102,6 +108,7 @@ export default function App() {
     q?: string | null
     custom?: boolean
     cq?: string | null
+    pack?: string | null
     replace?: boolean
   }) {
     const sp = new URLSearchParams()
@@ -111,6 +118,9 @@ export default function App() {
       sp.set('path', next.path)
       sp.set('mode', next.mode ?? 'learn')
       if (next.topic) sp.set('topic', next.topic)
+      const packId =
+        next.pack === undefined ? params.get('pack') : next.pack
+      if (packId && !next.custom) sp.set('pack', packId)
       if (next.custom) {
         sp.set('custom', '1')
         if (next.cq) sp.set('cq', next.cq)
@@ -163,6 +173,10 @@ export default function App() {
     () => tracks.find((t) => t.id === trackId) ?? null,
     [trackId, tracks],
   )
+  const activePack = useMemo(
+    () => getPack(params.get('pack')),
+    [params],
+  )
   const topics = useMemo(
     () => (trackId ? topicsForTrack(trackId) : []),
     [trackId],
@@ -171,13 +185,19 @@ export default function App() {
     () => (topicId ? getTopic(topicId) ?? null : null),
     [topicId],
   )
+  /** Bank questions, optionally scoped to a curated role pack. */
+  const bankQuestions = useMemo(
+    () => filterQuestionsForPack(questions, activePack),
+    [questions, activePack],
+  )
   const topicQuestions = useMemo(() => {
-    if (!topicId) return questions
-    return questions.filter((q) => q.topic_id === topicId)
-  }, [questions, topicId])
+    if (activePack) return bankQuestions
+    if (!topicId) return bankQuestions
+    return bankQuestions.filter((q) => q.topic_id === topicId)
+  }, [bankQuestions, topicId, activePack])
   const question = useMemo(
-    () => questions.find((q) => q.id === questionId) ?? null,
-    [questionId, questions],
+    () => bankQuestions.find((q) => q.id === questionId) ?? null,
+    [questionId, bankQuestions],
   )
 
   const trackIsProOnly = trackId ? !FREE_PRACTICE_TRACKS.has(trackId) : false
@@ -200,12 +220,12 @@ export default function App() {
   const learnStats = useMemo(() => {
     void progressTick
     if (!trackId) return null
-    return pathStats(
-      trackId,
-      topics.map((t) => t.id),
-      questions.map((q) => q.id),
-    )
-  }, [trackId, topics, questions, progressTick])
+    const qids = (activePack ? bankQuestions : questions).map((q) => q.id)
+    const topicIds = activePack
+      ? [...new Set(bankQuestions.map((q) => q.topic_id))]
+      : topics.map((t) => t.id)
+    return pathStats(trackId, topicIds, qids)
+  }, [trackId, topics, questions, bankQuestions, activePack, progressTick])
 
   const trackProgress = useMemo(() => {
     void progressTick
@@ -347,17 +367,27 @@ export default function App() {
       .questions(urlPath)
       .then((qs) => {
         setQuestions(qs)
+        const pack = getPack(params.get('pack'))
+        const scoped = filterQuestionsForPack(qs, pack)
         const topics = topicsForTrack(urlPath)
         const topic =
           (urlTopic && topics.some((t) => t.id === urlTopic) && urlTopic) ||
+          scoped[0]?.topic_id ||
           topics[0]?.id ||
           qs[0]?.topic_id ||
           null
         setTopicId(topic)
-        const topicQs = topic ? qs.filter((q) => q.topic_id === topic) : qs
+        const topicQs =
+          pack && scoped.length
+            ? scoped
+            : topic
+              ? qs.filter((q) => q.topic_id === topic)
+              : qs
         const qid =
+          (urlQ && scoped.some((q) => q.id === urlQ) && urlQ) ||
           (urlQ && qs.some((q) => q.id === urlQ) && urlQ) ||
           topicQs[0]?.id ||
+          scoped[0]?.id ||
           qs[0]?.id ||
           null
         if (!urlCustom) setQuestionId(qid)
@@ -446,6 +476,7 @@ export default function App() {
       path: id,
       mode: 'learn',
       topic: firstTopic?.id ?? null,
+      pack: null,
     })
     trackEvent('track_open', {
       path: '/',
@@ -486,11 +517,28 @@ export default function App() {
   }
 
   function goNextQuestion() {
-    const list = topicQuestions.length ? topicQuestions : questions
+    const list = topicQuestions.length ? topicQuestions : bankQuestions
     if (!list.length) return
     const idx = list.findIndex((q) => q.id === questionId)
     const next = list[(idx >= 0 ? idx + 1 : 0) % list.length]
     if (!next) return
+    // Pack mode: stay in the curated queue (across topics).
+    if (activePack) {
+      writeLearnUrl({
+        path: trackId,
+        mode: 'practice',
+        topic: next.topic_id,
+        q: next.id,
+        pack: activePack.id,
+      })
+      setFeedback(null)
+      setAnswer('')
+      setInterim('')
+      setInputMode('text')
+      speech.stop()
+      stopSpeaking()
+      return
+    }
     // If wrapped and there is a next topic with questions, advance topic
     if (idx === list.length - 1 && topicId && topics.length) {
       const tIdx = topics.findIndex((t) => t.id === topicId)
@@ -500,6 +548,7 @@ export default function App() {
           path: trackId,
           mode: 'practice',
           topic: nextTopic.id,
+          pack: null,
         })
         setFeedback(null)
         setAnswer('')
@@ -515,6 +564,7 @@ export default function App() {
       mode: 'practice',
       topic: topicId,
       q: next.id,
+      pack: null,
     })
     setFeedback(null)
     setAnswer('')
@@ -522,6 +572,53 @@ export default function App() {
     setInputMode('text')
     speech.stop()
     stopSpeaking()
+  }
+
+  function startPack(pack: RolePack) {
+    setError(null)
+    setPaywall(null)
+    setFeedback(null)
+    setAnswer('')
+    setInterim('')
+    setInputMode('text')
+    speech.stop()
+    stopSpeaking()
+    if (!user) {
+      setPaywall('Sign in to practice a role pack and get AI feedback.')
+      trackEvent('pack_gate', {
+        path: '/',
+        properties: { pack_id: pack.id, reason: 'auth' },
+      })
+      // Still open the pack URL so they land after sign-in.
+    } else if (pack.proPractice && !user.is_pro) {
+      setPaywall(
+        'Role packs are Pro practice. Free still includes language paths and custom questions.',
+      )
+      trackEvent('pack_gate', {
+        path: '/',
+        properties: { pack_id: pack.id, reason: 'pro' },
+      })
+    }
+    const firstId = pack.questionIds[0]
+    const firstQ = filterQuestionsForPack(
+      localQuestions(pack.trackId),
+      pack,
+    )[0]
+    writeLearnUrl({
+      path: pack.trackId,
+      mode: 'practice',
+      topic: firstQ?.topic_id ?? null,
+      q: firstQ?.id ?? firstId ?? null,
+      pack: pack.id,
+    })
+    trackEvent('pack_open', {
+      path: '/',
+      properties: {
+        pack_id: pack.id,
+        track_id: pack.trackId,
+        questions: pack.questionIds.length,
+      },
+    })
   }
 
   function retrySameQuestion() {
@@ -731,16 +828,34 @@ export default function App() {
     setFeedback(null)
     setAnswer('')
     setPaywall(null)
-    const qs = id ? questions.filter((q) => q.topic_id === id) : questions
-    writeLearnUrl({
-      path: trackId,
-      mode: 'practice',
-      topic: id,
-      q: qs[0]?.id ?? questionId,
-    })
+    if (activePack) {
+      const qs = bankQuestions
+      const preferred =
+        (id && qs.find((q) => q.topic_id === id)) || qs[0] || null
+      writeLearnUrl({
+        path: trackId,
+        mode: 'practice',
+        topic: preferred?.topic_id ?? id,
+        q: preferred?.id ?? questionId,
+        pack: activePack.id,
+      })
+    } else {
+      const qs = id ? questions.filter((q) => q.topic_id === id) : questions
+      writeLearnUrl({
+        path: trackId,
+        mode: 'practice',
+        topic: id,
+        q: qs[0]?.id ?? questionId,
+        pack: null,
+      })
+    }
     trackEvent('practice_start', {
       path: '/',
-      properties: { track_id: trackId, topic_id: id ?? topicId },
+      properties: {
+        track_id: trackId,
+        topic_id: id ?? topicId,
+        pack_id: activePack?.id,
+      },
     })
   }
 
@@ -1039,12 +1154,15 @@ export default function App() {
                   type="button"
                   className="practice-hub-card"
                   disabled={loading}
-                  onClick={() => void selectTrack('staff-interview')}
+                  onClick={() => {
+                    const pack = ROLE_PACKS[0]
+                    if (pack) startPack(pack)
+                  }}
                 >
-                  <span className="eyebrow">Interview</span>
-                  <strong>Interview practice</strong>
-                  <p>Staff loop — ownership, design, influence out loud.</p>
-                  <span className="meta">Open path →</span>
+                  <span className="eyebrow">Pack</span>
+                  <strong>Staff loop</strong>
+                  <p>12 oral drills — ownership, design, influence, AI safety.</p>
+                  <span className="meta">Start pack →</span>
                 </button>
 
                 <button
@@ -1064,18 +1182,50 @@ export default function App() {
                   className="practice-hub-card"
                   onClick={() => {
                     const el = document.getElementById(
-                      'paths-catalog',
-                    ) as HTMLDetailsElement | null
-                    if (!el) return
-                    el.open = true
-                    el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                      'role-packs',
+                    ) as HTMLElement | null
+                    el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
                   }}
                 >
-                  <span className="eyebrow">Catalog</span>
-                  <strong>Browse paths</strong>
-                  <p>Career switches, interviews, languages — full list.</p>
-                  <span className="meta">Browse all paths →</span>
+                  <span className="eyebrow">Packs</span>
+                  <strong>All role packs</strong>
+                  <p>Staff · EM hiring manager · AI engineer screen.</p>
+                  <span className="meta">See packs →</span>
                 </button>
+              </div>
+
+              <div
+                id="role-packs"
+                className="role-packs reveal"
+                aria-label="Role packs"
+              >
+                <div className="section-title">
+                  <h2>{BRAND.packsTitle}</h2>
+                  <p className="muted">{BRAND.packsBlurb}</p>
+                </div>
+                <div className="practice-hub-grid doors-3">
+                  {ROLE_PACKS.map((pack) => {
+                    const locked = pack.proPractice && !user?.is_pro
+                    return (
+                      <button
+                        key={pack.id}
+                        type="button"
+                        className={`practice-hub-card pack${locked ? ' locked' : ''}`}
+                        disabled={loading}
+                        onClick={() => startPack(pack)}
+                      >
+                        <span className="eyebrow">{pack.eyebrow}</span>
+                        <strong>{pack.title}</strong>
+                        <p>{pack.blurb}</p>
+                        <span className="meta">
+                          {pack.questionIds.length} drills · ~{pack.durationMin}{' '}
+                          min
+                          {locked ? ' · Pro' : ''} →
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
               </div>
             </section>
           )}
@@ -1273,31 +1423,54 @@ export default function App() {
               <span className="crumb-sep" aria-hidden="true">
                 /
               </span>
-              <span className="crumb-current">{activeTrack.title}</span>
+              <span className="crumb-current">
+                {activePack ? activePack.title : activeTrack.title}
+              </span>
             </nav>
             <div className="workspace-title">
               <h2>
-                {activeTrack.title}
+                {activePack ? activePack.title : activeTrack.title}
+                {activePack ? (
+                  <span className="pill soft">Role pack</span>
+                ) : null}
                 {trackIsProOnly && !user?.is_pro && (
                   <span className="pill lock">Pro practice</span>
                 )}
               </h2>
-              <p>{activeTrack.summary}</p>
+              <p>{activePack ? activePack.blurb : activeTrack.summary}</p>
             </div>
+            {activePack ? (
+              <div className="pack-rubric panel">
+                <h4>Rubric signals</h4>
+                <ul className="check-list">
+                  {activePack.rubricSignals.map((signal) => (
+                    <li key={signal}>{signal}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
             <div className="progress-block">
               <div className="progress-label">
-                Path {learnStats?.pct ?? progressPct}% · reviewed{' '}
-                {learnStats?.studied ?? 0}/{learnStats?.topicsTotal ?? topics.length} ·
-                practiced {learnStats?.practiced ?? 0}/
-                {learnStats?.questionsTotal ?? questions.length}
+                {activePack ? 'Pack' : 'Path'} {learnStats?.pct ?? progressPct}%
+                {!activePack ? (
+                  <>
+                    {' '}
+                    · reviewed {learnStats?.studied ?? 0}/
+                    {learnStats?.topicsTotal ?? topics.length}
+                  </>
+                ) : null}{' '}
+                · practiced {learnStats?.practiced ?? 0}/
+                {learnStats?.questionsTotal ??
+                  (activePack ? bankQuestions.length : questions.length)}
                 {learnStats?.avg != null ? ` · avg ${learnStats.avg}/5` : ''}
               </div>
               <div className="progress-bar" aria-hidden="true">
                 <span style={{ width: `${learnStats?.pct ?? progressPct}%` }} />
               </div>
               <p className="progress-hint muted">
-                Loop: Study → Speak → score ≥4 → next topic. Mastery:{' '}
-                {learnStats?.mastery ?? 0}/{learnStats?.questionsTotal ?? 0} drills ≥4
+                {activePack
+                  ? `Curated queue · ${activePack.questionIds.length} oral drills · ~${activePack.durationMin} min. Speak → score ≥4 → next.`
+                  : `Loop: Study → Speak → score ≥4 → next topic. Mastery: ${learnStats?.mastery ?? 0}/${learnStats?.questionsTotal ?? 0} drills ≥4`}
               </p>
             </div>
           </div>
@@ -1313,6 +1486,7 @@ export default function App() {
                   path: trackId,
                   mode: 'learn',
                   topic: topicId,
+                  pack: null,
                 })
               }
             >
@@ -1468,6 +1642,35 @@ export default function App() {
           {step === 'practice' && (
             <div className="practice">
               <aside className="question-list">
+                {activePack ? (
+                  <>
+                    <h3>Role pack</h3>
+                    <div className="topic-item active pack-sidebar-card">
+                      <strong>{activePack.title}</strong>
+                      <span>
+                        {bankQuestions.length} drills · ~{activePack.durationMin}{' '}
+                        min
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      className="topic-item"
+                      onClick={() => {
+                        writeLearnUrl({
+                          path: trackId,
+                          mode: 'practice',
+                          topic: topicId,
+                          q: questionId,
+                          pack: null,
+                        })
+                      }}
+                    >
+                      <strong>Exit pack · full path</strong>
+                      <span>Browse all {questions.length} questions</span>
+                    </button>
+                  </>
+                ) : (
+                  <>
                 <h3>Topics</h3>
                 <button
                   className={!topicId ? 'topic-item active' : 'topic-item'}
@@ -1481,6 +1684,7 @@ export default function App() {
                       mode: 'practice',
                       custom: customMode,
                       cq: customMode ? customQuestionId : null,
+                      pack: null,
                     })
                   }}
                 >
@@ -1506,6 +1710,8 @@ export default function App() {
                     </button>
                   )
                 })}
+                  </>
+                )}
 
                 <button
                   type="button"
@@ -1659,7 +1865,7 @@ export default function App() {
                   </>
                 ) : (
                   <>
-                    <h3>Queue</h3>
+                    <h3>{activePack ? 'Pack queue' : 'Queue'}</h3>
                     {topicQuestions.map((q, idx) => (
                       <button
                         key={q.id}
@@ -1677,13 +1883,18 @@ export default function App() {
                           writeLearnUrl({
                             path: trackId,
                             mode: 'practice',
-                            topic: topicId,
+                            topic: q.topic_id,
                             q: q.id,
+                            pack: activePack?.id ?? null,
                           })
                         }}
                       >
                         <span>
                           {q.category} · Q{idx + 1}
+                          {activePack &&
+                          trackProgress?.attempts[q.id]?.score != null
+                            ? ` · ${trackProgress.attempts[q.id].score}/5`
+                            : ''}
                         </span>
                         <strong>{q.prompt.slice(0, 72)}…</strong>
                       </button>

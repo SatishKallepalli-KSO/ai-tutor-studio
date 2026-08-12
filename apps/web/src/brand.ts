@@ -23,6 +23,9 @@ export const BRAND = {
   /** Learner home chooser (3–4 doors). */
   launchpadTitle: 'Where to go',
   launchpadBlurb: 'Pick one — nothing starts until you choose.',
+  packsTitle: 'Role packs',
+  packsBlurb:
+    'Curated oral queues with clear rubric signals — Staff loop, EM hiring manager, AI engineer screen.',
   /** Hire home — brand-first magnet under the product name. */
   hireMagnet: 'Evaluate candidates who practiced out loud',
   hireMagnetSub:

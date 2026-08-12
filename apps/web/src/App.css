@@ -5071,6 +5071,57 @@ textarea {
   grid-template-columns: repeat(4, 1fr);
 }
 
+.practice-hub-grid.doors-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.role-packs {
+  margin: 1.5rem 0 0.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--line);
+  scroll-margin-top: 5.5rem;
+}
+
+.role-packs .section-title {
+  margin-bottom: 1rem;
+}
+
+.practice-hub-card.pack {
+  border-color: rgba(11, 107, 203, 0.22);
+  background: linear-gradient(
+    165deg,
+    rgba(11, 107, 203, 0.05) 0%,
+    var(--panel, #fff) 55%
+  );
+  min-height: 10.5rem;
+}
+
+.practice-hub-card.pack.locked .meta {
+  color: var(--muted);
+}
+
+.pack-rubric {
+  margin: 0 0 1rem;
+  padding: 0.9rem 1rem;
+}
+
+.pack-rubric h4 {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.pack-rubric .check-list {
+  margin: 0;
+}
+
+.pack-sidebar-card {
+  cursor: default;
+  pointer-events: none;
+}
+
 .paths-catalog-details {
   margin: 0 0 1.5rem;
   border-top: 1px solid var(--line);
@@ -5224,6 +5275,10 @@ button.practice-hub-card {
   .practice-hub-grid.doors-4 {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  .practice-hub-grid.doors-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 900px) {
@@ -5239,7 +5294,8 @@ button.practice-hub-card {
 
 @media (max-width: 560px) {
   .practice-hub-grid,
-  .practice-hub-grid.doors-4 {
+  .practice-hub-grid.doors-4,
+  .practice-hub-grid.doors-3 {
     grid-template-columns: 1fr;
   }
 
