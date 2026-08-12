@@ -5018,19 +5018,6 @@ textarea {
   color: #fff;
 }
 
-.weak-spot-strip {
-  border-color: rgba(180, 83, 9, 0.28);
-  background: rgba(180, 83, 9, 0.05);
-}
-
-.weak-spot-sidebar {
-  margin: 0 0 1rem;
-}
-
-.weak-spot-sidebar h3 {
-  margin: 0 0 0.45rem;
-}
-
 .continue-strip {
   display: flex;
   align-items: center;
@@ -5063,6 +5050,67 @@ textarea {
 
 .weak-spot-sidebar h3 {
   margin: 0 0 0.45rem;
+}
+
+.replay-compare {
+  margin: 1rem 0 1.15rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(18, 32, 51, 0.02);
+}
+
+.replay-compare-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.65rem;
+}
+
+.replay-compare-head h4 {
+  margin: 0;
+}
+
+.replay-trend {
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.replay-trend.up {
+  color: var(--accent-2, #0a8f6c);
+}
+
+.replay-trend.down {
+  color: #b42318;
+}
+
+.replay-trend.flat {
+  color: var(--muted);
+}
+
+.replay-compare-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem;
+}
+
+.replay-compare-grid .eyebrow {
+  margin: 0 0 0.35rem;
+}
+
+.replay-compare-grid p:last-child {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+@media (max-width: 700px) {
+  .replay-compare-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .continue-strip-copy .eyebrow {

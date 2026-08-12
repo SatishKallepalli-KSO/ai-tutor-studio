@@ -38,6 +38,13 @@ import {
   recordAttempt,
   unmarkTopicStudied,
 } from './learnProgress'
+import {
+  clipAnswer,
+  getQuestionReplay,
+  recordReplayAttempt,
+  replayTrend,
+  type QuestionReplay,
+} from './attemptReplay'
 import { MockScorecard } from './MockScorecard'
 import {
   createActiveMock,
@@ -110,6 +117,7 @@ export default function App() {
   )
   const [nowMs, setNowMs] = useState(() => Date.now())
   const mockForceRef = useRef<string | null>(null)
+  const [replay, setReplay] = useState<QuestionReplay | null>(null)
 
   const customRemaining =
     user?.is_pro || customQuota?.remaining === 'unlimited'
@@ -1253,6 +1261,14 @@ export default function App() {
           gaps: result.gaps,
         })
         setProgressTick((n) => n + 1)
+        const nextReplay = recordReplayAttempt({
+          trackId,
+          questionId,
+          answer: spokenOrTyped,
+          feedback: result,
+          dims: deriveDims(result),
+        })
+        setReplay(nextReplay)
         if (activeMock && params.get('mock') === '1') {
           recordMockResult(
             result,
@@ -1312,6 +1328,14 @@ export default function App() {
               gaps: result.gaps,
             })
             setProgressTick((n) => n + 1)
+            const nextReplay = recordReplayAttempt({
+              trackId,
+              questionId,
+              answer: spokenOrTyped,
+              feedback: result,
+              dims: deriveDims(result),
+            })
+            setReplay(nextReplay)
             if (activeMock && params.get('mock') === '1') {
               recordMockResult(
                 result,
@@ -1330,6 +1354,15 @@ export default function App() {
       setLoading(false)
     }
   }
+
+  // Load prior/best replay when the bank question changes.
+  useEffect(() => {
+    if (!trackId || !questionId || customMode) {
+      setReplay(null)
+      return
+    }
+    setReplay(getQuestionReplay(trackId, questionId))
+  }, [trackId, questionId, customMode])
 
   // Timed mock: tick clock + forced advance / end.
   useEffect(() => {
@@ -2783,6 +2816,43 @@ export default function App() {
                         )}
                       </div>
                     </div>
+                    {!customMode &&
+                      replay &&
+                      replay.history.length >= 2 &&
+                      (() => {
+                        const { trend, delta, prior } = replayTrend(replay)
+                        if (!prior) return null
+                        return (
+                          <div className="replay-compare">
+                            <div className="replay-compare-head">
+                              <h4>Before / after</h4>
+                              <span
+                                className={`replay-trend ${trend}`}
+                                aria-label="Score trend"
+                              >
+                                {trend === 'up'
+                                  ? `Up ${delta}`
+                                  : trend === 'down'
+                                    ? `Down ${Math.abs(delta ?? 0)}`
+                                    : 'Flat'}{' '}
+                                · best {replay.best.score}/5
+                              </span>
+                            </div>
+                            <div className="replay-compare-grid">
+                              <div>
+                                <p className="eyebrow">Prior · {prior.score}/5</p>
+                                <p>{clipAnswer(prior.answer)}</p>
+                              </div>
+                              <div>
+                                <p className="eyebrow">
+                                  Latest · {replay.latest.score}/5
+                                </p>
+                                <p>{clipAnswer(replay.latest.answer)}</p>
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      })()}
                     <h4>Stronger answer shape</h4>
                     <pre>{feedback.better_answer}</pre>
                     <p className="next">
