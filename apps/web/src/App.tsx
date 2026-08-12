@@ -13,7 +13,7 @@ import {
 import { AdSlot } from './AdSlot'
 import { track as trackEvent } from './analytics'
 import { useAuth } from './auth'
-import { AUDIENCES, AI_ENGINEER_JOURNEY, BRAND } from './brand'
+import { AUDIENCES, BRAND } from './brand'
 import { getTopic, topicsForTrack, type Topic } from './curriculum'
 import { localQuestions } from './data'
 import {
@@ -39,7 +39,6 @@ import {
 } from './learnProgress'
 import { usePersona } from './persona'
 import { Shell, TRACK_GROUPS } from './Shell'
-import { SocialProof } from './SocialProof'
 import { speakText, stopSpeaking, useSpeechAnswer } from './useSpeechAnswer'
 import './App.css'
 
@@ -579,38 +578,6 @@ export default function App() {
     })
   }
 
-  function startPracticeOnTrack(path: string) {
-    setError(null)
-    setPaywall(null)
-    setFeedback(null)
-    setAnswer('')
-    if (!FREE_PRACTICE_TRACKS.has(path) && !user?.is_pro) {
-      if (!user) {
-        setPaywall('Sign in to practice and get feedback on your answers.')
-        return
-      }
-      setPaywall(
-        'This path is Pro-only. Go Pro to unlock Staff, EM, Java→AI, and advanced language drills.',
-      )
-      void selectTrack(path)
-      return
-    }
-    const topics = topicsForTrack(path)
-    const topic = topics[0]?.id || null
-    const qs = localQuestions(path)
-    const topicQs = topic ? qs.filter((q) => q.topic_id === topic) : qs
-    writeLearnUrl({
-      path,
-      mode: 'practice',
-      topic,
-      q: topicQs[0]?.id ?? null,
-    })
-    trackEvent('practice_start', {
-      path: '/',
-      properties: { track_id: path, topic_id: topic, source: 'practice_hub' },
-    })
-  }
-
   function startCustomPractice(opts?: { path?: string; topic?: string | null }) {
     setError(null)
     setPaywall(null)
@@ -991,14 +958,6 @@ export default function App() {
                   >
                     {BRAND.ctaStart}
                   </button>
-                  <button
-                    type="button"
-                    className="btn ghost hero-cta-custom"
-                    disabled={loading}
-                    onClick={() => startCustomPractice()}
-                  >
-                    {BRAND.ctaCustomQuestion}
-                  </button>
                   {resume && (
                     <button
                       type="button"
@@ -1009,12 +968,22 @@ export default function App() {
                       {BRAND.ctaContinue}
                     </button>
                   )}
-                  <Link className="btn ghost" to="/agentic-path">
-                    {BRAND.ctaExploreAgentic}
-                  </Link>
+                  <button
+                    type="button"
+                    className="btn ghost hero-cta-custom"
+                    disabled={loading}
+                    onClick={() => startCustomPractice()}
+                  >
+                    {BRAND.ctaCustomQuestion}
+                  </button>
                 </>
               )}
             </div>
+            {!isRecruiter && (
+              <p className="hero-secondary">
+                <Link to="/agentic-path">{BRAND.ctaExploreAgentic} path →</Link>
+              </p>
+            )}
             <div className="hero-stage" aria-hidden="true">
               <div className="hero-orbit" />
               <div className="hero-panel">
@@ -1025,110 +994,59 @@ export default function App() {
                 <em>
                   {isRecruiter
                     ? '“Reach candidates who already practiced out loud.”'
-                    : '“I pasted a real panel question, spoke the answer, and the coach told me exactly what to fix.”'}
+                    : '“Speak the answer. Get coached on what to fix.”'}
                 </em>
               </div>
             </div>
           </section>
 
-          {!isRecruiter && (
-            <div className="learning-trust reveal" aria-label="Product highlights">
-              <span>
-                <b>Learn</b> AI paths &amp; Agentic curriculum
-              </span>
-              <span>
-                <b>Practice</b> bank drills or your own question
-              </span>
-              <span>
-                <b>AI feedback</b> on content &amp; delivery
-              </span>
-              <span>
-                <b>Free</b> to start · Pro when ready
-              </span>
-            </div>
+          {!isRecruiter && resumeCard && (
+            <section
+              className="continue-strip reveal"
+              aria-label="Continue where you left off"
+            >
+              <div className="continue-strip-copy">
+                <p className="eyebrow">Continue</p>
+                <strong>
+                  {resumeCard.trackTitle}
+                  {resumeCard.topicTitle ? ` · ${resumeCard.topicTitle}` : ''}
+                </strong>
+                <p>
+                  {resumeCard.stats.pct}% complete
+                  {resumeCard.recommended
+                    ? ` · ${resumeCard.recommended.label}`
+                    : ''}
+                </p>
+              </div>
+              <button
+                type="button"
+                className="btn primary sm"
+                disabled={loading}
+                onClick={continueWhereLeftOff}
+              >
+                {BRAND.ctaContinue}
+              </button>
+            </section>
           )}
 
           {!isRecruiter && (
             <section
               id="practice-hub"
-              className={`practice-hub reveal${practiceHubFocused ? ' focused' : ''}`}
-              aria-label="Practice hub"
+              className={`practice-hub launchpad-doors reveal${practiceHubFocused ? ' focused' : ''}`}
+              aria-label="Where to go"
             >
               <div className="section-title">
-                <h2>Practice</h2>
-                <p className="muted">
-                  Choose a clear next step — continue, bring your own question, or
-                  pick a path. Nothing auto-starts until you choose.
-                </p>
+                <h2>{BRAND.launchpadTitle}</h2>
+                <p className="muted">{BRAND.launchpadBlurb}</p>
               </div>
 
-              <div className="practice-hub-grid">
-                {resumeCard && (
-                  <button
-                    type="button"
-                    className="practice-hub-card continue"
-                    disabled={loading}
-                    onClick={continueWhereLeftOff}
-                  >
-                    <span className="eyebrow">Continue</span>
-                    <strong>
-                      {resumeCard.trackTitle}
-                      {resumeCard.topicTitle
-                        ? ` · ${resumeCard.topicTitle}`
-                        : ''}
-                    </strong>
-                    <p>
-                      {resumeCard.stats.pct}% complete
-                      {resumeCard.recommended
-                        ? ` · ${resumeCard.recommended.label}`
-                        : ''}
-                    </p>
-                    <span className="meta">{BRAND.ctaContinue} →</span>
-                  </button>
-                )}
-
-                <button
-                  type="button"
-                  className="practice-hub-card custom"
-                  disabled={loading}
-                  onClick={() => startCustomPractice()}
-                >
-                  <span className="eyebrow">Your question</span>
-                  <strong>{BRAND.customFeatureTitle}</strong>
-                  <p>Paste a real panel prompt and get the same AI coach.</p>
-                  <span className="meta">{BRAND.ctaCustomQuestion} →</span>
-                </button>
-
+              <div className="practice-hub-grid doors-4">
                 <Link to="/agentic-path" className="practice-hub-card agentic">
-                  <span className="eyebrow">Featured path</span>
-                  <strong>Agentic AI curriculum</strong>
+                  <span className="eyebrow">Path</span>
+                  <strong>Agentic AI</strong>
                   <p>Watch → mark done → practice with AI feedback.</p>
-                  <span className="meta">Open Agentic path →</span>
+                  <span className="meta">Open path →</span>
                 </Link>
-
-                <button
-                  type="button"
-                  className="practice-hub-card"
-                  disabled={loading}
-                  onClick={() => startPracticeOnTrack('python')}
-                >
-                  <span className="eyebrow">Free practice</span>
-                  <strong>Python</strong>
-                  <p>Curated drills — free speak &amp; coach loop.</p>
-                  <span className="meta">Start practicing →</span>
-                </button>
-
-                <button
-                  type="button"
-                  className="practice-hub-card"
-                  disabled={loading}
-                  onClick={() => startPracticeOnTrack('javascript')}
-                >
-                  <span className="eyebrow">Free practice</span>
-                  <strong>JavaScript</strong>
-                  <p>Language fundamentals, spoken out loud.</p>
-                  <span className="meta">Start practicing →</span>
-                </button>
 
                 <button
                   type="button"
@@ -1137,159 +1055,41 @@ export default function App() {
                   onClick={() => void selectTrack('staff-interview')}
                 >
                   <span className="eyebrow">Interview</span>
-                  <strong>Staff Engineer loop</strong>
-                  <p>
-                    Ownership, design, influence — Pro to practice with feedback.
-                  </p>
+                  <strong>Interview practice</strong>
+                  <p>Staff loop — ownership, design, influence out loud.</p>
                   <span className="meta">Open path →</span>
                 </button>
-              </div>
 
-              <div className="practice-hub-more">
-                <a className="linkish" href="#paths">
-                  Browse full catalog ↓
-                </a>
-                <Link className="linkish" to="/snowflake-path">
-                  Snowflake path →
-                </Link>
-              </div>
-            </section>
-          )}
-
-          {!isRecruiter && (
-            <section
-              className="feature-callout custom-question-callout reveal"
-              aria-label="Practice your own question"
-            >
-              <div>
-                <p className="eyebrow">Flagship capability</p>
-                <h2>{BRAND.customFeatureTitle}</h2>
-                <p>{BRAND.customFeatureBlurb}</p>
-              </div>
-              <div className="feature-callout-actions">
                 <button
                   type="button"
-                  className="btn primary"
+                  className="practice-hub-card custom"
                   disabled={loading}
                   onClick={() => startCustomPractice()}
                 >
-                  {BRAND.ctaCustomQuestion}
+                  <span className="eyebrow">Custom</span>
+                  <strong>Your question</strong>
+                  <p>Paste a panel prompt and get the same AI coach.</p>
+                  <span className="meta">{BRAND.ctaCustomQuestion} →</span>
                 </button>
+
                 <button
                   type="button"
-                  className="btn ghost"
-                  disabled={loading}
-                  onClick={() => openPracticeHub()}
+                  className="practice-hub-card"
+                  onClick={() => {
+                    const el = document.getElementById(
+                      'paths-catalog',
+                    ) as HTMLDetailsElement | null
+                    if (!el) return
+                    el.open = true
+                    el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                  }}
                 >
-                  See all practice options
+                  <span className="eyebrow">Catalog</span>
+                  <strong>Browse paths</strong>
+                  <p>Career switches, interviews, languages — full list.</p>
+                  <span className="meta">Browse all paths →</span>
                 </button>
               </div>
-            </section>
-          )}
-
-          {!isRecruiter && <SocialProof />}
-
-          {!isRecruiter && (
-            <section className="magnet-proof reveal" aria-label="AI engineer journey">
-              {AI_ENGINEER_JOURNEY.map((item) => (
-                <div key={item.step}>
-                  <strong>
-                    {item.step}. {item.title}
-                  </strong>
-                  <p>{item.blurb}</p>
-                </div>
-              ))}
-            </section>
-          )}
-
-          {!isRecruiter && (
-            <section
-              className="featured-learning reveal"
-              aria-label="Featured learning paths"
-            >
-              <div className="section-title">
-                <h2>Featured paths</h2>
-                <p className="muted">
-                  Agentic AI, Staff interviews, and production AI upskilling —
-                  same study → speak → coach loop.
-                </p>
-              </div>
-              <div className="featured-grid">
-                <Link to="/agentic-path" className="featured-course agentic">
-                  <span className="cover" aria-hidden="true" />
-                  <span className="body">
-                    <span className="pill-row">
-                      <span className="pill">Headline path</span>
-                      <span className="pill">Free videos</span>
-                    </span>
-                    <strong>Agentic AI curriculum</strong>
-                    <p>
-                      Backend → Python for AI → LLMs → tools/agents → RAG →
-                      LangGraph → production. Watch, mark done, then practice
-                      with AI feedback.
-                    </p>
-                    <span className="meta">Open Agentic path →</span>
-                  </span>
-                </Link>
-                <button
-                  type="button"
-                  className="featured-course em"
-                  disabled={loading}
-                  onClick={() => void selectTrack('staff-interview')}
-                >
-                  <span className="cover" aria-hidden="true" />
-                  <span className="body">
-                    <span className="pill-row">
-                      <span className="pill">Interview</span>
-                      <span className="pill lock">Pro practice</span>
-                    </span>
-                    <strong>Staff Engineer interview loop</strong>
-                    <p>
-                      Ownership, design, AI safety, and influence — practiced
-                      out loud until the panel is easy.
-                    </p>
-                    <span className="meta">Open path →</span>
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  className="featured-course ai"
-                  disabled={loading}
-                  onClick={() => void selectTrack('java-to-ai')}
-                >
-                  <span className="cover" aria-hidden="true" />
-                  <span className="body">
-                    <span className="pill-row">
-                      <span className="pill">AI Engineer</span>
-                      <span className="pill lock">Pro practice</span>
-                    </span>
-                    <strong>Java → Production AI</strong>
-                    <p>
-                      Map your backend skills to RAG, agents, evals, and LLM
-                      ops — then speak the story.
-                    </p>
-                    <span className="meta">Open path →</span>
-                  </span>
-                </button>
-              </div>
-            </section>
-          )}
-
-          {!isRecruiter && (
-            <section className="learner-path-highlights reveal" aria-label="More AI paths">
-              <button
-                type="button"
-                className="path-banner path-banner-btn"
-                disabled={loading}
-                onClick={() => void selectTrack('em-interview')}
-              >
-                <strong>Engineering Manager interview loop</strong>
-                <span>People · conflict · org design — speak them →</span>
-              </button>
-              <Link to="/snowflake-path" className="path-banner">
-                <strong>Data Engineer → Snowflake + Cortex</strong>
-                <span>Core → Cortex → agents → interview prep →</span>
-              </Link>
             </section>
           )}
 
@@ -1314,14 +1114,7 @@ export default function App() {
             </section>
           )}
 
-          <AdSlot
-            id="home-below-hero"
-            variant="banner"
-            headline="Interview prep partners"
-            detail="Partner strip under the learn/practice magnet — not in the hero."
-          />
-
-          {isRecruiter ? (
+          {isRecruiter && (
             <section className="diff-row reveal">
               <div>
                 <strong>Practice-ready talent</strong>
@@ -1336,179 +1129,250 @@ export default function App() {
                 <p>Connect and message — phase-2 hire surface.</p>
               </div>
             </section>
-          ) : (
-            <section className="diff-row reveal">
-              <div>
-                <strong>Not another LeetCode</strong>
-                <p>AI systems + spoken narrative — not puzzle grinding alone.</p>
-              </div>
-              <div>
-                <strong>Not raw ChatGPT</strong>
-                <p>Curriculum, paths, and coaching product — not a blank prompt.</p>
-              </div>
-              <div>
-                <strong>One stop → AI engineer</strong>
-                <p>Learn, build, practice out loud, then apply from one platform.</p>
-              </div>
-            </section>
           )}
 
           {isRecruiter && (
-          <section className="compare reveal">
-            <div className="section-title">
-              <h2>Why teams look here later</h2>
-              <Link className="linkish" to="/compare">
-                Full comparison →
-              </Link>
-            </div>
-            <div className="compare-table-wrap">
-              <table className="compare-table">
-                <thead>
-                  <tr>
-                    <th></th>
-                    <th>Practice Out Loud</th>
-                    <th>Coding platforms</th>
-                    <th>Generic ChatGPT</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>Spoken interview practice</td>
-                    <td className="yes">Yes + delivery tips</td>
-                    <td>Rare</td>
-                    <td>DIY prompts</td>
-                  </tr>
-                  <tr>
-                    <td>Structured topic docs</td>
-                    <td className="yes">Per-path curriculum</td>
-                    <td>Problems only</td>
-                    <td>No curriculum</td>
-                  </tr>
-                  <tr>
-                    <td>Staff / EM loops</td>
-                    <td className="yes">Native paths</td>
-                    <td>Limited</td>
-                    <td>Unstructured</td>
-                  </tr>
-                  <tr>
-                    <td>Free → Pro path</td>
-                    <td className="yes">Stripe-ready</td>
-                    <td>Yes</td>
-                    <td>No product</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </section>
+            <section className="compare reveal">
+              <div className="section-title">
+                <h2>Why teams look here later</h2>
+                <Link className="linkish" to="/compare">
+                  Full comparison →
+                </Link>
+              </div>
+              <div className="compare-table-wrap">
+                <table className="compare-table">
+                  <thead>
+                    <tr>
+                      <th></th>
+                      <th>Practice Out Loud</th>
+                      <th>Coding platforms</th>
+                      <th>Generic ChatGPT</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Spoken interview practice</td>
+                      <td className="yes">Yes + delivery tips</td>
+                      <td>Rare</td>
+                      <td>DIY prompts</td>
+                    </tr>
+                    <tr>
+                      <td>Structured topic docs</td>
+                      <td className="yes">Per-path curriculum</td>
+                      <td>Problems only</td>
+                      <td>No curriculum</td>
+                    </tr>
+                    <tr>
+                      <td>Staff / EM loops</td>
+                      <td className="yes">Native paths</td>
+                      <td>Limited</td>
+                      <td>Unstructured</td>
+                    </tr>
+                    <tr>
+                      <td>Free → Pro path</td>
+                      <td className="yes">Stripe-ready</td>
+                      <td>Yes</td>
+                      <td>No product</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
           )}
 
           <section className="section paths-layout" id="paths">
-            <div className="section-title">
-              <h2>
-                {isRecruiter
-                  ? 'Paths talent trains on'
-                  : 'Path catalog'}
-              </h2>
-              <p className="muted">
-                {isRecruiter
-                  ? `${tracks.length} paths learners use before they apply`
-                  : 'Grouped by Career switches · Interview · Languages — study free, practice when ready'}
-              </p>
-            </div>
-
-            <div className="paths-with-ad">
-              <div className="paths-main">
-                {TRACK_GROUPS.map((group) => {
-                  const items = group.trackIds
-                    .map((id) => tracks.find((t) => t.id === id))
-                    .filter(Boolean) as Track[]
-                  if (!items.length) return null
-                  return (
-                    <div key={group.id} className="track-group reveal">
-                      <div className="track-group-head">
-                        <h3>{group.title}</h3>
-                        <p>{group.blurb}</p>
-                      </div>
-                      {group.id === 'career' && (
-                        <>
-                          <Link to="/agentic-path" className="path-banner">
-                            <strong>Full Agentic AI video curriculum</strong>
-                            <span>
-                              Watch → mark done → practice with AI feedback →
-                            </span>
-                          </Link>
-                          <Link to="/snowflake-path" className="path-banner">
-                            <strong>
-                              Data Engineer → Snowflake + Agentic AI
-                            </strong>
-                            <span>
-                              Validated YouTube library: core → Cortex → agents
-                              → interview prep →
-                            </span>
-                          </Link>
-                        </>
-                      )}
-                      <div className="track-grid">
-                        {items.map((item) => {
-                          const count = topicsForTrack(item.id).length
-                          const locked =
-                            !FREE_PRACTICE_TRACKS.has(item.id) && !(user?.is_pro)
-                          return (
-                            <button
-                              key={item.id}
-                              className={`track-card ${locked ? 'locked' : ''}`}
-                              onClick={() => selectTrack(item.id)}
-                              disabled={loading}
-                            >
-                              <span className="course-cover" aria-hidden="true" />
-                              <span className="course-body">
-                                <span className="pill-row">
-                                  <span className="pill">{item.audience}</span>
-                                  {locked ? (
-                                    <span className="pill lock">Pro</span>
-                                  ) : (
-                                    <span className="pill free">Free practice</span>
-                                  )}
+            {isRecruiter ? (
+              <>
+                <div className="section-title">
+                  <h2>Paths talent trains on</h2>
+                  <p className="muted">
+                    {tracks.length} paths learners use before they apply
+                  </p>
+                </div>
+                <div className="paths-with-ad">
+                  <div className="paths-main">
+                    {TRACK_GROUPS.map((group) => {
+                      const items = group.trackIds
+                        .map((id) => tracks.find((t) => t.id === id))
+                        .filter(Boolean) as Track[]
+                      if (!items.length) return null
+                      return (
+                        <div key={group.id} className="track-group reveal">
+                          <div className="track-group-head">
+                            <h3>{group.title}</h3>
+                            <p>{group.blurb}</p>
+                          </div>
+                          {group.id === 'career' && (
+                            <>
+                              <Link to="/agentic-path" className="path-banner">
+                                <strong>Full Agentic AI video curriculum</strong>
+                                <span>
+                                  Watch → mark done → practice with AI feedback →
                                 </span>
-                                <strong>{item.title}</strong>
-                                <p>{item.summary}</p>
-                                <span className="meta">
-                                  {count} topics · Study free · Practice{' '}
-                                  {locked ? 'Pro' : 'included'}
+                              </Link>
+                              <Link to="/snowflake-path" className="path-banner">
+                                <strong>
+                                  Data Engineer → Snowflake + Agentic AI
+                                </strong>
+                                <span>
+                                  Validated YouTube library: core → Cortex →
+                                  agents → interview prep →
                                 </span>
-                                <span className="track-go">Open path →</span>
+                              </Link>
+                            </>
+                          )}
+                          <div className="track-grid">
+                            {items.map((item) => {
+                              const count = topicsForTrack(item.id).length
+                              const locked =
+                                !FREE_PRACTICE_TRACKS.has(item.id) &&
+                                !(user?.is_pro)
+                              return (
+                                <button
+                                  key={item.id}
+                                  className={`track-card ${locked ? 'locked' : ''}`}
+                                  onClick={() => selectTrack(item.id)}
+                                  disabled={loading}
+                                >
+                                  <span
+                                    className="course-cover"
+                                    aria-hidden="true"
+                                  />
+                                  <span className="course-body">
+                                    <span className="pill-row">
+                                      <span className="pill">{item.audience}</span>
+                                      {locked ? (
+                                        <span className="pill lock">Pro</span>
+                                      ) : (
+                                        <span className="pill free">
+                                          Free practice
+                                        </span>
+                                      )}
+                                    </span>
+                                    <strong>{item.title}</strong>
+                                    <p>{item.summary}</p>
+                                    <span className="meta">
+                                      {count} topics · Study free · Practice{' '}
+                                      {locked ? 'Pro' : 'included'}
+                                    </span>
+                                    <span className="track-go">Open path →</span>
+                                  </span>
+                                </button>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                  <AdSlot
+                    id="home-paths-sidebar"
+                    variant="sidebar"
+                    className="paths-ad"
+                    headline="Career switch partners"
+                    detail="Sidebar placement for bootcamps, certs, and hiring tools."
+                  />
+                </div>
+              </>
+            ) : (
+              <details id="paths-catalog" className="paths-catalog-details reveal">
+                <summary className="paths-catalog-summary">
+                  <span>
+                    <strong>Browse all paths</strong>
+                    <span className="muted">
+                      {' '}
+                      · Career · Interview · Languages
+                    </span>
+                  </span>
+                  <span className="paths-catalog-chevron" aria-hidden="true">
+                    ▾
+                  </span>
+                </summary>
+                <div className="paths-catalog-body">
+                  <p className="muted paths-catalog-lede">
+                    Study free, practice when ready — same speak → coach loop.
+                  </p>
+                  {TRACK_GROUPS.map((group) => {
+                    const items = group.trackIds
+                      .map((id) => tracks.find((t) => t.id === id))
+                      .filter(Boolean) as Track[]
+                    if (!items.length) return null
+                    return (
+                      <div key={group.id} className="track-group">
+                        <div className="track-group-head">
+                          <h3>{group.title}</h3>
+                          <p>{group.blurb}</p>
+                        </div>
+                        {group.id === 'career' && (
+                          <>
+                            <Link to="/agentic-path" className="path-banner">
+                              <strong>Full Agentic AI video curriculum</strong>
+                              <span>
+                                Watch → mark done → practice with AI feedback →
                               </span>
-                            </button>
-                          )
-                        })}
+                            </Link>
+                            <Link to="/snowflake-path" className="path-banner">
+                              <strong>
+                                Data Engineer → Snowflake + Agentic AI
+                              </strong>
+                              <span>
+                                Core → Cortex → agents → interview prep →
+                              </span>
+                            </Link>
+                          </>
+                        )}
+                        <div className="track-grid">
+                          {items.map((item) => {
+                            const count = topicsForTrack(item.id).length
+                            const locked =
+                              !FREE_PRACTICE_TRACKS.has(item.id) &&
+                              !(user?.is_pro)
+                            return (
+                              <button
+                                key={item.id}
+                                className={`track-card ${locked ? 'locked' : ''}`}
+                                onClick={() => selectTrack(item.id)}
+                                disabled={loading}
+                              >
+                                <span
+                                  className="course-cover"
+                                  aria-hidden="true"
+                                />
+                                <span className="course-body">
+                                  <span className="pill-row">
+                                    <span className="pill">{item.audience}</span>
+                                    {locked ? (
+                                      <span className="pill lock">Pro</span>
+                                    ) : (
+                                      <span className="pill free">
+                                        Free practice
+                                      </span>
+                                    )}
+                                  </span>
+                                  <strong>{item.title}</strong>
+                                  <p>{item.summary}</p>
+                                  <span className="meta">
+                                    {count} topics · Study free · Practice{' '}
+                                    {locked ? 'Pro' : 'included'}
+                                  </span>
+                                  <span className="track-go">Open path →</span>
+                                </span>
+                              </button>
+                            )
+                          })}
+                        </div>
                       </div>
-                    </div>
-                  )
-                })}
-              </div>
-              <AdSlot
-                id="home-paths-sidebar"
-                variant="sidebar"
-                className="paths-ad"
-                headline="Career switch partners"
-                detail="Sidebar placement for bootcamps, certs, and hiring tools."
-              />
-            </div>
+                    )
+                  })}
+                  <p className="launchpad-jobs-link">
+                    <Link className="linkish" to="/jobs">
+                      When you&apos;re ready — browse open jobs →
+                    </Link>
+                  </p>
+                </div>
+              </details>
+            )}
           </section>
-
-          {!isRecruiter && (
-            <section className="learner-jobs-strip reveal" aria-label="Open jobs">
-              <div className="section-title">
-                <h2>When you&apos;re ready — open jobs</h2>
-                <p className="muted">
-                  Secondary: browse roles recruiters post after you practice.
-                </p>
-              </div>
-              <Link className="btn ghost" to="/jobs">
-                View open jobs
-              </Link>
-            </section>
-          )}
         </>
       )}
 

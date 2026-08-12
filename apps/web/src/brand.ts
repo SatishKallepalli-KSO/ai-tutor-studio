@@ -9,17 +9,20 @@ export const BRAND = {
   /** Primary headline under the product name. */
   magnet: 'Learn, practice out loud, get AI feedback',
   magnetSub:
-    'For engineers leveling into AI and interview-ready oral practice. Study a path, speak curated drills or bring your own interview question, and get coaching on content and delivery — free to start.',
+    'Study a path, speak drills or your own interview question, and get AI coaching — free to start.',
   /** Homepage primary CTA label. */
   ctaStart: 'Start practicing',
   ctaContinue: 'Continue',
-  ctaCustomQuestion: 'Practice your own question',
-  ctaExploreAgentic: 'Explore Agentic AI',
+  ctaCustomQuestion: 'Your own question',
+  ctaExploreAgentic: 'Agentic AI',
   customFeatureTitle: 'Bring any interview question',
   customFeatureBlurb:
     'Paste a real panel prompt, speak or type your answer, and get AI coaching on content, clarity, and delivery — same coach as the curated bank. Free includes 2 AI feedbacks on your own questions per topic; Pro unlocks unlimited custom practice.',
   oneLiner:
     'Practice Out Loud helps you learn AI engineering, practice out loud, and get AI feedback — including your own interview questions, Agentic paths, and stack depth. Free to start (2 custom AI feedbacks per topic), Pro for full access.',
+  /** Learner home chooser (3–4 doors). */
+  launchpadTitle: 'Where to go',
+  launchpadBlurb: 'Pick one — nothing starts until you choose.',
   copyright: '© 2026 Practice Out Loud · Kallepalli Labs. All rights reserved.',
   contactEmail: 'hello@practiceoutloud.com',
 } as const
