@@ -90,15 +90,10 @@ export function Shell({
 
   const customPracticeHref = useMemo(() => {
     const resume = getResumePointer()
-    const canResume =
-      !!resume &&
-      (FREE_PRACTICE_TRACKS.has(resume.trackId) || !!user?.is_pro)
-    const path =
-      canResume && resume ? resume.trackId : DEFAULT_CUSTOM_CONTEXT_TRACK
+    // Custom prompts are allowed on any path (including Pro tracks for free users).
+    const path = resume?.trackId || DEFAULT_CUSTOM_CONTEXT_TRACK
     const topic =
-      (canResume && resume?.lastTopicId) ||
-      topicsForTrack(path)[0]?.id ||
-      null
+      resume?.lastTopicId || topicsForTrack(path)[0]?.id || null
     return `/${buildLearnSearch({
       path,
       mode: 'practice',

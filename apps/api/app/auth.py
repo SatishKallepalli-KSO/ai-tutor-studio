@@ -215,15 +215,8 @@ def update_persona(
     return user_to_out(db, user)
 
 
-def assert_can_get_feedback(db: Session, user: User, track_id: str) -> None:
-    if not can_practice_track(track_id, user.plan, user.subscription_status):
-        raise HTTPException(
-            status_code=402,
-            detail={
-                "code": "track_locked",
-                "message": "This track is Pro-only. Upgrade to unlock Staff, EM, and advanced tracks.",
-            },
-        )
+def assert_daily_feedback_quota(db: Session, user: User) -> None:
+    """Shared free daily AI feedback budget (bank + custom)."""
     if is_pro(user.plan, user.subscription_status):
         return
     used = feedback_usage(db, user.id)
@@ -232,9 +225,37 @@ def assert_can_get_feedback(db: Session, user: User, track_id: str) -> None:
             status_code=402,
             detail={
                 "code": "quota_exceeded",
-                "message": f"Free plan includes {FREE_FEEDBACK_PER_DAY} feedback reviews per day. Upgrade to Pro for unlimited coaching.",
+                "message": (
+                    f"Free plan includes {FREE_FEEDBACK_PER_DAY} feedback reviews per day. "
+                    "Upgrade to Pro for unlimited coaching."
+                ),
             },
         )
+
+
+def assert_can_get_feedback(
+    db: Session,
+    user: User,
+    track_id: str,
+    *,
+    custom: bool = False,
+) -> None:
+    """Gate bank practice by free-track list; custom prompts skip track lock.
+
+    Custom questions are a freemium taste on any path (still burn daily +
+    per-topic custom quotas). Curated bank drills stay Pro-locked on Staff/EM/etc.
+    """
+    if not custom and not can_practice_track(
+        track_id, user.plan, user.subscription_status
+    ):
+        raise HTTPException(
+            status_code=402,
+            detail={
+                "code": "track_locked",
+                "message": "This track is Pro-only. Upgrade to unlock Staff, EM, and advanced tracks.",
+            },
+        )
+    assert_daily_feedback_quota(db, user)
 
 
 def normalize_topic_id(topic_id: str | None) -> str:

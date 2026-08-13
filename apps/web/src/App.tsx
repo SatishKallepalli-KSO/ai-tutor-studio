@@ -95,7 +95,10 @@ export default function App() {
   const [interim, setInterim] = useState('')
   const [feedback, setFeedback] = useState<Feedback | null>(null)
   const [step, setStep] = useState<Step>('tracks')
-  const [loading, setLoading] = useState(false)
+  /** Track/question fetch — must not disable Submit (known sticky-loading bug). */
+  const [trackLoading, setTrackLoading] = useState(false)
+  /** Feedback POST in flight — only this should disable Submit. */
+  const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [paywall, setPaywall] = useState<string | null>(null)
   const [progressTick, setProgressTick] = useState(0)
@@ -109,6 +112,25 @@ export default function App() {
   const [renameId, setRenameId] = useState<string | null>(null)
   const [renameDraft, setRenameDraft] = useState('')
   const loadingTrackRef = useRef<string | null>(null)
+  const trackLoadGenRef = useRef(0)
+
+  function revealBanner(selector: string) {
+    window.requestAnimationFrame(() => {
+      document
+        .querySelector(selector)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+  }
+
+  function showPaywall(message: string) {
+    setPaywall(message)
+    revealBanner('.banner.paywall')
+  }
+
+  function showError(message: string) {
+    setError(message)
+    revealBanner('.banner.error')
+  }
   const [activeMock, setActiveMock] = useState<ActiveMock | null>(() =>
     readActiveMock(),
   )
@@ -416,8 +438,9 @@ export default function App() {
     const urlCq = params.get('cq')
 
     if (!urlPath) {
-      // Leaving a path: always clear sticky loading so Home CTAs stay clickable.
-      setLoading(false)
+      // Leaving a path: always clear sticky track loading so Home CTAs stay clickable.
+      trackLoadGenRef.current += 1
+      setTrackLoading(false)
       loadingTrackRef.current = null
       if (step !== 'tracks' || trackId) {
         setStep('tracks')
@@ -459,15 +482,17 @@ export default function App() {
 
     if (loadingTrackRef.current === urlPath) return
     loadingTrackRef.current = urlPath
+    const loadGen = ++trackLoadGenRef.current
     setError(null)
     setPaywall(null)
     setTrackId(urlPath)
     setFeedback(null)
     setAnswer('')
-    setLoading(true)
+    setTrackLoading(true)
     void api
       .questions(urlPath)
       .then((qs) => {
+        if (trackLoadGenRef.current !== loadGen) return
         setQuestions(qs)
         const pack = getPack(params.get('pack'))
         const scoped = filterQuestionsForPack(qs, pack)
@@ -497,11 +522,13 @@ export default function App() {
         setCustomMode(urlCustom && urlMode === 'practice')
       })
       .catch((err: Error) => {
-        setError(err.message)
+        if (trackLoadGenRef.current !== loadGen) return
+        showError(err.message)
         clearLearnUrl()
       })
       .finally(() => {
-        setLoading(false)
+        if (trackLoadGenRef.current !== loadGen) return
+        setTrackLoading(false)
         loadingTrackRef.current = null
       })
     // eslint-disable-next-line react-hooks/exhaustive-deps -- sync from URL params only
@@ -694,14 +721,14 @@ export default function App() {
     writeActiveMock(null)
     setMockSummary(null)
     if (!user) {
-      setPaywall('Sign in to practice a role pack and get AI feedback.')
+      showPaywall('Sign in to practice a role pack and get AI feedback.')
       trackEvent('pack_gate', {
         path: '/',
         properties: { pack_id: pack.id, reason: 'auth' },
       })
       // Still open the pack URL so they land after sign-in.
     } else if (pack.proPractice && !user.is_pro) {
-      setPaywall(
+      showPaywall(
         'Role packs are Pro practice. Free still includes language paths and custom questions.',
       )
       trackEvent('pack_gate', {
@@ -904,20 +931,15 @@ export default function App() {
     // Free short mock is the product's ungated demo — start without sign-in.
     // AI feedback still requires auth at submit time.
     if (!user && !isFreeShort) {
-      setPaywall('Sign in to run a timed mock and get AI feedback.')
+      showPaywall('Sign in to run a timed mock and get AI feedback.')
       trackEvent('mock_gate', {
         path: '/',
         properties: { pack_id: pack.id, reason: 'auth' },
       })
-      window.requestAnimationFrame(() => {
-        document
-          .querySelector('.banner.paywall')
-          ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      })
       return
     }
     if (pack.proPractice && !user?.is_pro) {
-      setPaywall(
+      showPaywall(
         'Full timed mocks on role packs are Pro. Use the free 15-minute mock below, or go Pro for full packs.',
       )
       trackEvent('mock_gate', {
@@ -1014,21 +1036,19 @@ export default function App() {
     setAnswer('')
     setInterim('')
     setInputMode('text')
+    setSubmitting(false)
     speech.stop()
     stopSpeaking()
     const pointer = getResumePointer()
-    const canUseResume =
-      !!pointer &&
-      (FREE_PRACTICE_TRACKS.has(pointer.trackId) || !!user?.is_pro)
+    // Custom practice is allowed on any path context (API skips Pro track lock).
     const path =
       opts?.path ||
-      (canUseResume && pointer ? pointer.trackId : DEFAULT_CUSTOM_CONTEXT_TRACK)
+      pointer?.trackId ||
+      DEFAULT_CUSTOM_CONTEXT_TRACK
     const topics = topicsForTrack(path)
     const topic =
       opts?.topic ??
-      (canUseResume && pointer?.lastTopicId
-        ? pointer.lastTopicId
-        : null) ??
+      pointer?.lastTopicId ??
       topics[0]?.id ??
       null
     setCustomMode(true)
@@ -1056,7 +1076,12 @@ export default function App() {
   }
 
   function enterCustomMode() {
-    if (!trackId) return
+    if (!trackId) {
+      startCustomPractice()
+      return
+    }
+    setError(null)
+    setPaywall(null)
     setFeedback(null)
     setAnswer('')
     setInterim('')
@@ -1064,6 +1089,7 @@ export default function App() {
     speech.stop()
     stopSpeaking()
     setCustomMode(true)
+    setSubmitting(false)
     writeLearnUrl({
       path: trackId,
       mode: 'practice',
@@ -1152,12 +1178,12 @@ export default function App() {
 
   function goPractice(forTopicId?: string) {
     if (!user) {
-      setPaywall('Sign in to practice and get feedback on your answers.')
+      showPaywall('Sign in to practice and get feedback on your answers.')
       return
     }
     if (trackId && !user.is_pro && !FREE_PRACTICE_TRACKS.has(trackId)) {
-      setPaywall(
-        'This path is Pro-only. Go Pro to unlock Staff, EM, Java→AI, and advanced language drills.',
+      showPaywall(
+        'This path is Pro-only. Go Pro to unlock Staff, EM, Java→AI, and advanced language drills — or use Your own question for a free custom drill on this path.',
       )
       return
     }
@@ -1197,20 +1223,30 @@ export default function App() {
   }
 
   async function submitAnswer() {
-    if (!trackId) return
-    const spokenOrTyped = liveAnswer.trim()
-    if (!spokenOrTyped) return
-    if (customMode && customPrompt.trim().length < 8) {
-      setError('Write your interview question first (at least a short prompt).')
+    if (submitting) return
+    if (!trackId) {
+      showError('Pick a practice path first, then submit your answer.')
       return
     }
-    if (!customMode && !questionId) return
+    const spokenOrTyped = liveAnswer.trim()
+    if (!spokenOrTyped) {
+      showError('Speak or type an answer before submitting.')
+      return
+    }
+    if (customMode && customPrompt.trim().length < 8) {
+      showError('Write your interview question first (at least a short prompt).')
+      return
+    }
+    if (!customMode && !questionId) {
+      showError('Select a question from the queue, or switch to Your own question.')
+      return
+    }
     if (!user) {
-      setPaywall('Sign in to get feedback.')
+      showPaywall('Sign in to get feedback on your answers.')
       return
     }
     if (customMode && customQuotaExhausted) {
-      setPaywall(
+      showPaywall(
         `Free plan includes ${FREE_CUSTOM_FEEDBACK_PER_TOPIC} AI feedbacks on your own questions per topic. Upgrade to Pro for unlimited custom practice.`,
       )
       return
@@ -1218,7 +1254,7 @@ export default function App() {
     speech.stop()
     setInterim('')
     setAnswer(spokenOrTyped)
-    setLoading(true)
+    setSubmitting(true)
     setError(null)
     setFeedback(null)
     setPaywall(null)
@@ -1257,82 +1293,94 @@ export default function App() {
         input_mode: inputMode,
       })
       setFeedback(result)
-      if (customMode && activeCustom) {
-        recordCustomAttemptLocal(activeCustom.id, result.score)
-        setCustomTick((n) => n + 1)
-        void api
-          .recordCustomAttempt({
-            client_id: activeCustom.id,
-            track_id: trackId,
-            topic_id: topicId ?? undefined,
-            prompt: activeCustom.prompt,
-            title: activeCustom.title,
-            score: result.score,
-            provider: result.provider,
-            input_mode: inputMode,
+      // Bookkeeping must not surface as a failed submit after coaching succeeds.
+      try {
+        if (customMode && activeCustom) {
+          recordCustomAttemptLocal(activeCustom.id, result.score)
+          setCustomTick((n) => n + 1)
+          void api
+            .recordCustomAttempt({
+              client_id: activeCustom.id,
+              track_id: trackId,
+              topic_id: topicId ?? undefined,
+              prompt: activeCustom.prompt,
+              title: activeCustom.title,
+              score: result.score,
+              provider: result.provider,
+              input_mode: inputMode,
+            })
+            .catch(() => undefined)
+          trackEvent('custom_practice', {
+            path: '/practice',
+            properties: {
+              track_id: trackId,
+              topic_id: topicId,
+              score: result.score,
+              source: 'submit',
+            },
           })
-          .catch(() => undefined)
-        trackEvent('custom_practice', {
-          path: '/practice',
-          properties: {
-            track_id: trackId,
-            topic_id: topicId,
-            score: result.score,
-            source: 'submit',
-          },
-        })
-      } else if (questionId) {
-        recordAttempt(trackId, questionId, result.score, result.provider, {
-          category: question?.category,
-          gaps: result.gaps,
-        })
-        setProgressTick((n) => n + 1)
-        const nextReplay = recordReplayAttempt({
-          trackId,
-          questionId,
-          answer: spokenOrTyped,
-          feedback: result,
-          dims: deriveDims(result),
-        })
-        setReplay(nextReplay)
-        if (activeMock && params.get('mock') === '1') {
-          recordMockResult(
-            result,
+        } else if (questionId) {
+          recordAttempt(trackId, questionId, result.score, result.provider, {
+            category: question?.category,
+            gaps: result.gaps,
+          })
+          setProgressTick((n) => n + 1)
+          const nextReplay = recordReplayAttempt({
+            trackId,
             questionId,
-            question?.prompt ?? questionId,
-            question?.category ?? '',
-          )
+            answer: spokenOrTyped,
+            feedback: result,
+            dims: deriveDims(result),
+          })
+          setReplay(nextReplay)
+          if (activeMock && params.get('mock') === '1') {
+            recordMockResult(
+              result,
+              questionId,
+              question?.prompt ?? questionId,
+              question?.category ?? '',
+            )
+          }
         }
+        await refresh()
+      } catch {
+        /* ignore post-success bookkeeping */
       }
-      await refresh()
+      window.requestAnimationFrame(() => {
+        document
+          .querySelector('.feedback')
+          ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      })
     } catch (err) {
       if (err instanceof ApiError && err.status === 402) {
-        setPaywall(err.message)
+        showPaywall(err.message)
       } else if (err instanceof ApiError && err.status === 401) {
-        setPaywall('Sign in to get feedback on your answers.')
-      } else if (!api.apiBase && user) {
+        showPaywall('Sign in to get feedback on your answers.')
+      } else if (!(err instanceof ApiError) && user) {
+        // Network / CORS only — never swallow real HTTP errors as "offline demo".
         const key = `ats_fb_${new Date().toISOString().slice(0, 10)}`
         const used = Number(localStorage.getItem(key) || '0')
         const customKey = `ats_custom_fb_${user.id}_${trackId}_${topicId ?? ''}`
         const customUsed = Number(localStorage.getItem(customKey) || '0')
         if (!user.is_pro && used >= 5) {
-          setPaywall(
+          showPaywall(
             'Free daily coaching limit reached. Go Pro for unlimited feedback.',
           )
-        } else if (
-          !user.is_pro &&
-          trackId &&
-          !FREE_PRACTICE_TRACKS.has(trackId)
-        ) {
-          setPaywall('This path is Pro-only. Go Pro to unlock full access.')
         } else if (
           customMode &&
           !user.is_pro &&
           customUsed >= FREE_CUSTOM_FEEDBACK_PER_TOPIC
         ) {
-          setPaywall(
+          showPaywall(
             `Free plan includes ${FREE_CUSTOM_FEEDBACK_PER_TOPIC} AI feedbacks on your own questions per topic. Upgrade to Pro for unlimited custom practice.`,
           )
+        } else if (
+          !customMode &&
+          !user.is_pro &&
+          trackId &&
+          !FREE_PRACTICE_TRACKS.has(trackId)
+        ) {
+          showPaywall('This path is Pro-only. Go Pro to unlock full access.')
         } else {
           const result = api.localFeedback({
             track_id: trackId as Track['id'],
@@ -1372,12 +1420,15 @@ export default function App() {
             }
           }
           if (!user.is_pro) localStorage.setItem(key, String(used + 1))
+          showError(
+            'Could not reach the coaching API — showing local rubric feedback. Check your connection and try again for full AI coaching.',
+          )
         }
       } else {
-        setError(err instanceof Error ? err.message : 'Feedback failed')
+        showError(err instanceof Error ? err.message : 'Feedback failed')
       }
     } finally {
-      setLoading(false)
+      setSubmitting(false)
     }
   }
 
@@ -1398,7 +1449,7 @@ export default function App() {
   }, [mockMode, activeMock])
 
   useEffect(() => {
-    if (!mockMode || !activeMock || loading) return
+    if (!mockMode || !activeMock || submitting) return
     if (nowMs >= activeMock.endsAt) {
       if (mockForceRef.current === 'end') return
       mockForceRef.current = 'end'
@@ -1436,22 +1487,31 @@ export default function App() {
     ]
     advanceMockTo(idx + 1, results)
     // eslint-disable-next-line react-hooks/exhaustive-deps -- timer-driven mock advance
-  }, [nowMs, mockMode, activeMock, loading, questionId, feedback])
+  }, [nowMs, mockMode, activeMock, submitting, questionId, feedback])
 
   return (
     <Shell wide={step !== 'tracks'}>
-      {error && <div className="banner error">{error}</div>}
+      {error && (
+        <div className="banner error" role="alert">
+          {error}
+        </div>
+      )}
       {paywall && (
-        <div className="banner paywall reveal">
+        <div className="banner paywall reveal" role="status">
           <div>
-            <strong>Ready for Pro?</strong>
+            <strong>{!user ? 'Sign in required' : 'Ready for Pro?'}</strong>
             <p>{paywall}</p>
           </div>
           <div className="actions">
             {!user ? (
-              <Link className="btn primary" to="/register">
-                Create free account
-              </Link>
+              <>
+                <Link className="btn primary" to="/register">
+                  Create free account
+                </Link>
+                <Link className="btn ghost" to="/login">
+                  Sign in
+                </Link>
+              </>
             ) : (
               <Link className="btn primary" to="/pricing">
                 See Pro plans
@@ -1487,7 +1547,7 @@ export default function App() {
                   <button
                     type="button"
                     className="btn primary"
-                    disabled={loading}
+                    disabled={trackLoading}
                     onClick={startPracticing}
                   >
                     {BRAND.ctaStart}
@@ -1496,7 +1556,7 @@ export default function App() {
                     <button
                       type="button"
                       className="btn ghost"
-                      disabled={loading}
+                      disabled={trackLoading}
                       onClick={continueWhereLeftOff}
                     >
                       {BRAND.ctaContinue}
@@ -1505,7 +1565,6 @@ export default function App() {
                   <button
                     type="button"
                     className="btn ghost hero-cta-custom"
-                    disabled={loading}
                     onClick={() => startCustomPractice()}
                   >
                     {BRAND.ctaCustomQuestion}
@@ -1555,7 +1614,7 @@ export default function App() {
               <button
                 type="button"
                 className="btn primary sm"
-                disabled={loading}
+                disabled={trackLoading}
                 onClick={continueWhereLeftOff}
               >
                 {BRAND.ctaContinue}
@@ -1582,7 +1641,7 @@ export default function App() {
               <button
                 type="button"
                 className="btn primary sm"
-                disabled={loading}
+                disabled={trackLoading}
                 onClick={() => startWeakSpotDrill(weakPlan.spots[0])}
               >
                 Drill weak spots
@@ -1632,7 +1691,6 @@ export default function App() {
                 <button
                   type="button"
                   className="practice-hub-card custom"
-                  disabled={loading}
                   onClick={() => startCustomPractice()}
                 >
                   <span className="eyebrow">Custom</span>
@@ -1689,7 +1747,7 @@ export default function App() {
                           <button
                             type="button"
                             className="btn ghost sm"
-                            disabled={loading}
+                            disabled={trackLoading}
                             onClick={() => startPack(pack)}
                           >
                             Practice
@@ -1697,7 +1755,6 @@ export default function App() {
                           <button
                             type="button"
                             className="btn primary sm"
-                            disabled={loading}
                             onClick={() => startTimedMock(pack)}
                           >
                             Timed mock
@@ -1863,7 +1920,7 @@ export default function App() {
                               key={item.id}
                               className={`track-card ${locked ? 'locked' : ''}`}
                               onClick={() => selectTrack(item.id)}
-                              disabled={loading}
+                              disabled={trackLoading}
                             >
                               <span
                                 className="course-cover"
@@ -2681,12 +2738,32 @@ export default function App() {
                             type="button"
                             className="btn primary"
                             onClick={() => {
+                              if (
+                                customMode &&
+                                customPrompt.trim().length < 8
+                              ) {
+                                showError(
+                                  'Write your interview question first, then tap Speak — or type your answer.',
+                                )
+                                return
+                              }
+                              if (!speech.supported) {
+                                speech.setError(
+                                  'Voice input isn’t supported in this browser. Type your answer — AI coaching works the same.',
+                                )
+                                document.getElementById('answer')?.focus()
+                                return
+                              }
                               setInputMode('voice')
                               speech.start()
                             }}
-                            disabled={
-                              !speech.supported ||
-                              (customMode && customPrompt.trim().length < 8)
+                            title={
+                              !speech.supported
+                                ? 'Voice not supported here — type your answer'
+                                : customMode &&
+                                    customPrompt.trim().length < 8
+                                  ? 'Write your question first'
+                                  : 'Answer out loud'
                             }
                           >
                             Speak
@@ -2699,6 +2776,7 @@ export default function App() {
                             setInputMode('text')
                             speech.stop()
                             setInterim('')
+                            speech.setError(null)
                             document.getElementById('answer')?.focus()
                           }}
                         >
@@ -2707,15 +2785,10 @@ export default function App() {
                         <button
                           type="button"
                           className="btn primary"
-                          onClick={submitAnswer}
-                          disabled={
-                            loading ||
-                            !liveAnswer.trim() ||
-                            (customMode && customPrompt.trim().length < 8) ||
-                            (customMode && customQuotaExhausted)
-                          }
+                          onClick={() => void submitAnswer()}
+                          disabled={submitting}
                         >
-                          {loading
+                          {submitting
                             ? 'Coaching…'
                             : customMode && customQuotaExhausted
                               ? 'Upgrade for more'
@@ -2739,6 +2812,22 @@ export default function App() {
                       </div>
                     </div>
 
+                    {!speech.supported && (
+                      <p className="muted speech-fallback" role="status">
+                        Voice isn’t available in this browser (common in
+                        in-app browsers). Type your answer below — AI coaching
+                        works the same.
+                      </p>
+                    )}
+                    {speech.supported &&
+                      customMode &&
+                      customPrompt.trim().length < 8 && (
+                        <p className="muted speech-fallback">
+                          Add your interview question above (a short prompt is
+                          enough), then Speak or Type.
+                        </p>
+                      )}
+
                     {speech.listening && (
                       <p className="listening-bar" aria-live="polite">
                         Listening… aim for ~90–120 seconds.
@@ -2746,7 +2835,9 @@ export default function App() {
                       </p>
                     )}
                     {speech.error && (
-                      <div className="banner error">{speech.error}</div>
+                      <div className="banner error" role="alert">
+                        {speech.error}
+                      </div>
                     )}
 
                     <textarea

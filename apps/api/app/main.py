@@ -160,8 +160,9 @@ def tutor_feedback(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> FeedbackResponse:
-    assert_can_get_feedback(db, user, body.track_id)
     is_custom = bool((body.custom_prompt or "").strip())
+    # Custom prompts are allowed on Pro paths for free users (topic quota still applies).
+    assert_can_get_feedback(db, user, body.track_id, custom=is_custom)
     if is_custom:
         assert_can_custom_feedback(db, user, body.track_id, body.topic_id)
     try:
